@@ -31,20 +31,20 @@ export class CheckoutPageComponent {
     estimatedDelivery: '5-7 business days',
   };
 
-  readonly checkoutForm = this.formBuilder.group({
+  readonly checkoutForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    newsletter: [true],
-    shippingAddress: this.formBuilder.group({
-      firstName: [''],
-      lastName: [''],
-      address: [''],
-      apartment: [''],
-      city: [''],
-      region: [''],
-      postalCode: [''],
-      country: ['United States'],
+    newsletter: true,
+    shippingAddress: this.formBuilder.nonNullable.group({
+      firstName: '',
+      lastName: '',
+      address: '',
+      apartment: '',
+      city: '',
+      region: '',
+      postalCode: '',
+      country: 'United States',
     }),
-    shippingMethod: [this.fallbackShippingMethod.id],
+    shippingMethod: this.fallbackShippingMethod.id,
   });
 
   currentStep = 1;
