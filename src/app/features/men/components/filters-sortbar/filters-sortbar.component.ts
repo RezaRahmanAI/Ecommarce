@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-men-filters-sortbar',
@@ -6,4 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './filters-sortbar.component.html',
   styleUrl: './filters-sortbar.component.css',
 })
-export class MenFiltersSortbarComponent {}
+export class MenFiltersSortbarComponent {
+  @Input() shownProducts = 0;
+  @Input() totalProducts = 0;
+}

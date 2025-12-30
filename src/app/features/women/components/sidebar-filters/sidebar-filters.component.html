@@ -3,34 +3,17 @@
     <div>
       <h3 class="mb-4 text-sm font-bold uppercase tracking-wider text-primary dark:text-white">Categories</h3>
       <ul class="space-y-3 text-[15px] font-medium text-gray-600 dark:text-gray-400">
-        <li>
-          <a class="flex items-center justify-between text-primary font-bold dark:text-white" href="#">
-            All Products <span class="text-xs text-gray-400 font-normal">124</span>
-          </a>
-        </li>
-        <li>
-          <a class="flex items-center justify-between hover:text-primary transition-colors" href="#">
-            Abayas <span class="text-xs text-gray-400 font-normal">42</span>
-          </a>
-        </li>
-        <li>
-          <a class="flex items-center justify-between hover:text-primary transition-colors" href="#">
-            Dresses <span class="text-xs text-gray-400 font-normal">35</span>
-          </a>
-        </li>
-        <li>
-          <a class="flex items-center justify-between hover:text-primary transition-colors" href="#">
-            Hijabs <span class="text-xs text-gray-400 font-normal">18</span>
-          </a>
-        </li>
-        <li>
-          <a class="flex items-center justify-between hover:text-primary transition-colors" href="#">
-            Tops <span class="text-xs text-gray-400 font-normal">15</span>
-          </a>
-        </li>
-        <li>
-          <a class="flex items-center justify-between hover:text-primary transition-colors" href="#">
-            Bottoms <span class="text-xs text-gray-400 font-normal">14</span>
+        <li *ngFor="let category of categoryCounts">
+          <a
+            class="flex items-center justify-between"
+            [ngClass]="
+              category.highlight
+                ? 'text-primary font-bold dark:text-white'
+                : 'hover:text-primary transition-colors'
+            "
+            href="#"
+          >
+            {{ category.label }} <span class="text-xs text-gray-400 font-normal">{{ category.count }}</span>
           </a>
         </li>
       </ul>

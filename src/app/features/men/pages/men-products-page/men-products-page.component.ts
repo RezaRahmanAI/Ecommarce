@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MenBreadcrumbsComponent } from '../../components/breadcrumbs/breadcrumbs.component';
@@ -6,6 +6,8 @@ import { MenCategoryChipsComponent } from '../../components/category-chips/categ
 import { MenFiltersSortbarComponent } from '../../components/filters-sortbar/filters-sortbar.component';
 import { MenProductGridComponent } from '../../components/product-grid/product-grid.component';
 import { MenPaginationComponent } from '../../components/pagination/pagination.component';
+import { ProductService } from '../../../../core/services/product.service';
+import { Product } from '../../../../core/models/product';
 
 @Component({
   selector: 'app-men-products-page',
@@ -21,4 +23,14 @@ import { MenPaginationComponent } from '../../components/pagination/pagination.c
   templateUrl: './men-products-page.component.html',
   styleUrl: './men-products-page.component.css',
 })
-export class MenProductsPageComponent {}
+export class MenProductsPageComponent implements OnInit {
+  products: Product[] = [];
+
+  constructor(private readonly productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.productService.getByGender('men').subscribe((products) => {
+      this.products = products;
+    });
+  }
+}

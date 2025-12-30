@@ -6,6 +6,7 @@ import { WomenProductsPageComponent } from './features/women/pages/women-product
 import { ChildrenProductsPageComponent } from './features/children/pages/children-products-page/children-products-page.component';
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
 import { AccessoriesPageComponent } from './features/accessories/pages/accessories-page/accessories-page.component';
+import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 
 export const appRoutes: Routes = [
   { path: '', component: HomePageComponent },
@@ -15,8 +16,7 @@ export const appRoutes: Routes = [
   { path: 'accessories', component: AccessoriesPageComponent },
   {
     path: 'product/:id',
-    component: PlaceholderComponent,
-    data: { title: 'Product Details', description: 'Product detail view coming soon.' },
+    component: ProductDetailsPageComponent,
   },
   { path: 'cart', component: PlaceholderComponent, data: { title: 'Cart', description: 'Cart experience coming soon.' } },
   { path: 'login', component: PlaceholderComponent, data: { title: 'Login', description: 'Login experience coming soon.' } },
