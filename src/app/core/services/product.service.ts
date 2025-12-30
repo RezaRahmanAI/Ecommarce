@@ -41,4 +41,10 @@ export class ProductService {
   getReviewsByProductId(productId: number): Observable<Review[]> {
     return of(MOCK_REVIEWS.filter((review) => review.productId === productId));
   }
+
+  getRecommendedProducts(): Observable<Product[]> {
+    const highlighted = this.products.filter((product) => product.featured || product.newArrival);
+    const picks = (highlighted.length ? highlighted : this.products).slice(0, 4);
+    return of(picks);
+  }
 }
