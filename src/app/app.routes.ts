@@ -7,6 +7,9 @@ import { ChildrenProductsPageComponent } from './features/children/pages/childre
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
 import { AccessoriesPageComponent } from './features/accessories/pages/accessories-page/accessories-page.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
+import { CartPageComponent } from './features/cart/pages/cart-page/cart-page.component';
+import { CheckoutPageComponent } from './features/checkout/pages/checkout-page/checkout-page.component';
+import { OrderConfirmationPageComponent } from './features/order-confirmation/pages/order-confirmation-page/order-confirmation-page.component';
 
 export const appRoutes: Routes = [
   { path: '', component: HomePageComponent },
@@ -18,7 +21,14 @@ export const appRoutes: Routes = [
     path: 'product/:id',
     component: ProductDetailsPageComponent,
   },
-  { path: 'cart', component: PlaceholderComponent, data: { title: 'Cart', description: 'Cart experience coming soon.' } },
+  { path: 'cart', component: CartPageComponent },
+  { path: 'checkout', component: CheckoutPageComponent },
+  { path: 'order-confirmation/:orderId', component: OrderConfirmationPageComponent },
+  {
+    path: 'track/:orderId',
+    component: PlaceholderComponent,
+    data: { title: 'Track Order', description: 'Order tracking experience coming soon.' },
+  },
   { path: 'login', component: PlaceholderComponent, data: { title: 'Login', description: 'Login experience coming soon.' } },
   { path: '**', redirectTo: '' },
 ];
