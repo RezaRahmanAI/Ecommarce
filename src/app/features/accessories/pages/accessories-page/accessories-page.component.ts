@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ProductService } from '../../../core/services/product.service';
-import { Product } from '../../../core/models/product';
+import { ProductService } from '../../../../core/services/product.service';
+import { Product } from '../../../../core/models/product';
 
 @Component({
   selector: 'app-accessories-page',
@@ -17,7 +17,9 @@ export class AccessoriesPageComponent implements OnInit {
   constructor(private readonly productService: ProductService) {}
 
   ngOnInit(): void {
-    this.productService.getByCategory('Accessories').subscribe((products) => {
+    this.productService
+      .getByCategory('Accessories')
+      .subscribe((products: Product[]) => {
       this.products = products;
     });
   }
