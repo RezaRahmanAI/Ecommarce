@@ -1,0 +1,370 @@
+<main class="bg-white text-slate-800">
+  <div class="bg-primary text-white py-12 relative overflow-hidden">
+    <div
+      class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1623938676644-88985c7d2421?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"
+    ></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <nav class="flex items-center gap-2 text-xs text-white/60 mb-4">
+        <a class="hover:text-white transition-colors" href="#">Home</a>
+        <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+        <span class="text-white">Children</span>
+      </nav>
+      <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4">Children's Collection</h1>
+      <p class="max-w-xl text-accent/90 text-lg">
+        Modest, comfortable, and stylish outfits designed for your little ones. Explore our latest arrivals for boys and girls.
+      </p>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col lg:flex-row gap-10">
+      <aside class="w-full lg:w-64 shrink-0 space-y-8">
+        <div>
+          <h3 class="font-serif font-semibold text-primary mb-4 pb-2 border-b border-slate-100">Categories</h3>
+          <div class="space-y-3">
+            <div class="group">
+              <button
+                class="flex items-center justify-between w-full text-left text-sm font-medium text-slate-700 group-hover:text-primary"
+              >
+                <span>Girls</span>
+                <span class="material-symbols-outlined text-[16px] text-slate-400">expand_less</span>
+              </button>
+              <div class="pl-3 mt-2 space-y-2 border-l border-slate-200">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input class="rounded border-slate-300 text-primary focus:ring-primary size-4" type="checkbox" />
+                  <span class="text-sm text-slate-600">Abayas &amp; Dresses</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input class="rounded border-slate-300 text-primary focus:ring-primary size-4" type="checkbox" />
+                  <span class="text-sm text-slate-600">Hijabs</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input class="rounded border-slate-300 text-primary focus:ring-primary size-4" type="checkbox" />
+                  <span class="text-sm text-slate-600">Sets</span>
+                </label>
+              </div>
+            </div>
+            <div class="group pt-2">
+              <button
+                class="flex items-center justify-between w-full text-left text-sm font-medium text-slate-700 group-hover:text-primary"
+              >
+                <span>Boys</span>
+                <span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+              </button>
+              <div class="hidden pl-3 mt-2 space-y-2 border-l border-slate-200"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-serif font-semibold text-primary mb-4 pb-2 border-b border-slate-100">Size / Age</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <button class="px-2 py-1.5 text-xs border border-slate-200 rounded hover:border-primary hover:text-primary transition-colors">
+              2-3Y
+            </button>
+            <button class="px-2 py-1.5 text-xs border border-primary bg-primary text-white rounded transition-colors">4-5Y</button>
+            <button class="px-2 py-1.5 text-xs border border-slate-200 rounded hover:border-primary hover:text-primary transition-colors">
+              6-7Y
+            </button>
+            <button class="px-2 py-1.5 text-xs border border-slate-200 rounded hover:border-primary hover:text-primary transition-colors">
+              8-9Y
+            </button>
+            <button class="px-2 py-1.5 text-xs border border-slate-200 rounded hover:border-primary hover:text-primary transition-colors">
+              10-12Y
+            </button>
+            <button class="px-2 py-1.5 text-xs border border-slate-200 rounded hover:border-primary hover:text-primary transition-colors">
+              Teen
+            </button>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-serif font-semibold text-primary mb-4 pb-2 border-b border-slate-100">Price</h3>
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="relative flex-1">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">$</span>
+                <input
+                  class="w-full pl-5 pr-1 py-1 text-sm border-slate-200 rounded focus:ring-primary focus:border-primary"
+                  type="number"
+                  value="10"
+                />
+              </div>
+              <span class="text-slate-400 text-sm">to</span>
+              <div class="relative flex-1">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">$</span>
+                <input
+                  class="w-full pl-5 pr-1 py-1 text-sm border-slate-200 rounded focus:ring-primary focus:border-primary"
+                  type="number"
+                  value="150"
+                />
+              </div>
+            </div>
+            <input class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" type="range" />
+          </div>
+        </div>
+        <div class="bg-accent/20 rounded-lg p-6 text-center mt-6">
+          <h4 class="font-serif font-bold text-primary text-lg mb-2">Ramadan Ready?</h4>
+          <p class="text-sm text-slate-600 mb-4">Check out our exclusive prayer sets for kids.</p>
+          <button class="text-xs font-bold text-primary uppercase tracking-wider border-b border-primary pb-0.5 hover:text-opacity-80">
+            View Collection
+          </button>
+        </div>
+      </aside>
+      <div class="flex-1">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <p class="text-sm text-slate-500">
+            Showing <span class="font-semibold text-slate-900">127</span> products
+          </p>
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-slate-500">Sort by:</span>
+            <div class="relative group">
+              <button class="flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-primary">
+                <span>Popularity</span>
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+              </button>
+              <div
+                class="absolute right-0 top-full mt-2 w-40 bg-white shadow-xl rounded-lg border border-slate-100 py-1 hidden group-hover:block z-20"
+              >
+                <a class="block px-4 py-2 text-sm text-primary bg-slate-50" href="#">Popularity</a>
+                <a class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary" href="#">New Arrivals</a>
+                <a class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary" href="#">
+                  Price: Low to High
+                </a>
+                <a class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary" href="#">
+                  Price: High to Low
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Girl in dress"
+                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMy-Ze-fxj6VwXUaavYiP8BHoaJppd3dFzrT2ZQj_IhnbqxJBWgNKBNPQkglUUfwVZGzVQJ9r_e4i1gqBra1lwCWqn_sjUGmoGu-gcMDAOntePipEev82sUgJlV6AZ8bd1MmSXhUIAY2-Oo8ByZaSdSdbydOCfZ1vpXVCtxd9ihSfZUkvZpi-59HGyW0gdMZkd7w5zIHln6ebbGrqPJ2wQaoliDkorZJ91qp72CiYOLZT-otDD_zAfoiDXk7r4LjhWHLBPBqYNyD4"
+              />
+              <div class="absolute top-3 left-3">
+                <span class="bg-accent text-primary text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">New</span>
+              </div>
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">
+                  Floral A-Line Dress
+                </h3>
+                <span class="font-semibold text-primary">$35.00</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Girls • 4-10Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-[#E5D0C6] ring-1 ring-offset-1 ring-slate-300"></button>
+                <button class="size-3.5 rounded-full bg-[#ADC4CE]"></button>
+              </div>
+            </div>
+          </div>
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Boy in outfit"
+                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlkC_sqRpn0i9XBR_S0DBXXQSasVLK9P-dGpG9gml6Kn9Hk8OSDgerG6Xj4JOpCx0WMclk3Cwa6De8z9xo6tuWC1eFqMF2PP_56YkjDF-WmweRPH44OKOgPS-weFdVVGpgQ_Yqvl9Sg7Wd8TXpik5qCFCh5jwKBVsGGtSzWVg44JPY-Zb4WkFk523x96hyVUXpZYWYxjFRgenNbK7M3GoCw4cTC53Bpko7Snwnr331P2tU4Xh7S_m8WtU2cFILO99eF4-2g9uu8fM"
+              />
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Classic Linen Thobe</h3>
+                <span class="font-semibold text-primary">$42.00</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Boys • 2-12Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-white border border-slate-200"></button>
+                <button class="size-3.5 rounded-full bg-[#2C3333]"></button>
+                <button class="size-3.5 rounded-full bg-[#9DA298] ring-1 ring-offset-1 ring-slate-300"></button>
+              </div>
+            </div>
+          </div>
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Kid praying"
+                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc9yaHOEt6_QtdiW6xf8tK5MypduAkArT8yxWGqE_LbXqnTtsTGpoPT2Z_i8QNXmu0Es_DAfYKwtU3q5E6ghyka3vN0F0ycxUSlzvIUvz66I7Rc_TllTl3B2d2ksHo2bPQtgnz6tnzuiNm0azLdRQ_3CX1Q6vJXh5eAgBuMlOlCo1OxmbL7Tg3XSkoFcc5P90HWR_L67KUYWXlgVj7Ya9pIsZB2o5rshFu1j1S35T8JoJdU7gghWPKoPUi0yQvqJLID23Nnvss3gw"
+              />
+              <div class="absolute top-3 left-3">
+                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">-20%</span>
+              </div>
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Kids Prayer Set</h3>
+                <div class="flex flex-col items-end">
+                  <span class="font-semibold text-red-600">$24.00</span>
+                  <span class="text-xs text-slate-400 line-through">$30.00</span>
+                </div>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Unisex • 4-8Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-[#756A63] ring-1 ring-offset-1 ring-slate-300"></button>
+                <button class="size-3.5 rounded-full bg-[#B69F8E]"></button>
+              </div>
+            </div>
+          </div>
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Summer set"
+                class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2_nncCh9cahMnLqLKA6oSZiOUCqKstjCd6Y86T4nvad7NuayhaJDQRNUabRgelcqdwSblw-lA2-FHimgaB9PgJw5ZBkUAKUPYBKzHyAQuiz4HgXsp1EvPt3Khk_ql8qQVBq-j3L3U9ENP0Nk-_UjimUULmhktlNIr2bvEHZY3Nuru0v3C6fS1IEYbYYlPYq30oweDtxiIGyp4GS1MdIF-2RKbbpDUGF7uce5adiJIRzxuJjvIL62qa2JaROzE-Bs-v7K6h__QJG8"
+              />
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Cotton Summer Set</h3>
+                <span class="font-semibold text-primary">$28.00</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Boys • 2-6Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-[#A3C4BC] ring-1 ring-offset-1 ring-slate-300"></button>
+                <button class="size-3.5 rounded-full bg-[#F3D1C9]"></button>
+              </div>
+            </div>
+          </div>
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Modest dress"
+                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR_7kikeHfZFzh4f2NeNQ5Jcjxv8CgNXj89xyU-D7j91iev5tcE8yFRKIEx60rleDyyySBzElK9clfizZtu5z95rpkwuX_m1uMb75aZk8Tpw-99y-0NQRxaEQGqKZ-ZklowO-nAjI-FoclNEwlg-IYnZcsoJ5px6VrVebsvuytfaNCCip-Y2AcZd9Me6VfVTP4xnJoRlCOm28CoDgrI5lj7qMWwWGj_vFZYqKp-FDNQONjazIfJaqJ32mLRs5MqVUt38qOMnQXzHI"
+              />
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Elegant Velvet Abaya</h3>
+                <span class="font-semibold text-primary">$55.00</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Girls • 8-14Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-[#4A0404] ring-1 ring-offset-1 ring-slate-300"></button>
+                <button class="size-3.5 rounded-full bg-[#0F172A]"></button>
+              </div>
+            </div>
+          </div>
+          <div class="group flex flex-col gap-3">
+            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
+              <img
+                alt="Casual set"
+                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA3ml1abd8a2avEOHdIU76O8wM4bDqNzPO_sfhOirUvlvKoMtDFKKsU715VjxOq_5yXr_g_XmYG_U70V06YWpGsErssAFLDwhRw6GCfBR8Qt3qE2LA08oR-K8R_XAcbYWmTWbOX704146QvD1PR8X7UKY9qD9_sdGZYSM4FEj5gpHbaq8ZkIX5fvCGcSUjk6HJ51kZUbgCH5ksJVfCY_HQa0jVdj5pdr_sUqnmbuawJdEAUpOGIy13FZWMSVAk8mnv6droxwPRDoo"
+              />
+              <div class="absolute top-3 left-3">
+                <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Best Seller</span>
+              </div>
+              <button
+                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
+              >
+                <span class="material-symbols-outlined text-[18px]">favorite</span>
+              </button>
+              <button
+                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+              </button>
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Everyday Play Set</h3>
+                <span class="font-semibold text-primary">$32.00</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">Unisex • 2-8Y</p>
+              <div class="flex items-center gap-1.5">
+                <button class="size-3.5 rounded-full bg-[#64748B] ring-1 ring-offset-1 ring-slate-300"></button>
+                <button class="size-3.5 rounded-full bg-[#CAE6D3]"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-12 flex justify-center">
+          <nav class="flex items-center gap-1 text-sm font-medium">
+            <a class="p-2 text-slate-400 hover:text-primary" href="#">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </a>
+            <a class="px-4 py-2 bg-primary text-white rounded-md shadow-lg shadow-primary/20" href="#">1</a>
+            <a class="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" href="#">2</a>
+            <a class="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" href="#">3</a>
+            <span class="px-2 text-slate-400">...</span>
+            <a class="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" href="#">8</a>
+            <a class="p-2 text-slate-600 hover:text-primary" href="#">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bg-accent/20 border-y border-accent/30 py-16">
+    <div class="max-w-xl mx-auto px-4 text-center">
+      <span class="material-symbols-outlined text-4xl text-primary mb-3">mail</span>
+      <h2 class="text-2xl font-serif font-bold text-primary mb-2">Join the Family</h2>
+      <p class="text-slate-600 mb-6">Subscribe to receive updates, access to exclusive deals, and more.</p>
+      <div class="flex gap-2 max-w-sm mx-auto">
+        <input
+          class="flex-1 rounded-lg border-slate-200 focus:ring-primary focus:border-primary"
+          placeholder="Enter your email"
+          type="email"
+        />
+        <button class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-[#052630] transition-colors">
+          Subscribe
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
