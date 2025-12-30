@@ -146,7 +146,7 @@
               <div class="absolute top-3 left-3" *ngIf="getBadge(product)">
                 <span
                   class="text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"
-                  [ngClass]="\n                    getBadge(product) === '-20%'\n                      ? 'bg-red-500 text-white'\n                      : getBadge(product) === 'Best Seller'\n                        ? 'bg-primary text-white'\n                        : 'bg-accent text-primary'\n                  "
+                  [ngClass]="                    getBadge(product) === '-20%'                     ? 'bg-red-500 text-white'                     : getBadge(product) === 'Best Seller'                      ? 'bg-primary text-white'                       : 'bg-accent text-primary'                 "
                 >
                   {{ getBadge(product) }}
                 </span>
