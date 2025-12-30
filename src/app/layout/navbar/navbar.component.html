@@ -1,0 +1,50 @@
+<header
+  class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#0e3b4a] bg-primary px-4 py-3 shadow-md md:px-10"
+>
+  <div class="flex items-center gap-8">
+    <div class="flex items-center gap-4 text-white">
+      <div class="size-8 flex items-center justify-center rounded-full bg-accent text-primary">
+        <span class="material-symbols-outlined text-xl">all_inclusive</span>
+      </div>
+      <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Muslim</h2>
+    </div>
+    <div class="hidden lg:flex items-center gap-6">
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/">Home</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/men">Men's</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/women">Women's</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Children's</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Accessories</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">About Us</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Contact</a>
+      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Blog</a>
+    </div>
+  </div>
+  <div class="flex flex-1 justify-end gap-4 md:gap-8">
+    <label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+      <div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#084255]">
+        <div class="text-gray-400 flex border-none bg-transparent items-center justify-center pl-4 rounded-l-lg border-r-0">
+          <span class="material-symbols-outlined text-xl">search</span>
+        </div>
+        <input
+          class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-transparent focus:border-none h-full placeholder:text-gray-400 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal"
+          placeholder="Search products..."
+          value=""
+        />
+      </div>
+    </label>
+    <div class="flex gap-2">
+      <button class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors">
+        <span class="material-symbols-outlined">person</span>
+      </button>
+      <button
+        class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors relative"
+      >
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent"></span>
+      </button>
+      <button class="flex lg:hidden items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </div>
+</header>

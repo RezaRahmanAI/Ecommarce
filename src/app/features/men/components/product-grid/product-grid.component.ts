@@ -1,0 +1,24 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { ProductService } from '../../../../core/services/product.service';
+import { Product } from '../../../../core/models/product';
+
+@Component({
+  selector: 'app-men-product-grid',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './product-grid.component.html',
+  styleUrl: './product-grid.component.css',
+})
+export class MenProductGridComponent implements OnInit {
+  products: Product[] = [];
+
+  constructor(private readonly productService: ProductService) {}
+
+  ngOnInit(): void {
+    this.productService.getByGender('men').subscribe((products) => {
+      this.products = products;
+    });
+  }
+}

@@ -1,0 +1,49 @@
+<div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+  <div *ngFor="let product of products" class="group relative flex flex-col">
+    <div class="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-gray-100">
+      <img
+        [alt]="product.name"
+        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        [src]="product.imageUrl"
+      />
+      <div class="absolute top-3 left-3" *ngIf="product.badge">
+        <span
+          class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold"
+          [ngClass]="
+            product.badge === 'Sale'
+              ? 'bg-red-100 text-red-600'
+              : 'bg-accent text-primary'
+          "
+        >
+          {{ product.badge === 'Sale' ? '-20%' : product.badge }}
+        </span>
+      </div>
+      <div class="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+        <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#084255]">
+          <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+          Add to Cart
+        </button>
+      </div>
+      <button
+        class="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-500 backdrop-blur-sm transition hover:bg-white hover:text-red-500 dark:bg-black/50 dark:text-white"
+      >
+        <span class="material-symbols-outlined text-[20px]">favorite</span>
+      </button>
+    </div>
+    <div class="mt-4 flex flex-col gap-1">
+      <h3 class="text-lg font-bold text-primary dark:text-white">
+        <a href="#"><span aria-hidden="true" class="absolute inset-0 z-0"></span>{{ product.name }}</a>
+      </h3>
+      <p class="text-sm text-gray-500">{{ product.material || product.color }}</p>
+      <div class="mt-1 flex items-center gap-2" *ngIf="product.salePrice; else standardPrice">
+        <span class="text-lg font-bold text-red-500">${{ product.price | number: '1.2-2' }}</span>
+        <span class="text-sm text-gray-400 line-through">${{ product.salePrice | number: '1.2-2' }}</span>
+      </div>
+      <ng-template #standardPrice>
+        <div class="mt-1 flex items-center gap-2">
+          <span class="text-lg font-bold text-primary dark:text-accent">${{ product.price | number: '1.2-2' }}</span>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

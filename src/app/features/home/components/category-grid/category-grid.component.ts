@@ -1,0 +1,26 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+import { CategoryService } from '../../../../core/services/category.service';
+import { Category } from '../../../../core/models/category';
+import { SectionHeaderComponent } from '../../../../shared/components/section-header/section-header.component';
+
+@Component({
+  selector: 'app-category-grid',
+  standalone: true,
+  imports: [CommonModule, RouterModule, SectionHeaderComponent],
+  templateUrl: './category-grid.component.html',
+  styleUrl: './category-grid.component.css',
+})
+export class CategoryGridComponent implements OnInit {
+  categories: Category[] = [];
+
+  constructor(private readonly categoryService: CategoryService) {}
+
+  ngOnInit(): void {
+    this.categoryService.getCategories().subscribe((categories) => {
+      this.categories = categories;
+    });
+  }
+}

@@ -1,0 +1,36 @@
+<section class="px-4 py-16 md:px-20 lg:px-40 bg-white dark:bg-[#152329]">
+  <div class="layout-content-container flex flex-col max-w-[1200px] mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-primary dark:text-white text-3xl font-bold mb-4">What Our Customers Say</h2>
+      <div class="h-1 w-20 bg-accent mx-auto rounded-full"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div
+        *ngFor="let testimonial of testimonials"
+        class="bg-background-light dark:bg-[#1a2c33] p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative"
+      >
+        <div class="absolute -top-4 left-8 bg-accent text-primary p-2 rounded-full">
+          <span class="material-symbols-outlined text-3xl">format_quote</span>
+        </div>
+        <div class="flex gap-1 mb-4 mt-2 text-yellow-400">
+          <span
+            *ngFor="let star of stars"
+            class="material-symbols-outlined text-sm fill-current"
+          >
+            {{ getStarIcon(testimonial.rating, star) }}
+          </span>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 italic mb-6 leading-relaxed">"{{ testimonial.quote }}"</p>
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
+            <img class="h-full w-full object-cover" [alt]="testimonial.name" [src]="testimonial.avatarUrl" />
+          </div>
+          <div>
+            <p class="font-bold text-primary dark:text-white text-sm">{{ testimonial.name }}</p>
+            <p class="text-xs text-gray-500">{{ testimonial.title }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
