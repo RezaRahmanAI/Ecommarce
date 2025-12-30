@@ -9,7 +9,7 @@
     </div>
     <app-men-category-chips></app-men-category-chips>
   </div>
-  <app-men-filters-sortbar></app-men-filters-sortbar>
+  <app-men-filters-sortbar [shownProducts]="products.length" [totalProducts]="products.length"></app-men-filters-sortbar>
   <app-men-product-grid></app-men-product-grid>
   <app-men-pagination></app-men-pagination>
 </main>

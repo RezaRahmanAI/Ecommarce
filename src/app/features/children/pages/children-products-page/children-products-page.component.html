@@ -111,7 +111,7 @@
       <div class="flex-1">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <p class="text-sm text-slate-500">
-            Showing <span class="font-semibold text-slate-900">127</span> products
+            Showing <span class="font-semibold text-slate-900">{{ products.length }}</span> products
           </p>
           <div class="flex items-center gap-3">
             <span class="text-sm text-slate-500">Sort by:</span>
@@ -136,15 +136,20 @@
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
-          <div class="group flex flex-col gap-3">
+          <div *ngFor="let product of products" class="group flex flex-col gap-3">
             <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
               <img
-                alt="Girl in dress"
+                [alt]="product.images.mainImage.alt"
                 class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMy-Ze-fxj6VwXUaavYiP8BHoaJppd3dFzrT2ZQj_IhnbqxJBWgNKBNPQkglUUfwVZGzVQJ9r_e4i1gqBra1lwCWqn_sjUGmoGu-gcMDAOntePipEev82sUgJlV6AZ8bd1MmSXhUIAY2-Oo8ByZaSdSdbydOCfZ1vpXVCtxd9ihSfZUkvZpi-59HGyW0gdMZkd7w5zIHln6ebbGrqPJ2wQaoliDkorZJ91qp72CiYOLZT-otDD_zAfoiDXk7r4LjhWHLBPBqYNyD4"
+                [src]="product.images.mainImage.url"
               />
-              <div class="absolute top-3 left-3">
-                <span class="bg-accent text-primary text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">New</span>
+              <div class="absolute top-3 left-3" *ngIf="getBadge(product)">
+                <span
+                  class="text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"
+                  [ngClass]="\n                    getBadge(product) === '-20%'\n                      ? 'bg-red-500 text-white'\n                      : getBadge(product) === 'Best Seller'\n                        ? 'bg-primary text-white'\n                        : 'bg-accent text-primary'\n                  "
+                >
+                  {{ getBadge(product) }}
+                </span>
               </div>
               <button
                 class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
@@ -160,174 +165,24 @@
             <div>
               <div class="flex justify-between items-start mb-1">
                 <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">
-                  Floral A-Line Dress
+                  {{ product.name }}
                 </h3>
-                <span class="font-semibold text-primary">$35.00</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-2">Girls • 4-10Y</p>
-              <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-[#E5D0C6] ring-1 ring-offset-1 ring-slate-300"></button>
-                <button class="size-3.5 rounded-full bg-[#ADC4CE]"></button>
-              </div>
-            </div>
-          </div>
-          <div class="group flex flex-col gap-3">
-            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
-              <img
-                alt="Boy in outfit"
-                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlkC_sqRpn0i9XBR_S0DBXXQSasVLK9P-dGpG9gml6Kn9Hk8OSDgerG6Xj4JOpCx0WMclk3Cwa6De8z9xo6tuWC1eFqMF2PP_56YkjDF-WmweRPH44OKOgPS-weFdVVGpgQ_Yqvl9Sg7Wd8TXpik5qCFCh5jwKBVsGGtSzWVg44JPY-Zb4WkFk523x96hyVUXpZYWYxjFRgenNbK7M3GoCw4cTC53Bpko7Snwnr331P2tU4Xh7S_m8WtU2cFILO99eF4-2g9uu8fM"
-              />
-              <button
-                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
-              >
-                <span class="material-symbols-outlined text-[18px]">favorite</span>
-              </button>
-              <button
-                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
-              </button>
-            </div>
-            <div>
-              <div class="flex justify-between items-start mb-1">
-                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Classic Linen Thobe</h3>
-                <span class="font-semibold text-primary">$42.00</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-2">Boys • 2-12Y</p>
-              <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-white border border-slate-200"></button>
-                <button class="size-3.5 rounded-full bg-[#2C3333]"></button>
-                <button class="size-3.5 rounded-full bg-[#9DA298] ring-1 ring-offset-1 ring-slate-300"></button>
-              </div>
-            </div>
-          </div>
-          <div class="group flex flex-col gap-3">
-            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
-              <img
-                alt="Kid praying"
-                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc9yaHOEt6_QtdiW6xf8tK5MypduAkArT8yxWGqE_LbXqnTtsTGpoPT2Z_i8QNXmu0Es_DAfYKwtU3q5E6ghyka3vN0F0ycxUSlzvIUvz66I7Rc_TllTl3B2d2ksHo2bPQtgnz6tnzuiNm0azLdRQ_3CX1Q6vJXh5eAgBuMlOlCo1OxmbL7Tg3XSkoFcc5P90HWR_L67KUYWXlgVj7Ya9pIsZB2o5rshFu1j1S35T8JoJdU7gghWPKoPUi0yQvqJLID23Nnvss3gw"
-              />
-              <div class="absolute top-3 left-3">
-                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">-20%</span>
-              </div>
-              <button
-                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
-              >
-                <span class="material-symbols-outlined text-[18px]">favorite</span>
-              </button>
-              <button
-                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
-              </button>
-            </div>
-            <div>
-              <div class="flex justify-between items-start mb-1">
-                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Kids Prayer Set</h3>
-                <div class="flex flex-col items-end">
-                  <span class="font-semibold text-red-600">$24.00</span>
-                  <span class="text-xs text-slate-400 line-through">$30.00</span>
+                <div class="flex flex-col items-end" *ngIf="product.salePrice; else standardPrice">
+                  <span class="font-semibold text-red-600">${{ product.price | number: '1.2-2' }}</span>
+                  <span class="text-xs text-slate-400 line-through">${{ product.salePrice | number: '1.2-2' }}</span>
                 </div>
+                <ng-template #standardPrice>
+                  <span class="font-semibold text-primary">${{ product.price | number: '1.2-2' }}</span>
+                </ng-template>
               </div>
-              <p class="text-xs text-slate-500 mb-2">Unisex • 4-8Y</p>
+              <p class="text-xs text-slate-500 mb-2">{{ product.tags.join(' • ') }}</p>
               <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-[#756A63] ring-1 ring-offset-1 ring-slate-300"></button>
-                <button class="size-3.5 rounded-full bg-[#B69F8E]"></button>
-              </div>
-            </div>
-          </div>
-          <div class="group flex flex-col gap-3">
-            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
-              <img
-                alt="Summer set"
-                class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2_nncCh9cahMnLqLKA6oSZiOUCqKstjCd6Y86T4nvad7NuayhaJDQRNUabRgelcqdwSblw-lA2-FHimgaB9PgJw5ZBkUAKUPYBKzHyAQuiz4HgXsp1EvPt3Khk_ql8qQVBq-j3L3U9ENP0Nk-_UjimUULmhktlNIr2bvEHZY3Nuru0v3C6fS1IEYbYYlPYq30oweDtxiIGyp4GS1MdIF-2RKbbpDUGF7uce5adiJIRzxuJjvIL62qa2JaROzE-Bs-v7K6h__QJG8"
-              />
-              <button
-                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
-              >
-                <span class="material-symbols-outlined text-[18px]">favorite</span>
-              </button>
-              <button
-                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
-              </button>
-            </div>
-            <div>
-              <div class="flex justify-between items-start mb-1">
-                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Cotton Summer Set</h3>
-                <span class="font-semibold text-primary">$28.00</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-2">Boys • 2-6Y</p>
-              <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-[#A3C4BC] ring-1 ring-offset-1 ring-slate-300"></button>
-                <button class="size-3.5 rounded-full bg-[#F3D1C9]"></button>
-              </div>
-            </div>
-          </div>
-          <div class="group flex flex-col gap-3">
-            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
-              <img
-                alt="Modest dress"
-                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR_7kikeHfZFzh4f2NeNQ5Jcjxv8CgNXj89xyU-D7j91iev5tcE8yFRKIEx60rleDyyySBzElK9clfizZtu5z95rpkwuX_m1uMb75aZk8Tpw-99y-0NQRxaEQGqKZ-ZklowO-nAjI-FoclNEwlg-IYnZcsoJ5px6VrVebsvuytfaNCCip-Y2AcZd9Me6VfVTP4xnJoRlCOm28CoDgrI5lj7qMWwWGj_vFZYqKp-FDNQONjazIfJaqJ32mLRs5MqVUt38qOMnQXzHI"
-              />
-              <button
-                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
-              >
-                <span class="material-symbols-outlined text-[18px]">favorite</span>
-              </button>
-              <button
-                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
-              </button>
-            </div>
-            <div>
-              <div class="flex justify-between items-start mb-1">
-                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Elegant Velvet Abaya</h3>
-                <span class="font-semibold text-primary">$55.00</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-2">Girls • 8-14Y</p>
-              <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-[#4A0404] ring-1 ring-offset-1 ring-slate-300"></button>
-                <button class="size-3.5 rounded-full bg-[#0F172A]"></button>
-              </div>
-            </div>
-          </div>
-          <div class="group flex flex-col gap-3">
-            <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
-              <img
-                alt="Casual set"
-                class="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA3ml1abd8a2avEOHdIU76O8wM4bDqNzPO_sfhOirUvlvKoMtDFKKsU715VjxOq_5yXr_g_XmYG_U70V06YWpGsErssAFLDwhRw6GCfBR8Qt3qE2LA08oR-K8R_XAcbYWmTWbOX704146QvD1PR8X7UKY9qD9_sdGZYSM4FEj5gpHbaq8ZkIX5fvCGcSUjk6HJ51kZUbgCH5ksJVfCY_HQa0jVdj5pdr_sUqnmbuawJdEAUpOGIy13FZWMSVAk8mnv6droxwPRDoo"
-              />
-              <div class="absolute top-3 left-3">
-                <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Best Seller</span>
-              </div>
-              <button
-                class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300"
-              >
-                <span class="material-symbols-outlined text-[18px]">favorite</span>
-              </button>
-              <button
-                class="absolute bottom-0 left-0 right-0 bg-primary/95 text-white py-3.5 font-medium text-sm tracking-wide translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
-              </button>
-            </div>
-            <div>
-              <div class="flex justify-between items-start mb-1">
-                <h3 class="text-base font-medium text-slate-900 group-hover:text-primary transition-colors cursor-pointer">Everyday Play Set</h3>
-                <span class="font-semibold text-primary">$32.00</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-2">Unisex • 2-8Y</p>
-              <div class="flex items-center gap-1.5">
-                <button class="size-3.5 rounded-full bg-[#64748B] ring-1 ring-offset-1 ring-slate-300"></button>
-                <button class="size-3.5 rounded-full bg-[#CAE6D3]"></button>
+                <button
+                  *ngFor="let color of product.variants.colors"
+                  class="size-3.5 rounded-full"
+                  [ngClass]="color.selected ? 'ring-1 ring-offset-1 ring-slate-300' : ''"
+                  [style.backgroundColor]="color.hex"
+                ></button>
               </div>
             </div>
           </div>

@@ -1,0 +1,301 @@
+<ng-container *ngIf="product$ | async as product">
+  <div class="bg-background-light dark:bg-background-dark text-primary dark:text-white font-display transition-colors duration-200">
+    <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-40 py-6 lg:py-10">
+    <!-- Breadcrumbs -->
+    <div class="flex flex-wrap gap-2 text-sm text-[#4d8799] dark:text-gray-400 font-medium mb-8">
+      <a class="hover:underline hover:text-primary dark:hover:text-white" href="#">Home</a>
+      <span>/</span>
+      <a class="hover:underline hover:text-primary dark:hover:text-white" href="#">{{ product.category }}</a>
+      <span>/</span>
+      <span class="text-primary dark:text-white">{{ product.subCategory }}</span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+      <!-- Left Column: Image Gallery -->
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 relative group cursor-zoom-in">
+          <img
+            [alt]="product.images.mainImage.alt"
+            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            [attr.data-alt]="product.images.mainImage.alt"
+            [src]="product.images.mainImage.url"
+          />
+          <div
+            *ngIf="product.badges.length"
+            class="absolute top-4 left-4 bg-white/90 dark:bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary dark:text-white uppercase tracking-wider"
+          >
+            {{ product.badges[0] }}
+          </div>
+        </div>
+        <!-- Thumbnails -->
+        <div class="grid grid-cols-4 gap-3 lg:gap-4">
+          <button
+            *ngFor="let thumbnail of product.images.thumbnails; let isFirst = first"
+            class="aspect-[3/4] rounded-lg overflow-hidden cursor-pointer relative"
+            [ngClass]="
+              isFirst
+                ? 'border-2 border-primary'
+                : 'border border-transparent hover:border-primary/50'
+            "
+          >
+            <img
+              [alt]="thumbnail.label"
+              class="w-full h-full object-cover"
+              [attr.data-alt]="thumbnail.alt"
+              [src]="thumbnail.url"
+              [ngClass]="thumbnail.type === 'video' ? 'opacity-80' : ''"
+            />
+            <div *ngIf="thumbnail.type === 'video'" class="absolute inset-0 flex items-center justify-center bg-black/10">
+              <span class="material-symbols-outlined text-white drop-shadow-md">play_circle</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <!-- Right Column: Product Details -->
+      <div class="lg:col-span-5 flex flex-col h-full">
+        <div class="sticky top-24 space-y-8">
+          <!-- Header -->
+          <div class="space-y-4">
+            <div class="flex items-start justify-between">
+              <h1 class="text-3xl lg:text-4xl font-bold text-primary dark:text-white tracking-tight leading-tight">
+                {{ product.name }}
+              </h1>
+              <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-red-500 transition-colors">
+                <span class="material-symbols-outlined">favorite</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="text-2xl font-bold text-primary dark:text-white">${{ product.price | number: '1.2-2' }}</span>
+              <div class="flex items-center gap-1">
+                <div class="flex text-[#F59E0B]">
+                  <ng-container *ngFor="let _ of fullStars(product.ratings.avgRating)">
+                    <span class="material-symbols-outlined fill" style="font-size: 18px;">star</span>
+                  </ng-container>
+                  <ng-container *ngIf="hasHalfStar(product.ratings.avgRating)">
+                    <span
+                      class="material-symbols-outlined fill"
+                      style="font-size: 18px; width: 9px; overflow: hidden; display:inline-block;"
+                      >star</span
+                    >
+                    <span
+                      class="material-symbols-outlined text-gray-300"
+                      style="font-size: 18px; width: 9px; overflow: hidden; display:inline-block; margin-left: -4px;"
+                      >star</span
+                    >
+                  </ng-container>
+                  <ng-container *ngFor="let _ of emptyStars(product.ratings.avgRating)">
+                    <span class="material-symbols-outlined text-gray-300" style="font-size: 18px;">star</span>
+                  </ng-container>
+                </div>
+                <a
+                  class="text-sm text-[#4d8799] dark:text-gray-400 hover:text-primary underline offset-2 decoration-1"
+                  href="#reviews"
+                  >{{ product.ratings.reviewCount }} reviews</a
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Description -->
+          <p class="text-gray-600 dark:text-gray-300 leading-relaxed text-base">
+            {{ product.description }}
+          </p>
+          <!-- Selectors -->
+          <div class="space-y-6 pt-4 border-t border-[#e7f0f3] dark:border-white/10">
+            <!-- Colors -->
+            <div class="space-y-3">
+              <label class="text-sm font-bold text-primary dark:text-white"
+                >Color: <span class="font-normal text-gray-500">{{ selectedColorName(product) }}</span></label
+              >
+              <div class="flex gap-3">
+                <button
+                  *ngFor="let color of product.variants.colors"
+                  class="w-10 h-10 rounded-full"
+                  [ngClass]="
+                    color.selected
+                      ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-background-dark'
+                      : 'hover:ring-2 hover:ring-offset-2 hover:ring-gray-300 transition-all'
+                  "
+                  [style.backgroundColor]="color.hex"
+                  [class.border]="color.name === 'Moonlight'"
+                  [class.border-gray-200]="color.name === 'Moonlight'"
+                ></button>
+              </div>
+            </div>
+            <!-- Sizes -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <label class="text-sm font-bold text-primary dark:text-white"
+                  >Size: <span class="font-normal text-gray-500">{{ selectedSizeLabel(product) }}</span></label
+                >
+                <button class="text-xs font-medium text-[#4d8799] dark:text-accent hover:underline flex items-center gap-1">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">straighten</span> Size Guide
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button
+                  *ngFor="let size of product.variants.sizes"
+                  class="h-10 px-4 min-w-[3rem] rounded-lg text-sm transition-colors"
+                  [ngClass]="
+                    size.selected
+                      ? 'bg-primary text-white font-bold shadow-md'
+                      : 'border border-gray-200 dark:border-white/20 font-medium hover:border-primary hover:text-primary dark:hover:border-white dark:hover:text-white'
+                  "
+                >
+                  {{ size.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Actions -->
+          <div class="flex flex-col gap-3 pt-4">
+            <button
+              class="w-full h-12 rounded-xl bg-primary hover:bg-[#084052] text-white text-base font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+            >
+              <span class="material-symbols-outlined" style="font-size: 20px;">shopping_bag</span>
+              Add to Cart
+            </button>
+            <button
+              class="w-full h-12 rounded-xl border border-primary dark:border-white text-primary dark:text-white hover:bg-primary/5 dark:hover:bg-white/10 text-base font-bold transition-all"
+            >
+              Buy Now
+            </button>
+          </div>
+          <!-- Accordions -->
+          <div class="pt-6 divide-y divide-[#e7f0f3] dark:divide-white/10">
+            <details class="group py-4 cursor-pointer">
+              <summary class="flex items-center justify-between font-medium text-primary dark:text-white">
+                <span>Fabric &amp; Care</span>
+                <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+              </summary>
+              <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
+                {{ product.meta.fabricAndCare }}
+              </div>
+            </details>
+            <details class="group py-4 cursor-pointer">
+              <summary class="flex items-center justify-between font-medium text-primary dark:text-white">
+                <span>Shipping &amp; Returns</span>
+                <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
+              </summary>
+              <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
+                {{ product.meta.shippingAndReturns }}
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Reviews & Rating Section -->
+    <div class="mt-20 lg:mt-32 border-t border-[#e7f0f3] dark:border-white/10 pt-16" id="reviews">
+      <h3 class="text-2xl font-bold text-primary dark:text-white mb-8">Customer Reviews</h3>
+      <div class="flex flex-col lg:flex-row gap-12">
+        <!-- Summary Stats -->
+        <div class="w-full lg:w-1/3 flex-shrink-0">
+          <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-[#e7f0f3] dark:border-white/5">
+            <div class="flex items-end gap-3 mb-4">
+              <span class="text-5xl font-black text-primary dark:text-white leading-none">{{ product.ratings.avgRating }}</span>
+              <div class="mb-1">
+                <div class="flex text-[#F59E0B] text-sm mb-1">
+                  <ng-container *ngFor="let _ of fullStars(product.ratings.avgRating)">
+                    <span class="material-symbols-outlined fill" style="font-size: 20px;">star</span>
+                  </ng-container>
+                  <ng-container *ngIf="hasHalfStar(product.ratings.avgRating)">
+                    <span
+                      class="material-symbols-outlined fill"
+                      style="font-size: 20px; width: 10px; overflow: hidden; display:inline-block;"
+                      >star</span
+                    >
+                  </ng-container>
+                </div>
+                <span class="text-sm text-gray-500">Based on {{ product.ratings.reviewCount }} reviews</span>
+              </div>
+            </div>
+            <!-- Progress Bars -->
+            <div class="space-y-2">
+              <div
+                *ngFor="let breakdown of product.ratings.ratingBreakdown; trackBy: trackRating"
+                class="flex items-center gap-3 text-sm"
+              >
+                <span class="w-3 text-right font-medium">{{ breakdown.rating }}</span>
+                <div class="flex-1 h-2 bg-[#e7f0f3] dark:bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full"
+                    [ngClass]="breakdown.percentage === 0 ? 'bg-gray-300' : 'bg-primary dark:bg-accent'"
+                    [style.width.%]="breakdown.percentage"
+                  ></div>
+                </div>
+                <span class="w-8 text-right text-gray-500">{{ breakdown.percentage }}%</span>
+              </div>
+            </div>
+            <button
+              class="w-full mt-6 py-2.5 rounded-lg border border-primary dark:border-white text-primary dark:text-white font-bold text-sm hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-primary transition-colors"
+            >
+              Write a Review
+            </button>
+          </div>
+        </div>
+        <!-- Review List -->
+        <div class="flex-1 space-y-8" *ngIf="reviews$ | async as reviews">
+          <div
+            *ngFor="let review of reviews; trackBy: trackReview"
+            class="border-b border-[#e7f0f3] dark:border-white/10 pb-8 last:border-0"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="size-8 rounded-full flex items-center justify-center text-primary font-bold text-xs"
+                  [ngClass]="review.rating === 5 ? 'bg-accent' : 'bg-gray-200 dark:bg-surface-dark text-gray-600'"
+                >
+                  {{ review.reviewerInitials }}
+                </div>
+                <span class="font-bold text-primary dark:text-white">{{ review.reviewerName }}</span>
+                <span class="flex text-[#F59E0B] text-xs">
+                  <ng-container *ngFor="let _ of fullStars(review.rating)">
+                    <span class="material-symbols-outlined fill" style="font-size: 16px;">star</span>
+                  </ng-container>
+                  <ng-container *ngFor="let _ of emptyStars(review.rating)">
+                    <span class="material-symbols-outlined text-gray-300" style="font-size: 16px;">star</span>
+                  </ng-container>
+                </span>
+              </div>
+              <span class="text-xs text-gray-400">{{ review.timeAgo }}</span>
+            </div>
+            <h4 class="font-bold text-sm mb-2">{{ review.title }}</h4>
+            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+              {{ review.message }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Related Products -->
+    <div class="mt-20 lg:mt-32">
+      <div class="flex justify-between items-end mb-8">
+        <h3 class="text-2xl font-bold text-primary dark:text-white">Complete the Look</h3>
+        <a class="text-sm font-bold text-primary dark:text-accent hover:underline flex items-center gap-1" href="#">
+          View All <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
+        <a *ngFor="let related of product.relatedProducts" class="group flex flex-col gap-3" href="#">
+          <div class="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 relative">
+            <img
+              [alt]="related.image.label"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              [attr.data-alt]="related.image.alt"
+              [src]="related.image.url"
+            />
+            <div
+              class="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur py-2 text-center rounded opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold text-primary uppercase"
+            >
+              {{ related.quickViewLabel }}
+            </div>
+          </div>
+          <div>
+            <h4 class="font-medium text-primary dark:text-white group-hover:underline">{{ related.name }}</h4>
+            <p class="text-sm text-gray-500 mt-1">${{ related.price | number: '1.2-2' }}</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    </main>
+  </div>
+</ng-container>

@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { MOCK_PRODUCTS } from '../data/mock-products';
+import { MOCK_REVIEWS } from '../data/mock-reviews';
 import { Product } from '../models/product';
+import { Review } from '../models/review';
 
 @Injectable({
   providedIn: 'root',
@@ -34,5 +36,9 @@ export class ProductService {
 
   getById(id: number): Observable<Product | undefined> {
     return of(this.products.find((product) => product.id === id));
+  }
+
+  getReviewsByProductId(productId: number): Observable<Review[]> {
+    return of(MOCK_REVIEWS.filter((review) => review.productId === productId));
   }
 }

@@ -14,4 +14,12 @@ import { IconButtonComponent } from '../icon-button/icon-button.component';
 })
 export class ProductCardComponent {
   @Input({ required: true }) product!: Product;
+
+  get primaryBadge(): string | undefined {
+    return this.product.badges[0];
+  }
+
+  get selectedColorName(): string {
+    return this.product.variants.colors.find((color) => color.selected)?.name ?? '';
+  }
 }

@@ -21,4 +21,12 @@ export class WomenProductGridComponent implements OnInit {
       this.products = products;
     });
   }
+
+  getBadge(product: Product): string | undefined {
+    return product.badges[0];
+  }
+
+  getSelectedColorName(product: Product): string {
+    return product.variants.colors.find((color) => color.selected)?.name ?? '';
+  }
 }
