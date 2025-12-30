@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ProductService } from '../../../core/services/product.service';
-import { Product } from '../../../core/models/product';
+import { ProductService } from '../../../../core/services/product.service';
+import { Product } from '../../../../core/models/product';
 
 @Component({
   selector: 'app-children-products-page',
@@ -17,7 +17,9 @@ export class ChildrenProductsPageComponent implements OnInit {
   constructor(private readonly productService: ProductService) {}
 
   ngOnInit(): void {
-    this.productService.getByGender('kids').subscribe((products) => {
+    this.productService
+      .getByGender('kids')
+      .subscribe((products: Product[]) => {
       this.products = products;
     });
   }
