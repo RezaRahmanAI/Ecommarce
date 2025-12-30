@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-3 group cursor-pointer">
+  <div class="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-gray-100">
+    <app-badge *ngIf="product.badge" [label]="product.badge"></app-badge>
+    <img
+      [alt]="product.name"
+      class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+      [src]="product.imageUrl"
+    />
+    <app-icon-button
+      icon="add_shopping_cart"
+      class="absolute bottom-4 right-4 opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
+      variant="light"
+    ></app-icon-button>
+  </div>
+  <div class="flex flex-col gap-1">
+    <h3 class="text-lg font-semibold text-primary dark:text-white group-hover:text-[#4d8799] transition-colors">
+      {{ product.name }}
+    </h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.color }}</p>
+    <p class="text-base font-bold text-primary dark:text-white mt-1">${{ product.price | number: '1.2-2' }}</p>
+  </div>
+</div>

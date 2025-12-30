@@ -1,0 +1,45 @@
+<div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+  <div *ngFor="let product of products" class="group relative flex flex-col">
+    <div class="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 relative">
+      <span
+        *ngIf="product.badge"
+        class="absolute top-3 left-3 z-10 rounded px-2 py-1 text-xs font-bold uppercase tracking-wider"
+        [ngClass]="
+          product.badge === 'Sale'
+            ? 'bg-red-100 text-red-700'
+            : 'bg-accent text-primary'
+        "
+      >
+        {{ product.badge }}
+      </span>
+      <img
+        [alt]="product.name"
+        class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+        [src]="product.imageUrl"
+      />
+      <button
+        class="absolute bottom-4 right-4 flex h-10 w-10 translate-y-4 opacity-0 items-center justify-center rounded-full bg-white text-primary shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-primary hover:text-white"
+      >
+        <span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+      </button>
+    </div>
+    <div class="mt-4 flex justify-between">
+      <div>
+        <h3 class="text-lg font-medium text-text-main dark:text-white">
+          <a href="#">
+            <span aria-hidden="true" class="absolute inset-0"></span>
+            {{ product.name }}
+          </a>
+        </h3>
+        <p class="mt-1 text-sm text-text-sub dark:text-gray-400">{{ product.color }}</p>
+      </div>
+      <div class="flex flex-col items-end" *ngIf="product.salePrice; else standardPrice">
+        <p class="text-lg font-bold text-red-600">${{ product.price | number: '1.2-2' }}</p>
+        <p class="text-sm text-text-sub line-through">${{ product.salePrice | number: '1.2-2' }}</p>
+      </div>
+      <ng-template #standardPrice>
+        <p class="text-lg font-bold text-primary dark:text-accent">${{ product.price | number: '1.2-2' }}</p>
+      </ng-template>
+    </div>
+  </div>
+</div>

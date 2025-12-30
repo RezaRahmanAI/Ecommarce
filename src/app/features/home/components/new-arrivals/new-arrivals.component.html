@@ -1,0 +1,8 @@
+<section class="px-4 py-12 md:px-20 lg:px-40 bg-white dark:bg-[#152329]">
+  <div class="layout-content-container flex flex-col max-w-[1200px] mx-auto">
+    <app-section-header title="New Arrivals"></app-section-header>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,26 @@
+<section class="px-4 py-12 md:px-20 lg:px-40 bg-background-light dark:bg-background-dark">
+  <div class="layout-content-container flex flex-col max-w-[1200px] mx-auto">
+    <app-section-header title="Shop by Category"></app-section-header>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <a
+        *ngFor="let category of categories"
+        class="group relative overflow-hidden rounded-xl aspect-[3/4]"
+        [routerLink]="category.href"
+      >
+        <div
+          class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+          [style.backgroundImage]="'url(' + category.imageUrl + ')'"
+        ></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 p-6">
+          <h3 class="text-white text-xl font-bold">{{ category.name }}</h3>
+          <p
+            class="text-gray-300 text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0"
+          >
+            {{ category.description }}
+          </p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
