@@ -5,12 +5,14 @@ import { MenProductsPageComponent } from './features/men/pages/men-products-page
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
 import { ChildrenProductsPageComponent } from './features/children/pages/children-products-page/children-products-page.component';
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
+import { AccessoriesPageComponent } from './features/accessories/pages/accessories-page/accessories-page.component';
 
 export const appRoutes: Routes = [
   { path: '', component: HomePageComponent },
   { path: 'men', component: MenProductsPageComponent },
   { path: 'women', component: WomenProductsPageComponent },
   { path: 'children', component: ChildrenProductsPageComponent },
+  { path: 'accessories', component: AccessoriesPageComponent },
   {
     path: 'product/:id',
     component: PlaceholderComponent,
