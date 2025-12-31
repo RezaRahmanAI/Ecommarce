@@ -1,35 +1,35 @@
-<ng-container *ngIf="product$ | async as product">
+<ng-container *ngIf="vm$ | async as vm">
   <div class="bg-background-light dark:bg-background-dark text-primary dark:text-white font-display transition-colors duration-200">
     <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-40 py-6 lg:py-10">
     <!-- Breadcrumbs -->
     <div class="flex flex-wrap gap-2 text-sm text-[#4d8799] dark:text-gray-400 font-medium mb-8">
       <a class="hover:underline hover:text-primary dark:hover:text-white" href="#">Home</a>
       <span>/</span>
-      <a class="hover:underline hover:text-primary dark:hover:text-white" href="#">{{ product.category }}</a>
+      <a class="hover:underline hover:text-primary dark:hover:text-white" href="#">{{ vm.product.category }}</a>
       <span>/</span>
-      <span class="text-primary dark:text-white">{{ product.subCategory }}</span>
+      <span class="text-primary dark:text-white">{{ vm.product.subCategory }}</span>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
       <!-- Left Column: Image Gallery -->
       <div class="lg:col-span-7 flex flex-col gap-4">
         <div class="aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 relative group cursor-zoom-in">
           <img
-            [alt]="product.images.mainImage.alt"
+            [alt]="vm.product.images.mainImage.alt"
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            [attr.data-alt]="product.images.mainImage.alt"
-            [src]="product.images.mainImage.url"
+            [attr.data-alt]="vm.product.images.mainImage.alt"
+            [src]="vm.product.images.mainImage.url"
           />
           <div
-            *ngIf="product.badges.length"
+            *ngIf="vm.product.badges.length"
             class="absolute top-4 left-4 bg-white/90 dark:bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary dark:text-white uppercase tracking-wider"
           >
-            {{ product.badges[0] }}
+            {{ vm.product.badges[0] }}
           </div>
         </div>
         <!-- Thumbnails -->
         <div class="grid grid-cols-4 gap-3 lg:gap-4">
           <button
-            *ngFor="let thumbnail of product.images.thumbnails; let isFirst = first"
+            *ngFor="let thumbnail of vm.product.images.thumbnails; let isFirst = first"
             class="aspect-[3/4] rounded-lg overflow-hidden cursor-pointer relative"
             [ngClass]="
               isFirst
@@ -57,20 +57,20 @@
           <div class="space-y-4">
             <div class="flex items-start justify-between">
               <h1 class="text-3xl lg:text-4xl font-bold text-primary dark:text-white tracking-tight leading-tight">
-                {{ product.name }}
+                {{ vm.product.name }}
               </h1>
               <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-red-500 transition-colors">
                 <span class="material-symbols-outlined">favorite</span>
               </button>
             </div>
             <div class="flex items-center gap-4">
-              <span class="text-2xl font-bold text-primary dark:text-white">${{ product.price | number: '1.2-2' }}</span>
+              <span class="text-2xl font-bold text-primary dark:text-white">${{ vm.product.price | number: '1.2-2' }}</span>
               <div class="flex items-center gap-1">
                 <div class="flex text-[#F59E0B]">
-                  <ng-container *ngFor="let _ of fullStars(product.ratings.avgRating)">
+                  <ng-container *ngFor="let _ of fullStars(vm.product.ratings.avgRating)">
                     <span class="material-symbols-outlined fill" style="font-size: 18px;">star</span>
                   </ng-container>
-                  <ng-container *ngIf="hasHalfStar(product.ratings.avgRating)">
+                  <ng-container *ngIf="hasHalfStar(vm.product.ratings.avgRating)">
                     <span
                       class="material-symbols-outlined fill"
                       style="font-size: 18px; width: 9px; overflow: hidden; display:inline-block;"
@@ -82,41 +82,46 @@
                       >star</span
                     >
                   </ng-container>
-                  <ng-container *ngFor="let _ of emptyStars(product.ratings.avgRating)">
+                  <ng-container *ngFor="let _ of emptyStars(vm.product.ratings.avgRating)">
                     <span class="material-symbols-outlined text-gray-300" style="font-size: 18px;">star</span>
                   </ng-container>
                 </div>
                 <a
                   class="text-sm text-[#4d8799] dark:text-gray-400 hover:text-primary underline offset-2 decoration-1"
                   href="#reviews"
-                  >{{ product.ratings.reviewCount }} reviews</a
+                  >{{ vm.product.ratings.reviewCount }} reviews</a
                 >
               </div>
             </div>
           </div>
           <!-- Description -->
           <p class="text-gray-600 dark:text-gray-300 leading-relaxed text-base">
-            {{ product.description }}
+            {{ vm.product.description }}
           </p>
           <!-- Selectors -->
           <div class="space-y-6 pt-4 border-t border-[#e7f0f3] dark:border-white/10">
             <!-- Colors -->
             <div class="space-y-3">
               <label class="text-sm font-bold text-primary dark:text-white"
-                >Color: <span class="font-normal text-gray-500">{{ selectedColorName(product) }}</span></label
+                >Color:
+                <span class="font-normal text-gray-500">
+                  {{ selectedColorName(vm.product, vm.selectedColor) }}
+                </span></label
               >
               <div class="flex gap-3">
                 <button
-                  *ngFor="let color of product.variants.colors"
+                  *ngFor="let color of vm.product.variants.colors"
                   class="w-10 h-10 rounded-full"
                   [ngClass]="
-                    color.selected
+                    color.name === vm.selectedColor
                       ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-background-dark'
                       : 'hover:ring-2 hover:ring-offset-2 hover:ring-gray-300 transition-all'
                   "
                   [style.backgroundColor]="color.hex"
                   [class.border]="color.name === 'Moonlight'"
                   [class.border-gray-200]="color.name === 'Moonlight'"
+                  type="button"
+                  (click)="selectColor(color.name)"
                 ></button>
               </div>
             </div>
@@ -124,7 +129,10 @@
             <div class="space-y-3">
               <div class="flex justify-between items-center">
                 <label class="text-sm font-bold text-primary dark:text-white"
-                  >Size: <span class="font-normal text-gray-500">{{ selectedSizeLabel(product) }}</span></label
+                  >Size:
+                  <span class="font-normal text-gray-500">
+                    {{ selectedSizeLabel(vm.product, vm.selectedSize) }}
+                  </span></label
                 >
                 <button class="text-xs font-medium text-[#4d8799] dark:text-accent hover:underline flex items-center gap-1">
                   <span class="material-symbols-outlined" style="font-size: 16px;">straighten</span> Size Guide
@@ -132,13 +140,15 @@
               </div>
               <div class="flex flex-wrap gap-3">
                 <button
-                  *ngFor="let size of product.variants.sizes"
+                  *ngFor="let size of vm.product.variants.sizes"
                   class="h-10 px-4 min-w-[3rem] rounded-lg text-sm transition-colors"
                   [ngClass]="
-                    size.selected
+                    size.label === vm.selectedSize
                       ? 'bg-primary text-white font-bold shadow-md'
                       : 'border border-gray-200 dark:border-white/20 font-medium hover:border-primary hover:text-primary dark:hover:border-white dark:hover:text-white'
                   "
+                  type="button"
+                  (click)="selectSize(size.label)"
                 >
                   {{ size.label }}
                 </button>
@@ -147,17 +157,47 @@
           </div>
           <!-- Actions -->
           <div class="flex flex-col gap-3 pt-4">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-slate-600 dark:text-slate-300">Qty</span>
+              <div class="flex items-center rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark">
+                <button
+                  class="w-8 h-8 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-l-lg transition-colors"
+                  type="button"
+                  (click)="decreaseQuantity()"
+                >
+                  -
+                </button>
+                <input
+                  class="w-10 h-8 text-center bg-transparent border-none p-0 text-sm font-medium focus:ring-0 text-primary dark:text-white"
+                  readonly
+                  type="text"
+                  [value]="vm.quantity"
+                />
+                <button
+                  class="w-8 h-8 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-r-lg transition-colors"
+                  type="button"
+                  (click)="increaseQuantity()"
+                >
+                  +
+                </button>
+              </div>
+            </div>
             <button
               class="w-full h-12 rounded-xl bg-primary hover:bg-[#084052] text-white text-base font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+              type="button"
+              (click)="addToCart(vm.product)"
             >
               <span class="material-symbols-outlined" style="font-size: 20px;">shopping_bag</span>
               Add to Cart
             </button>
             <button
               class="w-full h-12 rounded-xl border border-primary dark:border-white text-primary dark:text-white hover:bg-primary/5 dark:hover:bg-white/10 text-base font-bold transition-all"
+              type="button"
+              (click)="buyNow(vm.product)"
             >
               Buy Now
             </button>
+            <p *ngIf="selectionError" class="text-sm text-red-500 font-medium">{{ selectionError }}</p>
           </div>
           <!-- Accordions -->
           <div class="pt-6 divide-y divide-[#e7f0f3] dark:divide-white/10">
@@ -167,7 +207,7 @@
                 <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
               </summary>
               <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
-                {{ product.meta.fabricAndCare }}
+                {{ vm.product.meta.fabricAndCare }}
               </div>
             </details>
             <details class="group py-4 cursor-pointer">
@@ -176,7 +216,7 @@
                 <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
               </summary>
               <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
-                {{ product.meta.shippingAndReturns }}
+                {{ vm.product.meta.shippingAndReturns }}
               </div>
             </details>
           </div>
@@ -191,13 +231,13 @@
         <div class="w-full lg:w-1/3 flex-shrink-0">
           <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-[#e7f0f3] dark:border-white/5">
             <div class="flex items-end gap-3 mb-4">
-              <span class="text-5xl font-black text-primary dark:text-white leading-none">{{ product.ratings.avgRating }}</span>
+              <span class="text-5xl font-black text-primary dark:text-white leading-none">{{ vm.product.ratings.avgRating }}</span>
               <div class="mb-1">
                 <div class="flex text-[#F59E0B] text-sm mb-1">
-                  <ng-container *ngFor="let _ of fullStars(product.ratings.avgRating)">
+                  <ng-container *ngFor="let _ of fullStars(vm.product.ratings.avgRating)">
                     <span class="material-symbols-outlined fill" style="font-size: 20px;">star</span>
                   </ng-container>
-                  <ng-container *ngIf="hasHalfStar(product.ratings.avgRating)">
+                  <ng-container *ngIf="hasHalfStar(vm.product.ratings.avgRating)">
                     <span
                       class="material-symbols-outlined fill"
                       style="font-size: 20px; width: 10px; overflow: hidden; display:inline-block;"
@@ -205,13 +245,13 @@
                     >
                   </ng-container>
                 </div>
-                <span class="text-sm text-gray-500">Based on {{ product.ratings.reviewCount }} reviews</span>
+                <span class="text-sm text-gray-500">Based on {{ vm.product.ratings.reviewCount }} reviews</span>
               </div>
             </div>
             <!-- Progress Bars -->
             <div class="space-y-2">
               <div
-                *ngFor="let breakdown of product.ratings.ratingBreakdown; trackBy: trackRating"
+                *ngFor="let breakdown of vm.product.ratings.ratingBreakdown; trackBy: trackRating"
                 class="flex items-center gap-3 text-sm"
               >
                 <span class="w-3 text-right font-medium">{{ breakdown.rating }}</span>
@@ -276,7 +316,7 @@
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
         <a
-          *ngFor="let related of product.relatedProducts"
+          *ngFor="let related of vm.product.relatedProducts"
           [routerLink]="['/product', related.id]"
           class="group flex flex-col gap-3"
         >

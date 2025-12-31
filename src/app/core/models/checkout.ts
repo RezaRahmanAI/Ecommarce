@@ -17,11 +17,21 @@ export interface ShippingMethod {
   estimatedDelivery: string;
 }
 
+export interface PaymentDetails {
+  cardholderName: string;
+  cardNumber: string;
+  expMonth: string;
+  expYear: string;
+  cvc: string;
+  saveCard: boolean;
+}
+
 export interface CheckoutState {
   currentStep: number;
   email: string;
   newsletter: boolean;
   shippingAddress: ShippingAddress;
   shippingMethodId: string;
-  promoCode?: string;
+  promoCode: string;
+  payment: PaymentDetails;
 }

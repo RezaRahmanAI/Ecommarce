@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { AccessoriesPageComponent } from './features/accessories/pages/accessories-page/accessories-page.component';
+import { AccountPageComponent } from './features/account/pages/account-page/account-page.component';
 import { CartPageComponent } from './features/cart/pages/cart-page/cart-page.component';
 import { ChildrenProductsPageComponent } from './features/children/pages/children-products-page/children-products-page.component';
 import { CheckoutPageComponent } from './features/checkout/pages/checkout-page/checkout-page.component';
@@ -8,6 +9,7 @@ import { HomePageComponent } from './features/home/pages/home-page/home-page.com
 import { LoginPageComponent } from './features/login/pages/login-page/login.page';
 import { MenProductsPageComponent } from './features/men/pages/men-products-page/men-products-page.component';
 import { OrderConfirmationPageComponent } from './features/order-confirmation/pages/order-confirmation-page/order-confirmation-page.component';
+import { OrdersPageComponent } from './features/orders/pages/orders-page/orders-page.component';
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
@@ -44,15 +46,13 @@ export const appRoutes: Routes = [
   },
   {
     path: 'account',
-    component: PlaceholderComponent,
+    component: AccountPageComponent,
     canActivate: [authGuard],
-    data: { title: 'Account', description: 'Account experience coming soon.' },
   },
   {
     path: 'orders',
-    component: PlaceholderComponent,
+    component: OrdersPageComponent,
     canActivate: [authGuard],
-    data: { title: 'Orders', description: 'Order history experience coming soon.' },
   },
   { path: '**', redirectTo: '' },
 ];

@@ -42,6 +42,7 @@ export interface OrderTimeline {
 
 export interface Order {
   id: string;
+  userId?: string;
   email: string;
   status: OrderStatus;
   items: OrderItem[];

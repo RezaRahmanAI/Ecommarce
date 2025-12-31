@@ -36,7 +36,8 @@
           </ol>
         </nav>
         <form [formGroup]="checkoutForm">
-          <section aria-labelledby="contact-heading" class="mb-10">
+          <ng-container *ngIf="currentStep === 1">
+            <section aria-labelledby="contact-heading" class="mb-10">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-semibold text-slate-900 dark:text-white" id="contact-heading">Contact Information</h2>
               <span class="text-sm text-slate-500 dark:text-slate-400">
@@ -70,8 +71,8 @@
                 </label>
               </div>
             </div>
-          </section>
-          <section aria-labelledby="shipping-heading" class="mb-10" formGroupName="shippingAddress">
+            </section>
+            <section aria-labelledby="shipping-heading" class="mb-10" formGroupName="shippingAddress">
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="shipping-heading">Shipping Address</h2>
             <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,8 +174,8 @@
                 </select>
               </div>
             </div>
-          </section>
-          <section aria-labelledby="method-heading" class="mb-10">
+            </section>
+            <section aria-labelledby="method-heading" class="mb-10">
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="method-heading">Shipping Method</h2>
             <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
               <label
@@ -222,24 +223,160 @@
                 </div>
               </label>
             </div>
-          </section>
-          <div
-            class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
-          >
-            <a
-              class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
-              routerLink="/cart"
+            </section>
+            <div
+              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
             >
-              <span class="material-icons text-base mr-1">arrow_back</span> Return to cart
-            </a>
-            <button
-              class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              type="button"
-              (click)="continueToPayment()"
+              <a
+                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
+                routerLink="/cart"
+              >
+                <span class="material-icons text-base mr-1">arrow_back</span> Return to cart
+              </a>
+              <button
+                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                type="button"
+                (click)="continueToPayment()"
+              >
+                Continue to Payment
+              </button>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="currentStep === 2">
+            <section aria-labelledby="payment-heading" class="mb-10" formGroupName="payment">
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="payment-heading">Payment</h2>
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="cardholder">
+                    Cardholder name
+                  </label>
+                  <input
+                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                    id="cardholder"
+                    type="text"
+                    formControlName="cardholderName"
+                    placeholder="Amina Noor"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="card-number">Card number</label>
+                  <input
+                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                    id="card-number"
+                    type="text"
+                    formControlName="cardNumber"
+                    placeholder="4242 4242 4242 4242"
+                  />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="exp-month">Exp. Month</label>
+                    <input
+                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                      id="exp-month"
+                      type="text"
+                      formControlName="expMonth"
+                      placeholder="MM"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="exp-year">Exp. Year</label>
+                    <input
+                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                      id="exp-year"
+                      type="text"
+                      formControlName="expYear"
+                      placeholder="YY"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="cvc">CVC</label>
+                    <input
+                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                      id="cvc"
+                      type="text"
+                      formControlName="cvc"
+                      placeholder="123"
+                    />
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    id="save-card"
+                    type="checkbox"
+                    formControlName="saveCard"
+                  />
+                  <label class="ml-2 block text-sm text-slate-500 dark:text-slate-400" for="save-card">
+                    Save card for next time
+                  </label>
+                </div>
+              </div>
+            </section>
+            <div
+              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
             >
-              Continue to Payment
-            </button>
-          </div>
+              <button
+                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
+                type="button"
+                (click)="backToShipping()"
+              >
+                <span class="material-icons text-base mr-1">arrow_back</span> Back to shipping
+              </button>
+              <button
+                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                type="button"
+                (click)="continueToReview()"
+              >
+                Continue to Review
+              </button>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="currentStep === 3">
+            <section aria-labelledby="review-heading" class="mb-10">
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="review-heading">Review</h2>
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Shipping</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ checkoutForm.controls.shippingAddress.controls.firstName.value }}
+                    {{ checkoutForm.controls.shippingAddress.controls.lastName.value }} ·
+                    {{ checkoutForm.controls.shippingAddress.controls.address.value }},
+                    {{ checkoutForm.controls.shippingAddress.controls.city.value }}
+                  </p>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Payment</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
+                    Card ending in {{ checkoutForm.controls.payment.controls.cardNumber.value | slice:-4 }}
+                  </p>
+                </div>
+                <div *ngIf="checkoutForm.controls.promoCode.value" class="text-sm text-slate-500 dark:text-slate-400">
+                  Promo code: <span class="font-semibold">{{ checkoutForm.controls.promoCode.value }}</span>
+                </div>
+              </div>
+            </section>
+            <div
+              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
+            >
+              <button
+                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
+                type="button"
+                (click)="backToPayment()"
+              >
+                <span class="material-icons text-base mr-1">arrow_back</span> Back to payment
+              </button>
+              <button
+                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                type="button"
+                (click)="placeOrder()"
+              >
+                Place Order
+              </button>
+            </div>
+          </ng-container>
         </form>
       </div>
       <div class="mt-10 lg:mt-0 lg:col-span-5" *ngIf="vm$ | async as vm">
@@ -277,7 +414,7 @@
               </ul>
             </div>
             <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800">
-              <form class="flex space-x-2">
+              <div class="flex space-x-2" [formGroup]="checkoutForm">
                 <div class="flex-grow">
                   <label class="sr-only" for="discount-code">Discount code</label>
                   <input
@@ -286,15 +423,17 @@
                     name="discount-code"
                     placeholder="Discount code"
                     type="text"
+                    formControlName="promoCode"
                   />
                 </div>
                 <button
                   class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 px-4 rounded-lg font-medium text-sm transition-colors"
-                  type="submit"
+                  type="button"
+                  (click)="applyPromoCode()"
                 >
                   Apply
                 </button>
-              </form>
+              </div>
             </div>
             <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 space-y-4">
               <div class="flex items-center justify-between">

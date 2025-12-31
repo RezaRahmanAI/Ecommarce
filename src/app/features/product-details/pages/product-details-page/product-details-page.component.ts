@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map, switchMap } from 'rxjs';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { BehaviorSubject, combineLatest, filter, map, switchMap, tap } from 'rxjs';
 
 import { ProductService } from '../../../../core/services/product.service';
 import { Product, RatingBreakdown } from '../../../../core/models/product';
 import { Review } from '../../../../core/models/review';
+import { CartService } from '../../../../core/services/cart.service';
 
 @Component({
   selector: 'app-product-details-page',
@@ -17,16 +18,44 @@ import { Review } from '../../../../core/models/review';
 export class ProductDetailsPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
+  private readonly cartService = inject(CartService);
+  private readonly router = inject(Router);
+
+  private readonly selectedColorSubject = new BehaviorSubject<string | null>(null);
+  private readonly selectedSizeSubject = new BehaviorSubject<string | null>(null);
+  private readonly quantitySubject = new BehaviorSubject<number>(1);
 
   product$ = this.route.paramMap.pipe(
     map((params) => Number(params.get('id')) || 1),
     switchMap((id) => this.productService.getById(id)),
+    filter((product): product is Product => Boolean(product)),
+    tap((product) => {
+      this.selectedColorSubject.next(product.variants.colors[0]?.name ?? null);
+      this.selectedSizeSubject.next(product.variants.sizes[0]?.label ?? null);
+      this.quantitySubject.next(1);
+    }),
   );
 
   reviews$ = this.route.paramMap.pipe(
     map((params) => Number(params.get('id')) || 1),
     switchMap((id) => this.productService.getReviewsByProductId(id)),
   );
+
+  readonly vm$ = combineLatest([
+    this.product$,
+    this.selectedColorSubject,
+    this.selectedSizeSubject,
+    this.quantitySubject,
+  ]).pipe(
+    map(([product, selectedColor, selectedSize, quantity]) => ({
+      product,
+      selectedColor,
+      selectedSize,
+      quantity,
+    })),
+  );
+
+  selectionError = '';
 
   fullStars(rating: number): number[] {
     return Array.from({ length: Math.floor(rating) }, (_, index) => index);
@@ -42,12 +71,52 @@ export class ProductDetailsPageComponent {
     return Array.from({ length: Math.max(0, 5 - full - half) }, (_, index) => index);
   }
 
-  selectedColorName(product: Product): string {
-    return product.variants.colors.find((color) => color.selected)?.name ?? '';
+  selectedColorName(product: Product | null, selectedColor: string | null): string {
+    return selectedColor ?? product?.variants.colors[0]?.name ?? '';
   }
 
-  selectedSizeLabel(product: Product): string {
-    return product.variants.sizes.find((size) => size.selected)?.label ?? '';
+  selectedSizeLabel(product: Product | null, selectedSize: string | null): string {
+    return selectedSize ?? product?.variants.sizes[0]?.label ?? '';
+  }
+
+  selectColor(colorName: string): void {
+    this.selectedColorSubject.next(colorName);
+    this.selectionError = '';
+  }
+
+  selectSize(sizeLabel: string): void {
+    this.selectedSizeSubject.next(sizeLabel);
+    this.selectionError = '';
+  }
+
+  increaseQuantity(): void {
+    this.quantitySubject.next(this.quantitySubject.getValue() + 1);
+  }
+
+  decreaseQuantity(): void {
+    this.quantitySubject.next(Math.max(1, this.quantitySubject.getValue() - 1));
+  }
+
+  addToCart(product: Product | null): void {
+    if (!product) {
+      return;
+    }
+    const selectedColor = this.selectedColorSubject.getValue();
+    const selectedSize = this.selectedSizeSubject.getValue();
+    if (!selectedColor || !selectedSize) {
+      this.selectionError = 'Please select a color and size before adding to cart.';
+      return;
+    }
+    const quantity = this.quantitySubject.getValue();
+    this.cartService.addItem(product.id, quantity, selectedColor, selectedSize);
+    this.selectionError = '';
+  }
+
+  buyNow(product: Product | null): void {
+    this.addToCart(product);
+    if (!this.selectionError) {
+      void this.router.navigateByUrl('/cart');
+    }
   }
 
   trackRating(_: number, rating: RatingBreakdown): number {

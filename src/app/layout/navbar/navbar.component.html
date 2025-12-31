@@ -36,16 +36,46 @@
         />
       </div>
     </label>
-    <div class="flex gap-2">
-      <button class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors">
-        <span class="material-symbols-outlined">person</span>
-      </button>
-      <button
+    <div class="flex gap-2" *ngIf="vm$ | async as vm">
+      <ng-container *ngIf="vm.user; else guestActions">
+        <a
+          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
+          routerLink="/account"
+          aria-label="Account"
+        >
+          <span class="material-symbols-outlined">person</span>
+        </a>
+        <button
+          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
+          type="button"
+          (click)="logout()"
+          aria-label="Logout"
+        >
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </ng-container>
+      <ng-template #guestActions>
+        <a
+          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
+          routerLink="/login"
+          aria-label="Login"
+        >
+          <span class="material-symbols-outlined">person</span>
+        </a>
+      </ng-template>
+      <a
         class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors relative"
+        routerLink="/cart"
+        aria-label="Cart"
       >
         <span class="material-symbols-outlined">shopping_cart</span>
-        <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent"></span>
-      </button>
+        <span
+          *ngIf="vm.cartCount > 0"
+          class="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-accent text-[10px] font-bold text-primary flex items-center justify-center"
+        >
+          {{ vm.cartCount }}
+        </span>
+      </a>
       <button class="flex lg:hidden items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors">
         <span class="material-symbols-outlined">menu</span>
       </button>

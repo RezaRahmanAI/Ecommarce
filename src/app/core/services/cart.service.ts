@@ -11,11 +11,18 @@ import { Product } from '../models/product';
 export class CartService {
   private readonly freeShippingThreshold = 150;
   private readonly taxRate = 0.08;
+  private readonly storageKey = 'cart_items';
 
-  private readonly cartItemsSubject = new BehaviorSubject<CartItem[]>(this.buildInitialCart());
+  private readonly cartItemsSubject = new BehaviorSubject<CartItem[]>(this.loadCart());
   readonly cartItems$ = this.cartItemsSubject.asObservable();
 
   readonly summary$ = this.cartItems$.pipe(map((items) => this.calculateSummary(items)));
+
+  constructor() {
+    this.cartItems$.subscribe((items) => {
+      localStorage.setItem(this.storageKey, JSON.stringify(items));
+    });
+  }
 
   getCart(): Observable<CartItem[]> {
     return this.cartItems$;
@@ -35,9 +42,11 @@ export class CartService {
       return;
     }
 
+    const resolvedColor = color ?? product.variants.colors[0]?.name ?? 'Default';
+    const resolvedSize = size ?? product.variants.sizes[0]?.label ?? 'One Size';
     const items = this.cartItemsSubject.getValue();
     const existing = items.find(
-      (item) => item.productId === productId && item.color === (color ?? item.color) && item.size === (size ?? item.size),
+      (item) => item.productId === productId && item.color === resolvedColor && item.size === resolvedSize,
     );
 
     if (existing) {
@@ -45,7 +54,7 @@ export class CartService {
       return;
     }
 
-    const nextItems = [...items, this.createCartItem(product, quantity, color, size)];
+    const nextItems = [...items, this.createCartItem(product, quantity, resolvedColor, resolvedSize)];
     this.cartItemsSubject.next(nextItems);
   }
 
@@ -62,21 +71,13 @@ export class CartService {
     this.cartItemsSubject.next(nextItems);
   }
 
-  private buildInitialCart(): CartItem[] {
-    const [first, second] = MOCK_PRODUCTS;
-    if (!first || !second) {
-      return [];
-    }
-
-    return [
-      this.createCartItem(first, 1, first.variants.colors[0]?.name, first.variants.sizes[0]?.label),
-      this.createCartItem(second, 2, second.variants.colors[0]?.name, second.variants.sizes[0]?.label),
-    ];
+  clearCart(): void {
+    this.cartItemsSubject.next([]);
   }
 
   private createCartItem(product: Product, quantity: number, color?: string, size?: string): CartItem {
-    const resolvedColor = color ?? product.variants.colors.find((item) => item.selected)?.name ?? 'Default';
-    const resolvedSize = size ?? product.variants.sizes.find((item) => item.selected)?.label ?? 'One Size';
+    const resolvedColor = color ?? product.variants.colors[0]?.name ?? 'Default';
+    const resolvedSize = size ?? product.variants.sizes[0]?.label ?? 'One Size';
 
     return {
       id: `cart-${product.id}-${resolvedColor}-${resolvedSize}-${Math.random().toString(36).slice(2, 8)}`,
@@ -98,9 +99,10 @@ export class CartService {
     const total = Number((subtotal + tax + shipping).toFixed(2));
     const freeShippingRemaining = Math.max(this.freeShippingThreshold - subtotal, 0);
     const freeShippingProgress = Math.min((subtotal / this.freeShippingThreshold) * 100, 100);
+    const itemsCount = items.reduce((total, item) => total + item.quantity, 0);
 
     return {
-      itemsCount: items.length,
+      itemsCount,
       subtotal,
       tax,
       shipping,
@@ -109,5 +111,18 @@ export class CartService {
       freeShippingRemaining,
       freeShippingProgress,
     };
+  }
+
+  private loadCart(): CartItem[] {
+    const stored = localStorage.getItem(this.storageKey);
+    if (!stored) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(stored) as CartItem[];
+    } catch {
+      return [];
+    }
   }
 }
