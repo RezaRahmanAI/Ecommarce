@@ -11,13 +11,15 @@ interface PlaceOrderPayload {
   state: CheckoutState;
   cartItems: CartItem[];
   summary: CartSummary;
+  userId?: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService {
-  private readonly ordersSubject = new BehaviorSubject<Order[]>(MOCK_ORDERS);
+  private readonly storageKey = 'orders';
+  private readonly ordersSubject = new BehaviorSubject<Order[]>(this.loadOrders());
   readonly orders$ = this.ordersSubject.asObservable();
 
   getOrderById(orderId: string): Observable<Order | undefined> {
@@ -32,6 +34,9 @@ export class OrderService {
     const orderId = `MSLM-${Math.floor(100000 + Math.random() * 900000)}`;
     const shippingMethod = SHIPPING_METHODS.find((method) => method.id === payload.state.shippingMethodId) ??
       SHIPPING_METHODS[0];
+    const paymentDetails = payload.state.payment;
+    const last4 = paymentDetails.cardNumber.slice(-4) || '4242';
+    const brand = this.resolveCardBrand(paymentDetails.cardNumber);
 
     const items: OrderItem[] = payload.cartItems.map((item) => ({
       productId: item.productId,
@@ -47,16 +52,17 @@ export class OrderService {
 
     const order: Order = {
       id: orderId,
+      userId: payload.userId,
       email: payload.state.email,
       status: OrderStatus.Confirmed,
       items,
       shippingAddress: payload.state.shippingAddress,
       shippingMethod,
       payment: {
-        brand: 'Mastercard',
-        last4: '4242',
-        expMonth: '12',
-        expYear: '25',
+        brand,
+        last4,
+        expMonth: paymentDetails.expMonth || '12',
+        expYear: paymentDetails.expYear || '25',
       },
       totals: {
         subtotal: payload.summary.subtotal,
@@ -73,6 +79,37 @@ export class OrderService {
     };
 
     this.ordersSubject.next([order, ...this.ordersSubject.getValue()]);
+    this.persistOrders();
     return order;
+  }
+
+  private loadOrders(): Order[] {
+    const stored = localStorage.getItem(this.storageKey);
+    if (stored) {
+      try {
+        return JSON.parse(stored) as Order[];
+      } catch {
+        return [...MOCK_ORDERS];
+      }
+    }
+
+    return [...MOCK_ORDERS];
+  }
+
+  private persistOrders(): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.ordersSubject.getValue()));
+  }
+
+  private resolveCardBrand(cardNumber: string): string {
+    if (cardNumber.startsWith('4')) {
+      return 'Visa';
+    }
+    if (cardNumber.startsWith('5')) {
+      return 'Mastercard';
+    }
+    if (cardNumber.startsWith('3')) {
+      return 'Amex';
+    }
+    return 'Card';
   }
 }

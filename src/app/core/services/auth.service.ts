@@ -22,23 +22,13 @@ interface DemoUser extends AuthUser {
 })
 export class AuthService {
   private readonly storageKey = 'auth_session';
+  private readonly usersStorageKey = 'demo_users';
 
-  private readonly demoUsers: DemoUser[] = [
-    {
-      id: 'user-1',
-      name: 'Amina Noor',
-      email: 'amina@example.com',
-      username: 'amina',
-      password: 'password123',
-    },
-    {
-      id: 'user-2',
-      name: 'Layla Farah',
-      email: 'layla@example.com',
-      username: 'layla',
-      password: 'style2024',
-    },
-  ];
+  private demoUsers: DemoUser[] = [];
+
+  constructor() {
+    this.demoUsers = this.loadUsers();
+  }
 
   login(emailOrUsername: string, password: string): Observable<AuthSession> {
     return defer(() => {
@@ -100,6 +90,7 @@ export class AuthService {
       };
 
       this.demoUsers.push(newUser);
+      this.storeUsers();
 
       const session: AuthSession = {
         token: `mock-token-${newUser.id}`,
@@ -117,6 +108,18 @@ export class AuthService {
   storeSession(session: AuthSession, rememberMe: boolean): void {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem(this.storageKey, JSON.stringify(session));
+  }
+
+  updateSession(session: AuthSession): void {
+    if (localStorage.getItem(this.storageKey)) {
+      localStorage.setItem(this.storageKey, JSON.stringify(session));
+      return;
+    }
+    if (sessionStorage.getItem(this.storageKey)) {
+      sessionStorage.setItem(this.storageKey, JSON.stringify(session));
+      return;
+    }
+    localStorage.setItem(this.storageKey, JSON.stringify(session));
   }
 
   clearSession(): void {
@@ -139,5 +142,40 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return this.getSession() !== null;
+  }
+
+  private loadUsers(): DemoUser[] {
+    const stored = localStorage.getItem(this.usersStorageKey);
+    if (stored) {
+      try {
+        return JSON.parse(stored) as DemoUser[];
+      } catch {
+        // fall through to defaults
+      }
+    }
+
+    const defaults: DemoUser[] = [
+      {
+        id: 'user-1',
+        name: 'Amina Noor',
+        email: 'amina@example.com',
+        username: 'amina',
+        password: 'password123',
+      },
+      {
+        id: 'user-2',
+        name: 'Layla Farah',
+        email: 'layla@example.com',
+        username: 'layla',
+        password: 'style2024',
+      },
+    ];
+
+    localStorage.setItem(this.usersStorageKey, JSON.stringify(defaults));
+    return defaults;
+  }
+
+  private storeUsers(): void {
+    localStorage.setItem(this.usersStorageKey, JSON.stringify(this.demoUsers));
   }
 }

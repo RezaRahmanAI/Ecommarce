@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthStateService } from '../../../../core/services/auth-state.service';
 
 @Component({
   selector: 'app-login-page',
@@ -14,7 +14,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class LoginPageComponent {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
+  private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -51,8 +51,8 @@ export class LoginPageComponent {
 
     const { emailOrUsername, password, rememberMe } = this.loginForm.getRawValue();
 
-    this.authService
-      .login(emailOrUsername, password)
+    this.authState
+      .login(emailOrUsername, password, rememberMe)
       .pipe(
         take(1),
         finalize(() => {
@@ -61,7 +61,6 @@ export class LoginPageComponent {
       )
       .subscribe({
         next: (session) => {
-          this.authService.storeSession(session, rememberMe);
           const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/account';
           void this.router.navigateByUrl(returnUrl);
         },

@@ -11,7 +11,7 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthStateService } from '../../../../core/services/auth-state.service';
 
 const passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const password = control.get('password')?.value as string | undefined;
@@ -32,7 +32,7 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
 })
 export class RegisterPageComponent {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
+  private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
 
   readonly registerForm = this.formBuilder.nonNullable.group(
@@ -87,7 +87,7 @@ export class RegisterPageComponent {
 
     const { fullName, email, password } = this.registerForm.getRawValue();
 
-    this.authService
+    this.authState
       .register(fullName, email, password)
       .pipe(
         take(1),
@@ -97,7 +97,6 @@ export class RegisterPageComponent {
       )
       .subscribe({
         next: (session) => {
-          this.authService.storeSession(session, true);
           void this.router.navigateByUrl('/account');
         },
         error: (error: Error) => {

@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { combineLatest, map, startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CartService } from '../../../../core/services/cart.service';
 import { CheckoutService } from '../../../../core/services/checkout.service';
@@ -21,6 +22,8 @@ export class CheckoutPageComponent {
   private readonly cartService = inject(CartService);
   private readonly checkoutService = inject(CheckoutService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   readonly shippingMethods = SHIPPING_METHODS;
   private readonly fallbackShippingMethod: ShippingMethod = this.shippingMethods[0] ?? {
@@ -35,16 +38,25 @@ export class CheckoutPageComponent {
     email: ['', [Validators.required, Validators.email]],
     newsletter: true,
     shippingAddress: this.formBuilder.nonNullable.group({
-      firstName: '',
-      lastName: '',
-      address: '',
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      address: ['', Validators.required],
       apartment: '',
-      city: '',
-      region: '',
-      postalCode: '',
+      city: ['', Validators.required],
+      region: ['', Validators.required],
+      postalCode: ['', Validators.required],
       country: 'United States',
     }),
     shippingMethod: this.fallbackShippingMethod.id,
+    promoCode: '',
+    payment: this.formBuilder.nonNullable.group({
+      cardholderName: ['', Validators.required],
+      cardNumber: ['', [Validators.required, Validators.minLength(12)]],
+      expMonth: ['', Validators.required],
+      expYear: ['', Validators.required],
+      cvc: ['', Validators.required],
+      saveCard: false,
+    }),
   });
 
   currentStep = 1;
@@ -66,15 +78,66 @@ export class CheckoutPageComponent {
     map(([cartItems, summary]) => ({ cartItems, summary })),
   );
 
+  constructor() {
+    this.checkoutService.state$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((state) => {
+        this.currentStep = state.currentStep;
+        this.checkoutForm.patchValue({
+          email: state.email,
+          newsletter: state.newsletter,
+          shippingAddress: state.shippingAddress,
+          shippingMethod: state.shippingMethodId,
+          promoCode: state.promoCode,
+          payment: state.payment,
+        });
+      });
+  }
+
   continueToPayment(): void {
+    if (this.checkoutForm.controls.email.invalid || this.checkoutForm.controls.shippingAddress.invalid) {
+      this.checkoutForm.controls.email.markAsTouched();
+      this.checkoutForm.controls.shippingAddress.markAllAsTouched();
+      return;
+    }
+
     this.currentStep = 2;
     this.checkoutService.setStep(this.currentStep);
-    this.checkoutService.updateState({
-      email: this.checkoutForm.controls.email.value ?? '',
-      newsletter: this.checkoutForm.controls.newsletter.value ?? false,
-      shippingAddress: this.checkoutForm.controls.shippingAddress.getRawValue(),
-      shippingMethodId: this.checkoutForm.controls.shippingMethod.value ?? 'standard',
-    });
+    this.persistCheckoutState();
+  }
+
+  continueToReview(): void {
+    if (this.checkoutForm.controls.payment.invalid) {
+      this.checkoutForm.controls.payment.markAllAsTouched();
+      return;
+    }
+
+    this.currentStep = 3;
+    this.checkoutService.setStep(this.currentStep);
+    this.persistCheckoutState();
+  }
+
+  backToShipping(): void {
+    this.currentStep = 1;
+    this.checkoutService.setStep(this.currentStep);
+  }
+
+  backToPayment(): void {
+    this.currentStep = 2;
+    this.checkoutService.setStep(this.currentStep);
+  }
+
+  placeOrder(): void {
+    this.persistCheckoutState();
+    const orderId = this.checkoutService.createOrder();
+    if (!orderId) {
+      return;
+    }
+    void this.router.navigate(['/order-confirmation', orderId]);
+  }
+
+  applyPromoCode(): void {
+    this.persistCheckoutState();
   }
 
   stepClasses(step: number): string {
@@ -95,4 +158,15 @@ export class CheckoutPageComponent {
     return item.id;
   }
 
+  private persistCheckoutState(): void {
+    const paymentValue = this.checkoutForm.controls.payment.getRawValue();
+    this.checkoutService.updateState({
+      email: this.checkoutForm.controls.email.value ?? '',
+      newsletter: this.checkoutForm.controls.newsletter.value ?? false,
+      shippingAddress: this.checkoutForm.controls.shippingAddress.getRawValue(),
+      shippingMethodId: this.checkoutForm.controls.shippingMethod.value ?? 'standard',
+      promoCode: this.checkoutForm.controls.promoCode.value ?? '',
+      payment: paymentValue,
+    });
+  }
 }
