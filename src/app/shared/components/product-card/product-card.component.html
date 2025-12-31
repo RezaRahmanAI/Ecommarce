@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-3 group cursor-pointer">
+<a [routerLink]="['/product', product.id]" class="flex flex-col gap-3 group cursor-pointer">
   <div class="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-gray-100">
     <app-badge *ngIf="primaryBadge" [label]="primaryBadge"></app-badge>
     <img
@@ -19,4 +19,4 @@
     <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedColorName }}</p>
     <p class="text-base font-bold text-primary dark:text-white mt-1">${{ product.price | number: '1.2-2' }}</p>
   </div>
-</div>
+</a>

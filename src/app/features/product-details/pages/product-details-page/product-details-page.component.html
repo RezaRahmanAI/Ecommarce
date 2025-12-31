@@ -275,7 +275,11 @@
         </a>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
-        <a *ngFor="let related of product.relatedProducts" class="group flex flex-col gap-3" href="#">
+        <a
+          *ngFor="let related of product.relatedProducts"
+          [routerLink]="['/product', related.id]"
+          class="group flex flex-col gap-3"
+        >
           <div class="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 relative">
             <img
               [alt]="related.image.label"

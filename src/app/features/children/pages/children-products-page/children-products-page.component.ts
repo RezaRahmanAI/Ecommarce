@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { ProductService } from '../../../../core/services/product.service';
 import { Product } from '../../../../core/models/product';
@@ -7,7 +8,7 @@ import { Product } from '../../../../core/models/product';
 @Component({
   selector: 'app-children-products-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './children-products-page.component.html',
   styleUrl: './children-products-page.component.css',
 })

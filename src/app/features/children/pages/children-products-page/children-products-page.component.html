@@ -136,7 +136,11 @@
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
-          <div *ngFor="let product of products" class="group flex flex-col gap-3">
+          <div
+            *ngFor="let product of products"
+            [routerLink]="['/product', product.id]"
+            class="group flex flex-col gap-3 cursor-pointer"
+          >
             <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100 relative">
               <img
                 [alt]="product.images.mainImage.alt"
