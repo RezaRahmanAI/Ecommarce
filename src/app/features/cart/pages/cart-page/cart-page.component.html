@@ -91,7 +91,11 @@
         <div class="mt-8" *ngIf="recommendedProducts$ | async as recommendedProducts">
           <h2 class="text-xl font-bold text-primary dark:text-white mb-6">You Might Also Like</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="group cursor-pointer" *ngFor="let product of recommendedProducts; trackBy: trackProduct">
+            <div
+              class="group cursor-pointer"
+              *ngFor="let product of recommendedProducts; trackBy: trackProduct"
+              [routerLink]="['/product', product.id]"
+            >
               <div class="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 mb-3 relative">
                 <div
                   class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"

@@ -132,7 +132,11 @@
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div *ngFor="let product of products" class="group flex flex-col gap-3">
+        <div
+          *ngFor="let product of products"
+          [routerLink]="['/product', product.id]"
+          class="group flex flex-col gap-3 cursor-pointer"
+        >
           <div class="relative overflow-hidden rounded-lg aspect-[3/4] bg-accent">
             <span
               *ngIf="getBadge(product)"

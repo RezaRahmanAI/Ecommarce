@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs';
 
 import { ProductService } from '../../../../core/services/product.service';
@@ -10,7 +10,7 @@ import { Review } from '../../../../core/models/review';
 @Component({
   selector: 'app-product-details-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './product-details-page.component.html',
   styleUrl: './product-details-page.component.css',
 })
