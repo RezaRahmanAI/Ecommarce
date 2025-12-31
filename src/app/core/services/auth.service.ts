@@ -1,0 +1,95 @@
+import { Injectable } from '@angular/core';
+import { defer, Observable, of, throwError } from 'rxjs';
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface AuthSession {
+  token: string;
+  user: AuthUser;
+}
+
+interface DemoUser extends AuthUser {
+  username: string;
+  password: string;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthService {
+  private readonly storageKey = 'auth_session';
+
+  private readonly demoUsers: DemoUser[] = [
+    {
+      id: 'user-1',
+      name: 'Amina Noor',
+      email: 'amina@example.com',
+      username: 'amina',
+      password: 'password123',
+    },
+    {
+      id: 'user-2',
+      name: 'Layla Farah',
+      email: 'layla@example.com',
+      username: 'layla',
+      password: 'style2024',
+    },
+  ];
+
+  login(emailOrUsername: string, password: string): Observable<AuthSession> {
+    return defer(() => {
+      const matchedUser = this.demoUsers.find(
+        (user) =>
+          (user.email.toLowerCase() === emailOrUsername.toLowerCase() ||
+            user.username.toLowerCase() === emailOrUsername.toLowerCase()) &&
+          user.password === password,
+      );
+
+      if (!matchedUser) {
+        return throwError(() => new Error('Invalid credentials'));
+      }
+
+      const session: AuthSession = {
+        token: `mock-token-${matchedUser.id}`,
+        user: {
+          id: matchedUser.id,
+          name: matchedUser.name,
+          email: matchedUser.email,
+        },
+      };
+
+      return of(session);
+    });
+  }
+
+  storeSession(session: AuthSession, rememberMe: boolean): void {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem(this.storageKey, JSON.stringify(session));
+  }
+
+  clearSession(): void {
+    localStorage.removeItem(this.storageKey);
+    sessionStorage.removeItem(this.storageKey);
+  }
+
+  getSession(): AuthSession | null {
+    const stored = localStorage.getItem(this.storageKey) ?? sessionStorage.getItem(this.storageKey);
+    if (!stored) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(stored) as AuthSession;
+    } catch {
+      return null;
+    }
+  }
+
+  isAuthenticated(): boolean {
+    return this.getSession() !== null;
+  }
+}
