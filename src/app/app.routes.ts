@@ -10,6 +10,7 @@ import { MenProductsPageComponent } from './features/men/pages/men-products-page
 import { OrderConfirmationPageComponent } from './features/order-confirmation/pages/order-confirmation-page/order-confirmation-page.component';
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
+import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -34,8 +35,7 @@ export const appRoutes: Routes = [
   { path: 'login', component: LoginPageComponent },
   {
     path: 'register',
-    component: PlaceholderComponent,
-    data: { title: 'Create Account', description: 'Registration experience coming soon.' },
+    component: RegisterPageComponent,
   },
   {
     path: 'forgot-password',
