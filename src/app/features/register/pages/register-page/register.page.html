@@ -1,0 +1,83 @@
+<div class="bg-background-light dark:bg-background-dark font-display text-[#0e181b] dark:text-white transition-colors duration-200 flex flex-col min-h-screen">
+
+<!-- Main Registration Section -->
+<main class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
+<div class="w-full max-w-[520px] bg-white dark:bg-[#111d21] dark:border dark:border-gray-800 rounded-xl shadow-lg sm:shadow-md overflow-hidden relative">
+<!-- Decorative top accent -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<div class="px-6 py-8 sm:px-10">
+<!-- Header -->
+<div class="text-center mb-8">
+<h1 class="text-primary dark:text-white text-3xl font-bold tracking-tight mb-2">Create Your Account</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base">Sign up to discover exclusive modest fashion collections.</p>
+</div>
+<!-- Registration Form -->
+<form class="space-y-5" [formGroup]="registerForm" (ngSubmit)="submit()">
+<!-- Full Name Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-medium text-[#0e181b] dark:text-gray-200" for="fullName">Full Name</label>
+<div class="relative group">
+<input class="w-full h-12 px-4 rounded-lg bg-[#f8fbfc] dark:bg-white/5 border border-[#d0e2e7] dark:border-gray-700 text-[#0e181b] dark:text-white placeholder-[#4d8799] dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base" id="fullName" placeholder="Enter your full name" type="text" formControlName="fullName"/>
+</div>
+<p class="text-sm text-red-500" *ngIf="fullName.touched && fullName.errors?.['required']">Full name is required.</p>
+<p class="text-sm text-red-500" *ngIf="fullName.touched && fullName.errors?.['minlength']">Full name must be at least 3 characters.</p>
+</div>
+<!-- Email Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-medium text-[#0e181b] dark:text-gray-200" for="email">Email Address</label>
+<div class="relative group">
+<input class="w-full h-12 px-4 rounded-lg bg-[#f8fbfc] dark:bg-white/5 border border-[#d0e2e7] dark:border-gray-700 text-[#0e181b] dark:text-white placeholder-[#4d8799] dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base" id="email" placeholder="example@mail.com" type="email" formControlName="email"/>
+</div>
+<p class="text-sm text-red-500" *ngIf="email.touched && email.errors?.['required']">Email is required.</p>
+<p class="text-sm text-red-500" *ngIf="email.touched && email.errors?.['email']">Enter a valid email address.</p>
+<p class="text-sm text-red-500" *ngIf="email.touched && email.errors?.['emailTaken']">Email already in use.</p>
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-medium text-[#0e181b] dark:text-gray-200" for="password">Password</label>
+<div class="relative group">
+<input class="w-full h-12 px-4 pr-10 rounded-lg bg-[#f8fbfc] dark:bg-white/5 border border-[#d0e2e7] dark:border-gray-700 text-[#0e181b] dark:text-white placeholder-[#4d8799] dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base" id="password" placeholder="Create a password" [type]="isPasswordVisible ? 'text' : 'password'" formControlName="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors" type="button" (click)="togglePasswordVisibility()">
+<span class="material-symbols-outlined text-[20px]">{{ isPasswordVisible ? 'visibility_off' : 'visibility' }}</span>
+</button>
+</div>
+<p class="text-sm text-red-500" *ngIf="password.touched && password.errors?.['required']">Password is required.</p>
+<p class="text-sm text-red-500" *ngIf="password.touched && password.errors?.['minlength']">Password must be at least 6 characters.</p>
+</div>
+<!-- Confirm Password Field -->
+<div class="space-y-1.5">
+<label class="text-sm font-medium text-[#0e181b] dark:text-gray-200" for="confirmPassword">Confirm Password</label>
+<div class="relative group">
+<input class="w-full h-12 px-4 pr-10 rounded-lg bg-[#f8fbfc] dark:bg-white/5 border border-[#d0e2e7] dark:border-gray-700 text-[#0e181b] dark:text-white placeholder-[#4d8799] dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base" id="confirmPassword" placeholder="Confirm your password" type="password" formControlName="confirmPassword"/>
+</div>
+<p class="text-sm text-red-500" *ngIf="confirmPassword.touched && confirmPassword.errors?.['required']">Confirm your password.</p>
+<p class="text-sm text-red-500" *ngIf="confirmPassword.touched && !confirmPassword.errors?.['required'] && registerForm.errors?.['passwordMismatch']">Passwords do not match.</p>
+</div>
+<!-- Terms & Privacy -->
+<div class="flex items-start gap-3 pt-1">
+<div class="flex h-5 items-center">
+<input class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-white dark:bg-white/5" id="terms" type="checkbox" formControlName="terms"/>
+</div>
+<label class="text-sm text-gray-500 dark:text-gray-400 leading-tight" for="terms">
+                            I agree to the <a class="font-medium text-primary dark:text-accent hover:underline" href="#">Terms of Service</a> and <a class="font-medium text-primary dark:text-accent hover:underline" href="#">Privacy Policy</a>
+</label>
+</div>
+<p class="text-sm text-red-500" *ngIf="terms.touched && terms.invalid">You must accept the terms.</p>
+<!-- Submit Button -->
+<button class="w-full h-12 flex items-center justify-center rounded-lg bg-primary hover:bg-[#052631] text-white font-bold text-sm tracking-wide transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-gray-900 mt-2" type="submit" [disabled]="registerForm.invalid || isLoading">
+                        {{ isLoading ? 'Creating...' : 'Create Account' }}
+                    </button>
+<p class="text-sm text-red-500 text-center" *ngIf="errorMessage">{{ errorMessage }}</p>
+</form>
+<!-- Footer / Login Link -->
+<div class="mt-8 text-center border-t border-gray-100 dark:border-gray-800 pt-6">
+<p class="text-sm text-gray-600 dark:text-gray-400">
+                        Already have an account? 
+                        <a class="font-bold text-primary dark:text-accent hover:underline ml-1" routerLink="/login">Log in</a>
+</p>
+</div>
+</div>
+</div>
+</main>
+
+</div>

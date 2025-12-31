@@ -66,6 +66,54 @@ export class AuthService {
     });
   }
 
+  register(fullName: string, email: string, password: string): Observable<AuthSession> {
+    return defer(() => {
+      const normalizedEmail = email.trim().toLowerCase();
+      const existingUser = this.demoUsers.find(
+        (user) => user.email.toLowerCase() === normalizedEmail,
+      );
+
+      if (existingUser) {
+        return throwError(() => new Error('Email already in use'));
+      }
+
+      const baseUsername =
+        normalizedEmail.split('@')[0] ||
+        fullName
+          .trim()
+          .toLowerCase()
+          .replace(/\\s+/g, '');
+      let username = baseUsername || `user${this.demoUsers.length + 1}`;
+      let suffix = 1;
+
+      while (this.demoUsers.some((user) => user.username.toLowerCase() === username.toLowerCase())) {
+        username = `${baseUsername}${suffix}`;
+        suffix += 1;
+      }
+
+      const newUser: DemoUser = {
+        id: `user-${this.demoUsers.length + 1}`,
+        name: fullName.trim(),
+        email: normalizedEmail,
+        username,
+        password,
+      };
+
+      this.demoUsers.push(newUser);
+
+      const session: AuthSession = {
+        token: `mock-token-${newUser.id}`,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+        },
+      };
+
+      return of(session);
+    });
+  }
+
   storeSession(session: AuthSession, rememberMe: boolean): void {
     const storage = rememberMe ? localStorage : sessionStorage;
     storage.setItem(this.storageKey, JSON.stringify(session));
