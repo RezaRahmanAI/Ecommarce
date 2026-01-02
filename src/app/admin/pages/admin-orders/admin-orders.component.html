@@ -1,0 +1,323 @@
+<div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+  <!-- PageHeading -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2
+        class="text-primary dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-tight"
+      >
+        Order Management
+      </h2>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+        Manage, track and update customer orders.
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <button
+        class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark text-primary dark:text-white text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        type="button"
+        (click)="printOrders()"
+      >
+        <span class="material-symbols-outlined text-[20px]">print</span>
+        <span>Print</span>
+      </button>
+      <button
+        class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary hover:bg-primary-hover text-white text-sm font-bold shadow-sm transition-colors"
+        type="button"
+        (click)="exportOrders()"
+      >
+        <span class="material-symbols-outlined text-[20px]">download</span>
+        <span>Export Orders</span>
+      </button>
+    </div>
+  </div>
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div
+      class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-1"
+    >
+      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Orders</p>
+      <div class="flex items-end gap-2">
+        <p class="text-2xl font-bold text-primary dark:text-white">
+          {{ stats.totalOrders | number }}
+        </p>
+        <span
+          class="text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded text-xs font-medium mb-1"
+          >+12%</span
+        >
+      </div>
+    </div>
+    <div
+      class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-1"
+    >
+      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Pending Process</p>
+      <div class="flex items-end gap-2">
+        <p class="text-2xl font-bold text-primary dark:text-white">
+          {{ stats.processing | number }}
+        </p>
+        <span
+          class="text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded text-xs font-medium mb-1"
+          >+5%</span
+        >
+      </div>
+    </div>
+    <div
+      class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-1"
+    >
+      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Revenue</p>
+      <div class="flex items-end gap-2">
+        <p class="text-2xl font-bold text-primary dark:text-white">
+          {{ stats.totalRevenue | currency: 'USD':'symbol':'1.0-0' }}
+        </p>
+        <span
+          class="text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded text-xs font-medium mb-1"
+          >+18%</span
+        >
+      </div>
+    </div>
+    <div
+      class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-1"
+    >
+      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Refund Requests</p>
+      <div class="flex items-end gap-2">
+        <p class="text-2xl font-bold text-primary dark:text-white">
+          {{ stats.refundRequests | number }}
+        </p>
+        <span
+          class="text-red-500 bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded text-xs font-medium mb-1"
+          >-2%</span
+        >
+      </div>
+    </div>
+  </div>
+  <!-- Filters & Search -->
+  <div
+    class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-gray-200 dark:border-gray-700"
+  >
+    <div class="w-full lg:w-96 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="material-symbols-outlined text-gray-400">search</span>
+      </div>
+      <input
+        class="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-background-light dark:bg-background-dark text-primary dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary/20 text-sm"
+        placeholder="Search by Order ID or Customer Name"
+        type="text"
+        [formControl]="searchControl"
+      />
+    </div>
+    <div class="flex flex-wrap gap-2 w-full lg:w-auto">
+      <div class="relative" (click)="$event.stopPropagation()">
+        <button
+          class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          type="button"
+          (click)="toggleStatusMenu($event)"
+          (keydown.enter)="toggleStatusMenu($event)"
+          (keydown.escape)="handleEscape()"
+          [attr.aria-expanded]="statusMenuOpen"
+          aria-haspopup="true"
+        >
+          <span>Status: {{ selectedStatus }}</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+        </button>
+        <div
+          *ngIf="statusMenuOpen"
+          class="absolute mt-2 w-48 rounded-lg border border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark shadow-lg z-10"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            *ngFor="let status of statusOptions"
+            class="w-full text-left px-4 py-2 text-sm text-primary dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            type="button"
+            (click)="setStatusFilter(status, $event)"
+          >
+            {{ status }}
+          </button>
+        </div>
+      </div>
+      <div class="relative" (click)="$event.stopPropagation()">
+        <button
+          class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          type="button"
+          (click)="toggleDateMenu($event)"
+          (keydown.enter)="toggleDateMenu($event)"
+          (keydown.escape)="handleEscape()"
+          [attr.aria-expanded]="dateMenuOpen"
+          aria-haspopup="true"
+        >
+          <span>Date: {{ selectedDateRange }}</span>
+          <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+        </button>
+        <div
+          *ngIf="dateMenuOpen"
+          class="absolute mt-2 w-48 rounded-lg border border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark shadow-lg z-10"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            *ngFor="let range of dateRanges"
+            class="w-full text-left px-4 py-2 text-sm text-primary dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            type="button"
+            (click)="setDateRange(range, $event)"
+          >
+            {{ range }}
+          </button>
+        </div>
+      </div>
+      <button
+        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        type="button"
+        (click)="showMoreFilters($event)"
+      >
+        <span class="material-symbols-outlined text-[18px]">filter_list</span>
+        <span>More Filters</span>
+      </button>
+    </div>
+  </div>
+  <!-- Orders Table -->
+  <div
+    class="bg-surface-light dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm flex flex-col flex-1 min-h-[400px]"
+  >
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 text-xs uppercase tracking-wider text-gray-500 font-semibold"
+          >
+            <th class="p-4 w-12 text-center">
+              <input
+                class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 cursor-pointer"
+                type="checkbox"
+                [checked]="isAllVisibleSelected()"
+                [indeterminate]="isIndeterminate()"
+                (change)="toggleSelectAll($event)"
+              />
+            </th>
+            <th class="p-4">Order ID</th>
+            <th class="p-4">Customer</th>
+            <th class="p-4">Date</th>
+            <th class="p-4">Items</th>
+            <th class="p-4">Total</th>
+            <th class="p-4">Status</th>
+            <th class="p-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
+          <tr
+            *ngFor="let order of orders; trackBy: trackByOrderId"
+            class="hover:bg-accent/10 dark:hover:bg-gray-800/50 transition-colors group"
+          >
+            <td class="p-4 text-center">
+              <input
+                class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20 cursor-pointer"
+                type="checkbox"
+                [checked]="selectedOrderIds.has(order.id)"
+                (change)="toggleSelectOrder(order.id, $event)"
+              />
+            </td>
+            <td class="p-4 font-medium text-primary dark:text-white">{{ order.orderId }}</td>
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                  [ngClass]="avatarClass(order)"
+                >
+                  {{ order.customerInitials }}
+                </div>
+                <span class="text-primary dark:text-gray-200">{{ order.customerName }}</span>
+              </div>
+            </td>
+            <td class="p-4 text-gray-500 dark:text-gray-400">
+              {{ order.date | date: 'MMM d, y' }}
+            </td>
+            <td class="p-4 text-gray-500 dark:text-gray-400">
+              {{ order.itemsCount }} item{{ order.itemsCount === 1 ? '' : 's' }}
+            </td>
+            <td class="p-4 font-medium text-primary dark:text-white">
+              {{ order.total | currency: 'USD':'symbol':'1.2-2' }}
+            </td>
+            <td class="p-4">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="statusClass(order.status)"
+              >
+                {{ order.status }}
+              </span>
+            </td>
+            <td class="p-4 text-right">
+              <div class="relative inline-flex" (click)="$event.stopPropagation()">
+                <button
+                  class="text-gray-400 hover:text-primary dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  type="button"
+                  (click)="toggleRowActions(order.id, $event)"
+                  (keydown.enter)="toggleRowActions(order.id, $event)"
+                  (keydown.escape)="handleEscape()"
+                  [attr.aria-expanded]="actionMenuOpenId === order.id"
+                  aria-haspopup="true"
+                >
+                  <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                </button>
+                <div
+                  *ngIf="actionMenuOpenId === order.id"
+                  class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark shadow-lg z-10"
+                  (click)="$event.stopPropagation()"
+                >
+                  <a
+                    class="block px-4 py-2 text-sm text-primary dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    [routerLink]="['/admin/orders', order.id]"
+                    (click)="viewDetails($event)"
+                    >View Details</a
+                  >
+                  <button
+                    *ngIf="nextStatusLabel(order)"
+                    class="w-full text-left px-4 py-2 text-sm text-primary dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    type="button"
+                    (click)="markNextStatus(order, $event)"
+                  >
+                    {{ nextStatusLabel(order) }}
+                  </button>
+                  <button
+                    class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-gray-800 transition"
+                    type="button"
+                    (click)="cancelOrder(order, $event)"
+                  >
+                    Cancel Order
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Pagination -->
+    <div
+      class="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between bg-surface-light dark:bg-surface-dark mt-auto"
+    >
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Showing
+        <span class="font-medium text-primary dark:text-white">{{ paginationStart }}</span>
+        to
+        <span class="font-medium text-primary dark:text-white">{{ paginationEnd }}</span>
+        of
+        <span class="font-medium text-primary dark:text-white">{{ totalResults | number }}</span>
+        results
+      </p>
+      <div class="flex gap-2">
+        <button
+          class="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors"
+          type="button"
+          [disabled]="page === 1"
+          (click)="goToPreviousPage()"
+        >
+          Previous
+        </button>
+        <button
+          class="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          type="button"
+          [disabled]="page === totalPages"
+          (click)="goToNextPage()"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
