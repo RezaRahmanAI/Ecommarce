@@ -23,6 +23,7 @@ import { AdminLogoutComponent } from './admin/pages/admin-logout/admin-logout.co
 import { AdminOrderDetailsComponent } from './admin/pages/admin-order-details/admin-order-details.component';
 import { AdminOrdersComponent } from './admin/pages/admin-orders/admin-orders.component';
 import { AdminProductEditComponent } from './admin/pages/admin-product-edit/admin-product-edit.component';
+import { AdminProductCreateComponent } from './admin/pages/admin-product-create/admin-product-create.component';
 import { AdminProductsComponent } from './admin/pages/admin-products/admin-products.component';
 import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
 import { AboutComponent } from './pages/about/about.component';
@@ -94,6 +95,11 @@ export const appRoutes: Routes = [
         path: 'products',
         component: AdminProductsComponent,
         data: { title: 'Products' },
+      },
+      {
+        path: 'products/create',
+        component: AdminProductCreateComponent,
+        data: { title: 'Add Product' },
       },
       {
         path: 'products/:id/edit',

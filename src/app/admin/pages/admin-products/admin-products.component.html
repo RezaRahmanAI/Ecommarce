@@ -16,14 +16,13 @@
         <span class="material-symbols-outlined text-lg">file_upload</span>
         Export
       </button>
-      <button
+      <a
         class="h-10 px-4 rounded-lg bg-primary text-white text-sm font-medium hover:bg-[#083b4b] transition-colors flex items-center gap-2 shadow-sm"
-        type="button"
-        (click)="addProduct()"
+        routerLink="/admin/products/create"
       >
         <span class="material-symbols-outlined text-lg">add</span>
         Add New Product
-      </button>
+      </a>
     </div>
   </div>
   <!-- Filters & Search -->

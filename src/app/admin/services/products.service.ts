@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { Product, ProductsQueryParams, ProductsStatusTab } from '../models/products.models';
+import {
+  Product,
+  ProductCreatePayload,
+  ProductsQueryParams,
+  ProductsStatusTab,
+} from '../models/products.models';
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
@@ -301,6 +306,32 @@ export class ProductsService {
 
   deleteProduct(productId: string): void {
     this.products = this.products.filter((product) => product.id !== productId);
+  }
+
+  createProduct(payload: ProductCreatePayload): Observable<Product> {
+    const nextId = `prod-${String(this.products.length + 1).padStart(3, '0')}`;
+    const mediaUrl = payload.mediaUrls[0];
+    const newProduct: Product = {
+      id: nextId,
+      name: payload.name,
+      category: payload.category,
+      sku: payload.variants.variantRows[0]?.sku || `SKU-${nextId.toUpperCase()}`,
+      stock: payload.variants.variantRows.reduce((sum, row) => sum + (row.quantity ?? 0), 0),
+      price: payload.salePrice ?? payload.basePrice,
+      status: payload.statusActive ? 'Active' : 'Draft',
+      imageUrl: mediaUrl,
+      tags: payload.tags,
+    };
+    this.products = [newProduct, ...this.products];
+    return of(newProduct);
+  }
+
+  uploadProductMedia(files: File[]): Observable<string[]> {
+    if (files.length === 0) {
+      return of([]);
+    }
+    const urls = files.map((file) => URL.createObjectURL(file));
+    return of(urls);
   }
 
   private filterProducts(params: ProductsQueryParams): Product[] {

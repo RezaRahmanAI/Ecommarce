@@ -105,10 +105,6 @@ export class AdminProductsComponent implements OnInit, OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  addProduct(): void {
-    window.alert('Add product flow coming soon.');
-  }
-
   previousPage(): void {
     if (this.page === 1) {
       return;

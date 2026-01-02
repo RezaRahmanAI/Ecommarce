@@ -1,0 +1,352 @@
+<form
+  class="mx-auto flex w-full max-w-7xl flex-1 flex-col p-6"
+  [formGroup]="form"
+  (ngSubmit)="saveProduct()"
+>
+  <!-- Page Heading & Global Actions -->
+  <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <div>
+      <div class="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-1">
+        <span>Products</span>
+        <span class="material-symbols-outlined" style="font-size: 14px;">chevron_right</span>
+        <span class="font-medium text-text-main-light dark:text-text-main-dark">Add New</span>
+      </div>
+      <h1 class="text-3xl font-bold text-text-main-light dark:text-text-main-dark">Add New Product</h1>
+    </div>
+    <div class="flex gap-3">
+      <button
+        class="flex h-10 items-center justify-center rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-4 text-sm font-semibold text-text-main-light dark:text-text-main-dark hover:bg-gray-50 dark:hover:bg-gray-800"
+        type="button"
+        (click)="discard()"
+      >
+        Discard
+      </button>
+      <button
+        class="flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold text-white hover:bg-[#083a4a] shadow-lg shadow-primary/20"
+        type="submit"
+      >
+        <span class="material-symbols-outlined" style="font-size: 20px;">check</span>
+        Save Product
+      </button>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <!-- Left Column (Main Info) -->
+    <div class="flex flex-col gap-8 lg:col-span-2">
+      <!-- General Information Card -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-bold text-text-main-light dark:text-text-main-dark">General Information</h2>
+        <div class="flex flex-col gap-5">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Product Name</span>
+            <input
+              class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-4 py-2.5 text-text-main-light dark:text-text-main-dark placeholder:text-text-secondary-light focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="e.g. Premium Silk Hijab - Midnight Blue"
+              type="text"
+              formControlName="name"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Description</span>
+            <div class="overflow-hidden rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark">
+              <!-- Fake Toolbar -->
+              <div class="flex items-center gap-1 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-2 py-2">
+                <button class="p-1 text-text-secondary-light hover:text-primary" type="button">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">format_bold</span>
+                </button>
+                <button class="p-1 text-text-secondary-light hover:text-primary" type="button">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">format_italic</span>
+                </button>
+                <button class="p-1 text-text-secondary-light hover:text-primary" type="button">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">format_underlined</span>
+                </button>
+                <div class="mx-1 h-4 w-px bg-border-light dark:bg-border-dark"></div>
+                <button class="p-1 text-text-secondary-light hover:text-primary" type="button">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">format_list_bulleted</span>
+                </button>
+                <button class="p-1 text-text-secondary-light hover:text-primary" type="button">
+                  <span class="material-symbols-outlined" style="font-size: 20px;">link</span>
+                </button>
+              </div>
+              <textarea
+                class="w-full resize-y border-none bg-transparent p-4 text-text-main-light dark:text-text-main-dark placeholder:text-text-secondary-light focus:ring-0"
+                placeholder="Describe your product here..."
+                rows="6"
+                formControlName="description"
+              ></textarea>
+            </div>
+            <span class="text-xs text-text-secondary-light">Tell your customers about the material, fit, and care instructions.</span>
+          </label>
+        </div>
+      </div>
+      <!-- Media Card -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-text-main-light dark:text-text-main-dark">Media</h2>
+          <button class="text-sm font-medium text-primary hover:underline" type="button" (click)="addFromUrl()">
+            Add from URL
+          </button>
+        </div>
+        <div
+          class="rounded-lg border-2 border-dashed border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-8 transition-colors hover:border-primary/50"
+          (dragover)="handleDragOver($event)"
+          (drop)="handleDrop($event)"
+          (click)="fileInput.click()"
+        >
+          <div class="flex flex-col items-center justify-center text-center">
+            <div class="mb-3 rounded-full bg-surface-light dark:bg-surface-dark p-3 shadow-sm">
+              <span class="material-symbols-outlined text-primary" style="font-size: 32px;">cloud_upload</span>
+            </div>
+            <p class="text-sm font-medium text-text-main-light dark:text-text-main-dark">
+              <span class="text-primary cursor-pointer hover:underline">Click to upload</span> or drag and drop
+            </p>
+            <p class="mt-1 text-xs text-text-secondary-light">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+          </div>
+          <input
+            #fileInput
+            class="hidden"
+            type="file"
+            multiple
+            (change)="handleFilesSelected($event)"
+          />
+        </div>
+        <!-- Image Preview Grid -->
+        <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div
+            *ngFor="let preview of mediaPreviews; trackBy: trackByIndex"
+            class="group relative aspect-square overflow-hidden rounded-lg border border-border-light dark:border-border-dark bg-background-light"
+          >
+            <div
+              class="absolute inset-0 bg-cover bg-center transition-transform group-hover:scale-105"
+              [ngStyle]="{ 'background-image': 'url(' + preview.url + ')' }"
+            ></div>
+            <div class="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button
+                class="rounded-full bg-white p-1 text-red-500 shadow-sm hover:bg-red-50"
+                type="button"
+                (click)="$event.stopPropagation(); removeMedia(preview)"
+              >
+                <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Variants Card -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm" formGroupName="variants">
+        <h2 class="mb-4 text-lg font-bold text-text-main-light dark:text-text-main-dark">Variants</h2>
+        <div class="mb-6 flex flex-col gap-4 border-b border-border-light dark:border-border-dark pb-6" formArrayName="options">
+          <div
+            class="flex items-end gap-3"
+            *ngFor="let option of optionsArray.controls; let optionIndex = index; trackBy: trackByIndex"
+            [formGroupName]="optionIndex"
+          >
+            <label class="flex-1">
+              <span class="mb-1.5 block text-xs font-medium text-text-secondary-light uppercase">Option Name</span>
+              <select
+                class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-3 py-2 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+                formControlName="optionName"
+              >
+                <option>Size</option>
+                <option>Color</option>
+                <option>Material</option>
+              </select>
+            </label>
+            <label class="flex-[2]">
+              <span class="mb-1.5 block text-xs font-medium text-text-secondary-light uppercase">Option Values</span>
+              <input
+                class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-3 py-2 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="e.g. Small, Medium, Large"
+                type="text"
+                formControlName="values"
+              />
+            </label>
+            <button
+              class="flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-secondary-light hover:bg-gray-200 dark:hover:bg-gray-700"
+              type="button"
+              (click)="removeOption(optionIndex)"
+            >
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+          <button
+            class="flex w-fit items-center gap-2 rounded text-sm font-semibold text-primary hover:text-[#083a4a]"
+            type="button"
+            (click)="addOption()"
+          >
+            <span class="material-symbols-outlined" style="font-size: 20px;">add_circle</span>
+            Add another option
+          </button>
+        </div>
+        <div class="overflow-x-auto" formArrayName="variantRows">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-background-light dark:bg-background-dark text-text-secondary-light">
+              <tr>
+                <th class="rounded-l-lg px-4 py-3 font-medium">Variant</th>
+                <th class="px-4 py-3 font-medium">Price</th>
+                <th class="px-4 py-3 font-medium">SKU</th>
+                <th class="rounded-r-lg px-4 py-3 font-medium">Quantity</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-light dark:divide-border-dark text-text-main-light dark:text-text-main-dark">
+              <tr
+                *ngFor="let row of variantRowsArray.controls; let rowIndex = index; trackBy: trackByIndex"
+                [formGroupName]="rowIndex"
+              >
+                <td class="px-4 py-3">{{ row.get('label')?.value }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center rounded border border-border-light dark:border-border-dark bg-white dark:bg-black/20 px-2 py-1">
+                    <span class="text-text-secondary-light mr-1">$</span>
+                    <input
+                      class="w-16 border-none bg-transparent p-0 text-right focus:ring-0"
+                      type="number"
+                      formControlName="price"
+                    />
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                    class="w-full rounded border border-border-light dark:border-border-dark bg-white dark:bg-black/20 px-2 py-1 text-xs focus:border-primary focus:ring-1 focus:ring-primary"
+                    type="text"
+                    formControlName="sku"
+                  />
+                  <p
+                    *ngIf="duplicateSkus.has((row.get('sku')?.value ?? '').toString().trim())"
+                    class="mt-1 text-xs text-red-500"
+                  >
+                    SKU must be unique.
+                  </p>
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                    class="w-20 rounded border border-border-light dark:border-border-dark bg-white dark:bg-black/20 px-2 py-1 text-right focus:border-primary focus:ring-1 focus:ring-primary"
+                    type="number"
+                    formControlName="quantity"
+                  />
+                  <p
+                    *ngIf="row.get('quantity')?.invalid && row.get('quantity')?.touched"
+                    class="mt-1 text-xs text-red-500"
+                  >
+                    Quantity must be 0 or more.
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p *ngIf="variantLimitReached" class="mt-2 text-xs text-red-500">
+            Variant list truncated to 50 combinations to keep the form responsive.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- Right Column (Organization & Settings) -->
+    <div class="flex flex-col gap-8 lg:col-span-1">
+      <!-- Status Card -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-bold text-text-main-light dark:text-text-main-dark">Product Status</h2>
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Draft / Active</span>
+          <label class="relative inline-flex cursor-pointer items-center">
+            <input class="peer sr-only" type="checkbox" formControlName="statusActive" />
+            <div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700"></div>
+          </label>
+        </div>
+        <div class="rounded-lg bg-accent/20 p-3">
+          <p class="text-xs text-primary/80 font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
+            This product will be visible on the store immediately upon saving.
+          </p>
+        </div>
+      </div>
+      <!-- Organization Card -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-bold text-text-main-light dark:text-text-main-dark">Organization</h2>
+        <div class="flex flex-col gap-5">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Category</span>
+            <select
+              class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-3 py-2.5 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+              formControlName="category"
+            >
+              <option disabled value="">Select category</option>
+              <option>Abayas</option>
+              <option>Hijabs</option>
+              <option>Dresses</option>
+              <option>Accessories</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Subcategory</span>
+            <select
+              class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-3 py-2.5 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+              formControlName="subcategory"
+            >
+              <option disabled value="">Select subcategory</option>
+              <option>Silk</option>
+              <option>Cotton</option>
+              <option>Chiffon</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Collections</span>
+            <select
+              class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-3 py-2.5 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+              formControlName="collections"
+            >
+              <option>Ramadan 2024</option>
+              <option>Summer Essentials</option>
+              <option>New Arrivals</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Tags</span>
+            <input
+              class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark px-4 py-2.5 text-text-main-light dark:text-text-main-dark placeholder:text-text-secondary-light focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="e.g. vintage, summer, sale"
+              type="text"
+              formControlName="tags"
+            />
+            <span class="text-xs text-text-secondary-light">Separate tags with commas</span>
+          </label>
+        </div>
+      </div>
+      <!-- Pricing Card (Base) -->
+      <div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-bold text-text-main-light dark:text-text-main-dark">Pricing</h2>
+        <div class="flex flex-col gap-5">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Base Price</span>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light">$</span>
+              <input
+                class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-2.5 pl-7 pr-4 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="0.00"
+                type="number"
+                formControlName="basePrice"
+              />
+            </div>
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Sale Price</span>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light">$</span>
+              <input
+                class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-2.5 pl-7 pr-4 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="0.00"
+                type="number"
+                formControlName="salePrice"
+              />
+            </div>
+            <span class="text-xs text-text-secondary-light">Leave empty if not on sale.</span>
+            <span
+              *ngIf="form.errors?.['salePriceExceedsBase'] && form.get('salePrice')?.touched"
+              class="text-xs text-red-500"
+            >
+              Sale price must be less than or equal to base price.
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
