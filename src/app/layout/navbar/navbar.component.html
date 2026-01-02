@@ -34,7 +34,14 @@
       >
         Contact
       </a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Blog</a>
+      <a
+        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
+        routerLink="/blog"
+        routerLinkActive="text-accent"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Blog
+      </a>
     </div>
   </div>
   <div class="flex flex-1 justify-end gap-4 md:gap-8">
