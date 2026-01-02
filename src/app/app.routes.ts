@@ -15,6 +15,7 @@ import { ProductDetailsPageComponent } from './features/product-details/pages/pr
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
 import { AboutComponent } from './pages/about/about.component';
+import { ContactComponent } from './pages/contact/contact.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const appRoutes: Routes = [
@@ -25,6 +26,7 @@ export const appRoutes: Routes = [
   { path: 'accessories', component: AccessoriesPageComponent },
   { path: 'products', redirectTo: 'women', pathMatch: 'full' },
   { path: 'about', component: AboutComponent, title: 'About Us' },
+  { path: 'contact', component: ContactComponent, title: 'Contact' },
   {
     path: 'product/:id',
     component: ProductDetailsPageComponent,

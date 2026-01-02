@@ -26,7 +26,14 @@
       >
         About
       </a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Contact</a>
+      <a
+        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
+        routerLink="/contact"
+        routerLinkActive="text-accent"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Contact
+      </a>
       <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" href="#">Blog</a>
     </div>
   </div>
