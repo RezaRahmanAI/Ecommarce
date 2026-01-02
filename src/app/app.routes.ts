@@ -20,6 +20,7 @@ import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.c
 import { DashboardOverviewComponent } from './admin/pages/dashboard-overview/dashboard-overview.component';
 import { AdminPlaceholderComponent } from './admin/pages/admin-placeholder/admin-placeholder.component';
 import { AdminLogoutComponent } from './admin/pages/admin-logout/admin-logout.component';
+import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -107,8 +108,8 @@ export const appRoutes: Routes = [
       },
       {
         path: 'settings',
-        component: AdminPlaceholderComponent,
-        data: { title: 'Settings', description: 'Settings configuration coming soon.' },
+        component: AdminSettingsComponent,
+        data: { title: 'Settings' },
       },
       {
         path: 'logout',
