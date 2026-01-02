@@ -15,9 +15,11 @@ interface AdminNavItem {
   templateUrl: './admin-sidebar.component.html',
 })
 export class AdminSidebarComponent {
-  navItems: AdminNavItem[] = [
+  topItems: AdminNavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/admin/dashboard' },
-    { label: 'Products', icon: 'shopping_bag', route: '/admin/products' },
+  ];
+
+  navItems: AdminNavItem[] = [
     { label: 'Orders', icon: 'inventory_2', route: '/admin/orders' },
     { label: 'Customers', icon: 'group', route: '/admin/customers' },
     { label: 'Analytics', icon: 'analytics', route: '/admin/analytics' },

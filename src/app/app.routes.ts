@@ -25,6 +25,7 @@ import { AdminOrdersComponent } from './admin/pages/admin-orders/admin-orders.co
 import { AdminProductEditComponent } from './admin/pages/admin-product-edit/admin-product-edit.component';
 import { AdminProductCreateComponent } from './admin/pages/admin-product-create/admin-product-create.component';
 import { AdminProductsComponent } from './admin/pages/admin-products/admin-products.component';
+import { AdminCategoryManagementComponent } from './admin/pages/admin-category-management/admin-category-management.component';
 import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
@@ -95,6 +96,11 @@ export const appRoutes: Routes = [
         path: 'products',
         component: AdminProductsComponent,
         data: { title: 'Products' },
+      },
+      {
+        path: 'products/categories',
+        component: AdminCategoryManagementComponent,
+        data: { title: 'Category Management' },
       },
       {
         path: 'products/create',
