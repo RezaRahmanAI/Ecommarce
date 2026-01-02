@@ -11,13 +11,67 @@
     </div>
     <nav class="flex flex-col gap-2">
       <a
-        *ngFor="let item of navItems"
+        *ngFor="let item of topItems"
         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group"
         [routerLink]="item.route"
         routerLinkActive="bg-accent text-primary"
         #rla="routerLinkActive"
         [ngClass]="
           rla.isActive
+            ? 'bg-accent text-primary'
+            : 'text-gray-300 hover:bg-white/10 hover:text-white'
+        "
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span class="text-sm font-medium">{{ item.label }}</span>
+      </a>
+      <div class="flex flex-col gap-1">
+        <a
+          class="flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors group"
+          routerLink="/admin/products"
+          routerLinkActive="bg-accent text-primary"
+          #productsActive="routerLinkActive"
+          [ngClass]="
+            productsActive.isActive
+              ? 'bg-accent text-primary'
+              : 'text-gray-300 hover:bg-white/10 hover:text-white'
+          "
+          [routerLinkActiveOptions]="{ exact: false }"
+        >
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">shopping_bag</span>
+            <span class="text-sm font-medium">Products</span>
+          </div>
+          <span class="material-symbols-outlined text-sm">expand_less</span>
+        </a>
+        <div class="pl-10 flex flex-col gap-1 mb-2" *ngIf="productsActive.isActive">
+          <a
+            class="px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            routerLink="/admin/products"
+            routerLinkActive="text-white bg-white/10 rounded-md"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            All Products
+          </a>
+          <a
+            class="px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            routerLink="/admin/products/categories"
+            routerLinkActive="text-white bg-white/10 rounded-md"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Categories
+          </a>
+        </div>
+      </div>
+      <a
+        *ngFor="let item of navItems"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group"
+        [routerLink]="item.route"
+        routerLinkActive="bg-accent text-primary"
+        #rlaSecondary="routerLinkActive"
+        [ngClass]="
+          rlaSecondary.isActive
             ? 'bg-accent text-primary'
             : 'text-gray-300 hover:bg-white/10 hover:text-white'
         "
