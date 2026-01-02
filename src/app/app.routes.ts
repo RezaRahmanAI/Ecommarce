@@ -14,6 +14,7 @@ import { PlaceholderComponent } from './features/placeholder/placeholder.compone
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
+import { AboutComponent } from './pages/about/about.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const appRoutes: Routes = [
@@ -22,6 +23,8 @@ export const appRoutes: Routes = [
   { path: 'women', component: WomenProductsPageComponent },
   { path: 'children', component: ChildrenProductsPageComponent },
   { path: 'accessories', component: AccessoriesPageComponent },
+  { path: 'products', redirectTo: 'women', pathMatch: 'full' },
+  { path: 'about', component: AboutComponent, title: 'About Us' },
   {
     path: 'product/:id',
     component: ProductDetailsPageComponent,
@@ -43,6 +46,11 @@ export const appRoutes: Routes = [
     path: 'forgot-password',
     component: PlaceholderComponent,
     data: { title: 'Forgot Password', description: 'Password recovery experience coming soon.' },
+  },
+  {
+    path: 'blog',
+    component: PlaceholderComponent,
+    data: { title: 'Blog', description: 'Blog updates are coming soon.' },
   },
   {
     path: 'account',
