@@ -22,6 +22,8 @@ import { AdminPlaceholderComponent } from './admin/pages/admin-placeholder/admin
 import { AdminLogoutComponent } from './admin/pages/admin-logout/admin-logout.component';
 import { AdminOrderDetailsComponent } from './admin/pages/admin-order-details/admin-order-details.component';
 import { AdminOrdersComponent } from './admin/pages/admin-orders/admin-orders.component';
+import { AdminProductEditComponent } from './admin/pages/admin-product-edit/admin-product-edit.component';
+import { AdminProductsComponent } from './admin/pages/admin-products/admin-products.component';
 import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
@@ -90,8 +92,13 @@ export const appRoutes: Routes = [
       },
       {
         path: 'products',
-        component: AdminPlaceholderComponent,
-        data: { title: 'Products', description: 'Product management coming soon.' },
+        component: AdminProductsComponent,
+        data: { title: 'Products' },
+      },
+      {
+        path: 'products/:id/edit',
+        component: AdminProductEditComponent,
+        data: { title: 'Edit Product' },
       },
       {
         path: 'orders',

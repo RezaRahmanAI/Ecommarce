@@ -1,0 +1,20 @@
+<div class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Product</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
+        Product ID: {{ productId }}
+      </p>
+    </div>
+    <a
+      class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+      routerLink="/admin/products"
+    >
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+      Back to Products
+    </a>
+  </div>
+  <div class="mt-6 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 p-6 text-sm text-slate-500 dark:text-slate-400">
+    Product editing form coming soon.
+  </div>
+</div>
