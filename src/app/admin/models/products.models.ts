@@ -10,6 +10,13 @@ export interface Product {
   status: ProductStatus;
   imageUrl?: string;
   tags?: string[];
+  description?: string;
+  subCategory?: string;
+  basePrice?: number;
+  salePrice?: number;
+  statusActive?: boolean;
+  mediaUrls?: string[];
+  variants?: ProductVariantEdit[];
 }
 
 export interface ProductVariantOption {
@@ -22,6 +29,14 @@ export interface ProductVariantRow {
   price: number;
   sku: string;
   quantity: number;
+}
+
+export interface ProductVariantEdit {
+  label: string;
+  price: number;
+  sku: string;
+  inventory: number;
+  imageUrl?: string;
 }
 
 export interface ProductCreatePayload {
@@ -39,6 +54,19 @@ export interface ProductCreatePayload {
     options: ProductVariantOption[];
     variantRows: ProductVariantRow[];
   };
+}
+
+export interface ProductUpdatePayload {
+  name: string;
+  description: string;
+  statusActive: boolean;
+  category: string;
+  subCategory?: string;
+  tags: string[];
+  basePrice: number;
+  salePrice?: number;
+  mediaUrls: string[];
+  variants: ProductVariantEdit[];
 }
 
 export type ProductsStatusTab = 'All Items' | 'Active' | 'Drafts' | 'Archived';

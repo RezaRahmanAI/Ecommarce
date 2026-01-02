@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import {
   Product,
   ProductCreatePayload,
+  ProductUpdatePayload,
   ProductsQueryParams,
   ProductsStatusTab,
 } from '../models/products.models';
@@ -326,12 +327,84 @@ export class ProductsService {
     return of(newProduct);
   }
 
+  getProductById(productId: string): Observable<Product> {
+    const product =
+      this.products.find((item) => item.id === productId) ?? this.products[0];
+
+    if (!product) {
+      return of({
+        id: productId,
+        name: 'New Product',
+        category: 'Abayas',
+        sku: `SKU-${productId.toUpperCase()}`,
+        stock: 0,
+        price: 0,
+        status: 'Draft',
+        tags: [],
+        description: '',
+        basePrice: 0,
+        statusActive: false,
+        mediaUrls: [],
+        variants: [],
+      });
+    }
+
+    return of(this.buildProductDetail(product));
+  }
+
+  updateProduct(productId: string, payload: ProductUpdatePayload): Observable<Product> {
+    const existingIndex = this.products.findIndex((item) => item.id === productId);
+    const updatedProduct: Product = {
+      id: productId,
+      name: payload.name,
+      category: payload.category,
+      sku: payload.variants[0]?.sku ?? `SKU-${productId.toUpperCase()}`,
+      stock: payload.variants.reduce((sum, variant) => sum + (variant.inventory ?? 0), 0),
+      price: payload.salePrice ?? payload.basePrice,
+      status: payload.statusActive ? 'Active' : 'Draft',
+      imageUrl: payload.mediaUrls[0],
+      tags: payload.tags,
+      description: payload.description,
+      subCategory: payload.subCategory,
+      basePrice: payload.basePrice,
+      salePrice: payload.salePrice,
+      statusActive: payload.statusActive,
+      mediaUrls: payload.mediaUrls,
+      variants: payload.variants,
+    };
+
+    if (existingIndex >= 0) {
+      this.products = [
+        ...this.products.slice(0, existingIndex),
+        updatedProduct,
+        ...this.products.slice(existingIndex + 1),
+      ];
+    } else {
+      this.products = [updatedProduct, ...this.products];
+    }
+
+    return of(updatedProduct);
+  }
+
   uploadProductMedia(files: File[]): Observable<string[]> {
     if (files.length === 0) {
       return of([]);
     }
     const urls = files.map((file) => URL.createObjectURL(file));
     return of(urls);
+  }
+
+  removeProductMedia(productId: string, mediaUrl: string): Observable<boolean> {
+    const product = this.products.find((item) => item.id === productId);
+    if (!product) {
+      return of(false);
+    }
+    const updatedMedia = (product.mediaUrls ?? []).filter((url) => url !== mediaUrl);
+    product.mediaUrls = updatedMedia;
+    if (product.imageUrl === mediaUrl) {
+      product.imageUrl = updatedMedia[0];
+    }
+    return of(true);
   }
 
   private filterProducts(params: ProductsQueryParams): Product[] {
@@ -367,5 +440,43 @@ export class ProductsService {
       default:
         return true;
     }
+  }
+
+  private buildProductDetail(product: Product): Product {
+    const basePrice = product.basePrice ?? product.price ?? 0;
+    const salePrice = product.salePrice ?? undefined;
+    const mediaUrls = product.mediaUrls ?? (product.imageUrl ? [product.imageUrl] : []);
+    const variants =
+      product.variants?.length && product.variants.length > 0
+        ? product.variants
+        : [
+            {
+              label: 'S / Midnight Blue',
+              price: basePrice,
+              sku: product.sku + '-S',
+              inventory: Math.max(0, Math.round(product.stock / 2)),
+              imageUrl: mediaUrls[0],
+            },
+            {
+              label: 'M / Midnight Blue',
+              price: basePrice,
+              sku: product.sku + '-M',
+              inventory: Math.max(0, product.stock - Math.round(product.stock / 2)),
+              imageUrl: mediaUrls[0],
+            },
+          ];
+
+    return {
+      ...product,
+      description:
+        product.description ??
+        'Elegant chiffon abaya perfect for special occasions. Features delicate embroidery on the sleeves and hemline. Includes matching shayla.',
+      subCategory: product.subCategory ?? 'Occasion Wear',
+      basePrice,
+      salePrice,
+      statusActive: product.statusActive ?? product.status === 'Active',
+      mediaUrls,
+      variants,
+    };
   }
 }
