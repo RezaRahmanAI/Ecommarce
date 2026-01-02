@@ -12,6 +12,35 @@ export interface Product {
   tags?: string[];
 }
 
+export interface ProductVariantOption {
+  optionName: 'Size' | 'Color' | 'Material' | string;
+  values: string;
+}
+
+export interface ProductVariantRow {
+  label: string;
+  price: number;
+  sku: string;
+  quantity: number;
+}
+
+export interface ProductCreatePayload {
+  name: string;
+  description: string;
+  statusActive: boolean;
+  category: string;
+  subcategory?: string;
+  collections?: string;
+  tags: string[];
+  basePrice: number;
+  salePrice?: number;
+  mediaUrls: string[];
+  variants: {
+    options: ProductVariantOption[];
+    variantRows: ProductVariantRow[];
+  };
+}
+
 export type ProductsStatusTab = 'All Items' | 'Active' | 'Drafts' | 'Archived';
 
 export interface ProductsQueryParams {
