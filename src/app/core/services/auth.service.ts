@@ -144,6 +144,20 @@ export class AuthService {
     return this.getSession() !== null;
   }
 
+  isLoggedIn(): boolean {
+    return this.isAuthenticated() || localStorage.getItem('is_logged_in') === 'true';
+  }
+
+  getRole(): string {
+    return localStorage.getItem('user_role') ?? 'user';
+  }
+
+  logout(): void {
+    this.clearSession();
+    localStorage.removeItem('is_logged_in');
+    localStorage.removeItem('user_role');
+  }
+
   private loadUsers(): DemoUser[] {
     const stored = localStorage.getItem(this.usersStorageKey);
     if (stored) {

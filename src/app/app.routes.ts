@@ -16,9 +16,14 @@ import { BlogListComponent } from './features/blog/pages/blog-list/blog-list.com
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
+import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
+import { DashboardOverviewComponent } from './admin/pages/dashboard-overview/dashboard-overview.component';
+import { AdminPlaceholderComponent } from './admin/pages/admin-placeholder/admin-placeholder.component';
+import { AdminLogoutComponent } from './admin/pages/admin-logout/admin-logout.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
 import { authGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './admin/guards/admin.guard';
 
 export const appRoutes: Routes = [
   { path: '', component: HomePageComponent },
@@ -68,6 +73,49 @@ export const appRoutes: Routes = [
     path: 'orders',
     component: OrdersPageComponent,
     canActivate: [authGuard],
+  },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [AdminGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        component: DashboardOverviewComponent,
+        data: { title: 'Dashboard Overview' },
+      },
+      {
+        path: 'products',
+        component: AdminPlaceholderComponent,
+        data: { title: 'Products', description: 'Product management coming soon.' },
+      },
+      {
+        path: 'orders',
+        component: AdminPlaceholderComponent,
+        data: { title: 'Orders', description: 'Order management coming soon.' },
+      },
+      {
+        path: 'customers',
+        component: AdminPlaceholderComponent,
+        data: { title: 'Customers', description: 'Customer management coming soon.' },
+      },
+      {
+        path: 'analytics',
+        component: AdminPlaceholderComponent,
+        data: { title: 'Analytics', description: 'Analytics reports coming soon.' },
+      },
+      {
+        path: 'settings',
+        component: AdminPlaceholderComponent,
+        data: { title: 'Settings', description: 'Settings configuration coming soon.' },
+      },
+      {
+        path: 'logout',
+        component: AdminLogoutComponent,
+        data: { title: 'Logging out' },
+      },
+    ],
   },
   { path: '**', redirectTo: '' },
 ];
