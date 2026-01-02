@@ -20,6 +20,8 @@ import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.c
 import { DashboardOverviewComponent } from './admin/pages/dashboard-overview/dashboard-overview.component';
 import { AdminPlaceholderComponent } from './admin/pages/admin-placeholder/admin-placeholder.component';
 import { AdminLogoutComponent } from './admin/pages/admin-logout/admin-logout.component';
+import { AdminOrderDetailsComponent } from './admin/pages/admin-order-details/admin-order-details.component';
+import { AdminOrdersComponent } from './admin/pages/admin-orders/admin-orders.component';
 import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
@@ -93,8 +95,13 @@ export const appRoutes: Routes = [
       },
       {
         path: 'orders',
-        component: AdminPlaceholderComponent,
-        data: { title: 'Orders', description: 'Order management coming soon.' },
+        component: AdminOrdersComponent,
+        data: { title: 'Order Management' },
+      },
+      {
+        path: 'orders/:id',
+        component: AdminOrderDetailsComponent,
+        data: { title: 'Order Details' },
       },
       {
         path: 'customers',
