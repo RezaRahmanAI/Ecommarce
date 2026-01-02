@@ -11,6 +11,8 @@ import { MenProductsPageComponent } from './features/men/pages/men-products-page
 import { OrderConfirmationPageComponent } from './features/order-confirmation/pages/order-confirmation-page/order-confirmation-page.component';
 import { OrdersPageComponent } from './features/orders/pages/orders-page/orders-page.component';
 import { PlaceholderComponent } from './features/placeholder/placeholder.component';
+import { BlogDetailsComponent } from './features/blog/pages/blog-details/blog-details.component';
+import { BlogListComponent } from './features/blog/pages/blog-list/blog-list.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
@@ -51,8 +53,11 @@ export const appRoutes: Routes = [
   },
   {
     path: 'blog',
-    component: PlaceholderComponent,
-    data: { title: 'Blog', description: 'Blog updates are coming soon.' },
+    component: BlogListComponent,
+  },
+  {
+    path: 'blog/:slug',
+    component: BlogDetailsComponent,
   },
   {
     path: 'account',
