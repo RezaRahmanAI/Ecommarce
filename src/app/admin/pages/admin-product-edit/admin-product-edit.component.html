@@ -1,20 +1,292 @@
-<div class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
-  <div class="flex items-center justify-between gap-4">
-    <div>
-      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Edit Product</h2>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">
-        Product ID: {{ productId }}
-      </p>
+<form class="max-w-6xl mx-auto space-y-6" [formGroup]="form" (ngSubmit)="saveChanges()">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="space-y-1">
+      <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <a class="hover:text-primary transition-colors" routerLink="/admin/products">Products</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <a class="hover:text-primary transition-colors" routerLink="/admin/products">{{ displayCategory }}</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="font-medium text-slate-900 dark:text-white">Edit Product</span>
+      </nav>
+      <h1 class="text-2xl font-bold text-primary dark:text-white tracking-tight">
+        Edit Product: {{ displayName }}
+      </h1>
     </div>
-    <a
-      class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
-      routerLink="/admin/products"
-    >
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      Back to Products
-    </a>
+    <div class="flex items-center gap-3">
+      <button
+        class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:border-slate-600 dark:hover:bg-slate-700 transition-colors"
+        type="button"
+        (click)="discardChanges()"
+      >
+        Discard
+      </button>
+      <button
+        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+        type="submit"
+      >
+        <span class="material-symbols-outlined text-[20px]">save</span>
+        Save Changes
+      </button>
+    </div>
   </div>
-  <div class="mt-6 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 p-6 text-sm text-slate-500 dark:text-slate-400">
-    Product editing form coming soon.
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">General Information</h2>
+        <div class="space-y-4">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Product Name</span>
+            <input
+              class="w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-600 text-slate-900 dark:text-white focus:border-primary focus:ring-primary shadow-sm h-11 px-4"
+              type="text"
+              formControlName="name"
+            />
+          </label>
+          <div class="space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Description</span>
+            <div class="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
+              <div
+                class="flex items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50"
+              >
+                <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400" type="button">
+                  <span class="material-symbols-outlined text-[20px]">format_bold</span>
+                </button>
+                <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400" type="button">
+                  <span class="material-symbols-outlined text-[20px]">format_italic</span>
+                </button>
+                <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400" type="button">
+                  <span class="material-symbols-outlined text-[20px]">format_underlined</span>
+                </button>
+                <div class="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400" type="button">
+                  <span class="material-symbols-outlined text-[20px]">format_list_bulleted</span>
+                </button>
+              </div>
+              <textarea
+                class="w-full h-40 border-none p-4 bg-transparent text-slate-900 dark:text-white focus:ring-0 resize-none text-sm"
+                placeholder="Describe the product..."
+                formControlName="description"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">Media</h2>
+          <button
+            class="text-sm text-primary dark:text-secondary font-medium hover:underline"
+            type="button"
+            (click)="downloadAllMedia()"
+          >
+            Download All
+          </button>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div
+            *ngFor="let mediaUrl of existingMedia"
+            class="group relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+          >
+            <img class="w-full h-full object-cover" [src]="mediaUrl" />
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                class="bg-white/90 p-1 rounded-md text-red-500 shadow-sm hover:bg-white"
+                type="button"
+                (click)="removeExistingMedia(mediaUrl)"
+              >
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <div
+            *ngFor="let preview of mediaNewPreviews; let previewIndex = index"
+            class="group relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+          >
+            <img class="w-full h-full object-cover" [src]="preview.url" />
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                class="bg-white/90 p-1 rounded-md text-red-500 shadow-sm hover:bg-white"
+                type="button"
+                (click)="removeNewMedia(previewIndex)"
+              >
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <label
+            class="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+          >
+            <span class="material-symbols-outlined text-slate-400 text-[32px] mb-2">add_photo_alternate</span>
+            <span class="text-xs text-slate-500 font-medium">Add Media</span>
+            <input class="hidden" type="file" multiple (change)="onMediaSelected($event)" />
+          </label>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">Variants</h2>
+          <button class="flex items-center gap-1 text-sm text-primary font-medium hover:underline" type="button" (click)="addVariant()">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            Add Variant
+          </button>
+        </div>
+        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 font-medium border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="px-4 py-3">Variant</th>
+                <th class="px-4 py-3">Price</th>
+                <th class="px-4 py-3">SKU</th>
+                <th class="px-4 py-3">Inventory</th>
+                <th class="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700" formArrayName="variants">
+              <tr *ngFor="let variant of variants.controls; let i = index" [formGroupName]="i">
+                <td class="px-4 py-3 font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                  <div
+                    class="size-8 rounded bg-slate-200 dark:bg-slate-600 bg-cover"
+                    [ngStyle]="{
+                      'background-image': variant.get('imageUrl')?.value
+                        ? 'url(' + variant.get('imageUrl')?.value + ')'
+                        : null
+                    }"
+                  ></div>
+                  {{ variant.get('label')?.value }}
+                </td>
+                <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                  ${{ variant.get('price')?.value | number: '1.2-2' }}
+                </td>
+                <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                  <div>{{ variant.get('sku')?.value }}</div>
+                  <div class="text-xs text-red-500" *ngIf="isSkuDuplicate(i)">SKU must be unique</div>
+                </td>
+                <td class="px-4 py-3">
+                  <input
+                    class="w-20 px-2 py-1 text-sm border border-slate-300 rounded dark:bg-slate-800 dark:border-slate-600"
+                    type="number"
+                    formControlName="inventory"
+                  />
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button class="text-slate-400 hover:text-red-500" type="button" (click)="removeVariant(i)">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Status</h2>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-700 dark:text-slate-300">Product Visibility</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary dark:text-secondary uppercase">{{ statusLabel }}</span>
+            <button
+              [attr.aria-checked]="form.get('statusActive')?.value"
+              class="relative inline-flex h-6 w-11 items-center rounded-full bg-primary"
+              role="switch"
+              type="button"
+              (click)="toggleStatus()"
+            >
+              <span class="sr-only">Enable visibility</span>
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Pricing</h2>
+        <div class="space-y-4">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Base Price</span>
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span class="text-slate-500 sm:text-sm">$</span>
+              </div>
+              <input
+                class="block w-full rounded-lg border-slate-300 pl-7 pr-12 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11"
+                type="number"
+                formControlName="basePrice"
+              />
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <span class="text-slate-500 sm:text-sm">USD</span>
+              </div>
+            </div>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Sale Price</span>
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span class="text-slate-500 sm:text-sm">$</span>
+              </div>
+              <input
+                class="block w-full rounded-lg border-slate-300 pl-7 pr-12 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11"
+                placeholder="0.00"
+                type="number"
+                formControlName="salePrice"
+              />
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Organization</h2>
+        <div class="space-y-4">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Category</span>
+            <select
+              class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-3"
+              formControlName="category"
+            >
+              <option *ngFor="let category of categoryOptions" [value]="category">{{ category }}</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Sub-Category</span>
+            <select
+              class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-3"
+              formControlName="subCategory"
+            >
+              <option *ngFor="let subCategory of subCategoryOptions" [value]="subCategory">
+                {{ subCategory }}
+              </option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Tags</span>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <span
+                *ngFor="let tag of form.get('tags')?.value || []"
+                class="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-500/10"
+              >
+                {{ tag }}
+                <button class="ml-1 text-slate-400 hover:text-slate-600" type="button" (click)="removeTag(tag)">
+                  <span class="material-symbols-outlined text-[14px]">close</span>
+                </button>
+              </span>
+            </div>
+            <input
+              class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-4"
+              placeholder="Add a tag..."
+              type="text"
+              formControlName="tagInput"
+              (keydown.enter)="addTagFromInput($event)"
+              (blur)="addTagFromInput()"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</form>
