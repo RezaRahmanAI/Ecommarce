@@ -254,14 +254,33 @@
           </label>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Sub-Category</span>
+            <input
+              class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-3"
+              placeholder="e.g. Abayas, Thobes, Dresses"
+              type="text"
+              formControlName="subCategory"
+            />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Gender Filter</span>
             <select
               class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-3"
-              formControlName="subCategory"
+              formControlName="gender"
             >
-              <option *ngFor="let subCategory of subCategoryOptions" [value]="subCategory">
-                {{ subCategory }}
-              </option>
+              <option value="women">Women</option>
+              <option value="men">Men</option>
+              <option value="kids">Children</option>
+              <option value="accessories">Accessories</option>
             </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Badges</span>
+            <input
+              class="block w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11 px-3"
+              placeholder="e.g. New Season, Best Seller"
+              type="text"
+              formControlName="badges"
+            />
           </label>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Tags</span>
@@ -285,6 +304,16 @@
               (blur)="addTagFromInput()"
             />
           </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <input type="checkbox" class="h-4 w-4" formControlName="featured" />
+              Feature on homepage
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <input type="checkbox" class="h-4 w-4" formControlName="newArrival" />
+              Mark as new arrival
+            </label>
+          </div>
         </div>
       </div>
     </div>

@@ -2,29 +2,53 @@ import {
   ProductImage,
   ProductMeta,
   ProductRatings,
+  RelatedProduct,
   VariantColor,
   VariantSize,
 } from '../../core/models/product';
 
 export type ProductStatus = 'Active' | 'Draft' | 'Archived' | 'Out of Stock';
 
+export interface ProductVariantEdit {
+  label: string;
+  price: number;
+  sku: string;
+  inventory: number;
+  imageUrl?: string;
+}
+
 export interface Product {
-  id: string;
+  id: number;
   name: string;
-  category: 'Abayas' | 'Hijabs' | 'Prayer Sets' | 'Modest Dresses' | 'Dresses' | string;
+  description: string;
+  category: string;
+  subCategory: string;
+  tags: string[];
+  badges: string[];
+  price: number;
+  salePrice?: number;
+  gender: 'men' | 'women' | 'kids' | 'accessories';
+  ratings: ProductRatings;
+  images: {
+    mainImage: ProductImage;
+    thumbnails: ProductImage[];
+  };
+  variants: {
+    colors: VariantColor[];
+    sizes: VariantSize[];
+  };
+  meta: ProductMeta;
+  relatedProducts: RelatedProduct[];
+  featured?: boolean;
+  newArrival?: boolean;
   sku: string;
   stock: number;
-  price: number;
   status: ProductStatus;
   imageUrl?: string;
-  tags?: string[];
-  description?: string;
-  subCategory?: string;
-  basePrice?: number;
-  salePrice?: number;
   statusActive?: boolean;
   mediaUrls?: string[];
-  variants?: ProductVariantEdit[];
+  basePrice?: number;
+  inventoryVariants?: ProductVariantEdit[];
 }
 
 export interface ProductVariantOption {
@@ -39,21 +63,13 @@ export interface ProductVariantRow {
   quantity: number;
 }
 
-export interface ProductVariantEdit {
-  label: string;
-  price: number;
-  sku: string;
-  inventory: number;
-  imageUrl?: string;
-}
-
 export interface ProductCreatePayload {
   name: string;
   description: string;
   statusActive: boolean;
   category: string;
   subCategory: string;
-  gender: 'men' | 'women' | 'kids' | 'accessories' | string;
+  gender: 'men' | 'women' | 'kids' | 'accessories';
   tags: string[];
   badges: string[];
   price: number;
@@ -78,11 +94,15 @@ export interface ProductUpdatePayload {
   statusActive: boolean;
   category: string;
   subCategory?: string;
+  gender: 'men' | 'women' | 'kids' | 'accessories';
   tags: string[];
+  badges: string[];
+  featured: boolean;
+  newArrival: boolean;
   basePrice: number;
   salePrice?: number;
   mediaUrls: string[];
-  variants: ProductVariantEdit[];
+  inventoryVariants: ProductVariantEdit[];
 }
 
 export type ProductsStatusTab = 'All Items' | 'Active' | 'Drafts' | 'Archived';

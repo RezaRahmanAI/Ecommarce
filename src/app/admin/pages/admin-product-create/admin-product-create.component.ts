@@ -375,13 +375,15 @@ export class AdminProductCreateComponent implements OnDestroy {
       sizes[0].selected = true;
     }
 
+    const gender = (raw.gender ?? 'women') as ProductCreatePayload['gender'];
+
     return {
       name: raw.name ?? '',
       description: raw.description ?? '',
       statusActive: Boolean(raw.statusActive),
       category: raw.category ?? '',
       subCategory: raw.subCategory ?? '',
-      gender: raw.gender ?? 'women',
+      gender,
       tags,
       badges,
       price: Number(raw.price ?? 0),
