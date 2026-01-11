@@ -311,17 +311,23 @@ export class ProductsService {
 
   createProduct(payload: ProductCreatePayload): Observable<Product> {
     const nextId = `prod-${String(this.products.length + 1).padStart(3, '0')}`;
-    const mediaUrl = payload.mediaUrls[0];
+    const mediaUrl = payload.media.mainImage?.url ?? payload.media.thumbnails[0]?.url;
     const newProduct: Product = {
       id: nextId,
       name: payload.name,
       category: payload.category,
-      sku: payload.variants.variantRows[0]?.sku || `SKU-${nextId.toUpperCase()}`,
-      stock: payload.variants.variantRows.reduce((sum, row) => sum + (row.quantity ?? 0), 0),
-      price: payload.salePrice ?? payload.basePrice,
+      sku: `SKU-${nextId.toUpperCase()}`,
+      stock: payload.variants.sizes.reduce((sum, size) => sum + (size.stock ?? 0), 0),
+      price: payload.salePrice ?? payload.price,
       status: payload.statusActive ? 'Active' : 'Draft',
       imageUrl: mediaUrl,
       tags: payload.tags,
+      description: payload.description,
+      subCategory: payload.subCategory,
+      basePrice: payload.price,
+      salePrice: payload.salePrice,
+      statusActive: payload.statusActive,
+      mediaUrls: [payload.media.mainImage.url, ...payload.media.thumbnails.map((item) => item.url)],
     };
     this.products = [newProduct, ...this.products];
     return of(newProduct);
