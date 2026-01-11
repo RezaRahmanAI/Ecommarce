@@ -1,3 +1,11 @@
+import {
+  ProductImage,
+  ProductMeta,
+  ProductRatings,
+  VariantColor,
+  VariantSize,
+} from '../../core/models/product';
+
 export type ProductStatus = 'Active' | 'Draft' | 'Archived' | 'Out of Stock';
 
 export interface Product {
@@ -44,16 +52,24 @@ export interface ProductCreatePayload {
   description: string;
   statusActive: boolean;
   category: string;
-  subcategory?: string;
-  collections?: string;
+  subCategory: string;
+  gender: 'men' | 'women' | 'kids' | 'accessories' | string;
   tags: string[];
-  basePrice: number;
+  badges: string[];
+  price: number;
   salePrice?: number;
-  mediaUrls: string[];
-  variants: {
-    options: ProductVariantOption[];
-    variantRows: ProductVariantRow[];
+  featured: boolean;
+  newArrival: boolean;
+  ratings: ProductRatings;
+  media: {
+    mainImage: ProductImage;
+    thumbnails: ProductImage[];
   };
+  variants: {
+    colors: VariantColor[];
+    sizes: VariantSize[];
+  };
+  meta: ProductMeta;
 }
 
 export interface ProductUpdatePayload {
