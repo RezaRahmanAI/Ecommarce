@@ -26,7 +26,7 @@ export class AdminProductEditComponent implements OnDestroy {
   private productsService = inject(ProductsService);
   private formBuilder = inject(FormBuilder);
 
-  productId: string | null = null;
+  productId: number | null = null;
   productName = 'Product';
   categoryName = 'Category';
 
@@ -42,6 +42,10 @@ export class AdminProductEditComponent implements OnDestroy {
       salePrice: this.formBuilder.control<number | null>(null, [Validators.min(0)]),
       category: this.formBuilder.control('', Validators.required),
       subCategory: this.formBuilder.control(''),
+      gender: this.formBuilder.control('women', Validators.required),
+      badges: this.formBuilder.control(''),
+      featured: this.formBuilder.control(false),
+      newArrival: this.formBuilder.control(false),
       tags: this.formBuilder.control<string[]>([]),
       tagInput: this.formBuilder.control(''),
       mediaExisting: this.formBuilder.control<string[]>([]),
@@ -51,8 +55,7 @@ export class AdminProductEditComponent implements OnDestroy {
     { validators: [this.salePriceValidator.bind(this), this.uniqueSkuValidator.bind(this)] },
   );
 
-  categoryOptions = ['Abayas', 'Hijabs', 'Dresses', 'Accessories', 'Prayer Sets', 'Modest Dresses'];
-  subCategoryOptions = ['Occasion Wear', 'Everyday', 'Workwear'];
+  categoryOptions = ['Women', 'Men', 'Kids', 'Accessories'];
 
   get variants(): FormArray<FormGroup> {
     return this.form.get('variants') as FormArray<FormGroup>;
@@ -80,8 +83,12 @@ export class AdminProductEditComponent implements OnDestroy {
       if (!id) {
         return;
       }
-      this.productId = id;
-      this.loadProduct(id);
+      const parsedId = Number(id);
+      if (!Number.isFinite(parsedId)) {
+        return;
+      }
+      this.productId = parsedId;
+      this.loadProduct(parsedId);
     });
   }
 
@@ -89,7 +96,7 @@ export class AdminProductEditComponent implements OnDestroy {
     this.mediaNewPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
   }
 
-  loadProduct(productId: string): void {
+  loadProduct(productId: number): void {
     this.productsService.getProductById(productId).subscribe((product) => {
       this.productName = product.name;
       this.categoryName = product.category;
@@ -134,7 +141,7 @@ export class AdminProductEditComponent implements OnDestroy {
   }
 
   removeExistingMedia(mediaUrl: string): void {
-    if (!this.productId) {
+    if (this.productId === null) {
       return;
     }
     const updatedMedia = this.existingMedia.filter((url) => url !== mediaUrl);
@@ -198,9 +205,10 @@ export class AdminProductEditComponent implements OnDestroy {
   }
 
   saveChanges(): void {
-    if (!this.productId) {
+    if (this.productId === null) {
       return;
     }
+    const productId = this.productId;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -209,7 +217,7 @@ export class AdminProductEditComponent implements OnDestroy {
     this.productsService.uploadProductMedia(newFiles).subscribe((uploadedUrls) => {
       const mediaUrls = [...this.existingMedia, ...uploadedUrls];
       const payload = this.buildUpdatePayload(mediaUrls);
-      this.productsService.updateProduct(this.productId!, payload).subscribe(() => {
+      this.productsService.updateProduct(productId, payload).subscribe(() => {
         window.alert('Product updated successfully.');
         this.router.navigate(['/admin/products']);
       });
@@ -224,10 +232,14 @@ export class AdminProductEditComponent implements OnDestroy {
       category: product.category ?? '',
       subCategory: product.subCategory ?? '',
       tags: product.tags ?? [],
+      badges: product.badges ?? [],
+      gender: product.gender ?? 'women',
+      featured: product.featured ?? false,
+      newArrival: product.newArrival ?? false,
       basePrice: product.basePrice ?? product.price ?? 0,
       salePrice: product.salePrice ?? undefined,
       mediaUrls: product.mediaUrls ?? (product.imageUrl ? [product.imageUrl] : []),
-      variants: product.variants ?? [],
+      inventoryVariants: product.inventoryVariants ?? [],
     };
   }
 
@@ -240,6 +252,10 @@ export class AdminProductEditComponent implements OnDestroy {
       salePrice: payload.salePrice ?? null,
       category: payload.category,
       subCategory: payload.subCategory ?? '',
+      gender: payload.gender,
+      badges: payload.badges.join(', '),
+      featured: payload.featured,
+      newArrival: payload.newArrival,
       tags: payload.tags,
       mediaExisting: payload.mediaUrls,
       mediaNewFiles: [],
@@ -247,8 +263,8 @@ export class AdminProductEditComponent implements OnDestroy {
     });
 
     this.variants.clear();
-    payload.variants.forEach((variant) => this.variants.push(this.buildVariantGroup(variant)));
-    if (payload.variants.length === 0) {
+    payload.inventoryVariants.forEach((variant) => this.variants.push(this.buildVariantGroup(variant)));
+    if (payload.inventoryVariants.length === 0) {
       this.variants.push(
         this.buildVariantGroup({
           label: 'Default',
@@ -284,6 +300,11 @@ export class AdminProductEditComponent implements OnDestroy {
       inventory: Number(control.get('inventory')?.value ?? 0),
       imageUrl: control.get('imageUrl')?.value ?? undefined,
     }));
+    const badges = String(this.form.get('badges')?.value ?? '')
+      .split(',')
+      .map((badge) => badge.trim())
+      .filter((badge) => badge.length > 0);
+    const gender = (this.form.get('gender')?.value ?? 'women') as ProductUpdatePayload['gender'];
 
     return {
       name: String(this.form.get('name')?.value ?? ''),
@@ -291,11 +312,15 @@ export class AdminProductEditComponent implements OnDestroy {
       statusActive: Boolean(this.form.get('statusActive')?.value),
       category: String(this.form.get('category')?.value ?? ''),
       subCategory: String(this.form.get('subCategory')?.value ?? ''),
+      gender,
       tags: this.form.get('tags')?.value ?? [],
+      badges,
+      featured: Boolean(this.form.get('featured')?.value),
+      newArrival: Boolean(this.form.get('newArrival')?.value),
       basePrice,
       salePrice,
       mediaUrls,
-      variants,
+      inventoryVariants: variants,
     };
   }
 

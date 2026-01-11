@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, map } from 'rxjs';
 
-import { MOCK_PRODUCTS } from '../data/mock-products';
+import { ProductsService } from '../../admin/services/products.service';
 import { MOCK_REVIEWS } from '../data/mock-reviews';
 import { Product } from '../models/product';
 import { Review } from '../models/review';
@@ -10,32 +10,44 @@ import { Review } from '../models/review';
   providedIn: 'root',
 })
 export class ProductService {
-  private readonly products = MOCK_PRODUCTS;
+  constructor(private readonly productsService: ProductsService) {}
 
   // private readonly baseUrl = '/api/products';
 
   getProducts(): Observable<Product[]> {
-    return of(this.products);
+    return this.productsService.getCatalogProducts();
   }
 
   getByCategory(category: string): Observable<Product[]> {
-    return of(this.products.filter((product) => product.category.toLowerCase() === category.toLowerCase()));
+    return this.productsService.getCatalogProducts().pipe(
+      map((products) =>
+        products.filter((product) => product.category.toLowerCase() === category.toLowerCase()),
+      ),
+    );
   }
 
   getByGender(gender: string): Observable<Product[]> {
-    return of(this.products.filter((product) => product.gender === gender));
+    return this.productsService
+      .getCatalogProducts()
+      .pipe(map((products) => products.filter((product) => product.gender === gender)));
   }
 
   getFeatured(): Observable<Product[]> {
-    return of(this.products.filter((product) => product.featured));
+    return this.productsService
+      .getCatalogProducts()
+      .pipe(map((products) => products.filter((product) => product.featured)));
   }
 
   getNewArrivals(): Observable<Product[]> {
-    return of(this.products.filter((product) => product.newArrival));
+    return this.productsService
+      .getCatalogProducts()
+      .pipe(map((products) => products.filter((product) => product.newArrival)));
   }
 
   getById(id: number): Observable<Product | undefined> {
-    return of(this.products.find((product) => product.id === id));
+    return this.productsService
+      .getCatalogProducts()
+      .pipe(map((products) => products.find((product) => product.id === id)));
   }
 
   getReviewsByProductId(productId: number): Observable<Review[]> {
@@ -43,8 +55,11 @@ export class ProductService {
   }
 
   getRecommendedProducts(): Observable<Product[]> {
-    const highlighted = this.products.filter((product) => product.featured || product.newArrival);
-    const picks = (highlighted.length ? highlighted : this.products).slice(0, 4);
-    return of(picks);
+    return this.productsService.getCatalogProducts().pipe(
+      map((products) => {
+        const highlighted = products.filter((product) => product.featured || product.newArrival);
+        return (highlighted.length ? highlighted : products).slice(0, 4);
+      }),
+    );
   }
 }

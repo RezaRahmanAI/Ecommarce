@@ -27,14 +27,14 @@ export class AdminProductsComponent implements OnInit, OnDestroy {
   statusTabs: ProductsStatusTab[] = ['All Items', 'Active', 'Drafts', 'Archived'];
   selectedStatusTab: ProductsStatusTab = 'All Items';
 
-  categories = ['All Categories', 'Abayas', 'Hijabs', 'Prayer Sets', 'Modest Dresses', 'Dresses'];
+  categories = ['All Categories', 'Women', 'Men', 'Kids', 'Accessories'];
 
   products: Product[] = [];
   totalResults = 0;
   page = 1;
   pageSize = 10;
 
-  selectedProductIds = new Set<string>();
+  selectedProductIds = new Set<number>();
 
   ngOnInit(): void {
     this.loadProducts();
@@ -75,7 +75,7 @@ export class AdminProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleSelectProduct(productId: string, event: Event): void {
+  toggleSelectProduct(productId: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.checked) {
       this.selectedProductIds.add(productId);
@@ -186,7 +186,7 @@ export class AdminProductsComponent implements OnInit, OnDestroy {
     );
   }
 
-  isSelected(productId: string): boolean {
+  isSelected(productId: number): boolean {
     return this.selectedProductIds.has(productId);
   }
 

@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 
 import { CartItem, CartSummary } from '../models/cart';
-import { MOCK_PRODUCTS } from '../data/mock-products';
 import { Product } from '../models/product';
+import { ProductsService } from '../../admin/services/products.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
+  private readonly productsService = inject(ProductsService);
   private readonly freeShippingThreshold = 150;
   private readonly taxRate = 0.08;
   private readonly storageKey = 'cart_items';
@@ -37,7 +38,9 @@ export class CartService {
   }
 
   addItem(productId: number, quantity = 1, color?: string, size?: string): void {
-    const product = MOCK_PRODUCTS.find((item) => item.id === productId);
+    const product = this.productsService
+      .getCatalogSnapshot()
+      .find((item) => item.id === productId);
     if (!product) {
       return;
     }
