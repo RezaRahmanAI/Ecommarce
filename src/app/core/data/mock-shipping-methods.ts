@@ -12,7 +12,7 @@ export const SHIPPING_METHODS: ShippingMethod[] = [
     id: 'express',
     label: 'Express Shipping',
     description: '1-2 business days',
-    price: 15,
+    price: 150,
     estimatedDelivery: '1-2 business days',
   },
 ];

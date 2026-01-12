@@ -64,7 +64,9 @@
               </button>
             </div>
             <div class="flex items-center gap-4">
-              <span class="text-2xl font-bold text-primary dark:text-white">${{ vm.product.price | number: '1.2-2' }}</span>
+              <span class="text-2xl font-bold text-primary dark:text-white">
+                {{ vm.product.price | currency:'BDT':'symbol':'1.2-2' }}
+              </span>
               <div class="flex items-center gap-1">
                 <div class="flex text-[#F59E0B]">
                   <ng-container *ngFor="let _ of fullStars(vm.product.ratings.avgRating)">
@@ -335,7 +337,7 @@
           </div>
           <div>
             <h4 class="font-medium text-primary dark:text-white group-hover:underline">{{ related.name }}</h4>
-            <p class="text-sm text-gray-500 mt-1">${{ related.price | number: '1.2-2' }}</p>
+            <p class="text-sm text-gray-500 mt-1">{{ related.price | currency:'BDT':'symbol':'1.2-2' }}</p>
           </div>
         </a>
       </div>

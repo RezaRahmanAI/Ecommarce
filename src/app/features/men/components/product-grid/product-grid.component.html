@@ -36,11 +36,13 @@
         <p class="mt-1 text-sm text-text-sub dark:text-gray-400">{{ getSelectedColorName(product) }}</p>
       </div>
       <div class="flex flex-col items-end" *ngIf="product.salePrice; else standardPrice">
-        <p class="text-lg font-bold text-red-600">${{ product.price | number: '1.2-2' }}</p>
-        <p class="text-sm text-text-sub line-through">${{ product.salePrice | number: '1.2-2' }}</p>
+        <p class="text-lg font-bold text-red-600">{{ product.price | currency:'BDT':'symbol':'1.2-2' }}</p>
+        <p class="text-sm text-text-sub line-through">{{ product.salePrice | currency:'BDT':'symbol':'1.2-2' }}</p>
       </div>
       <ng-template #standardPrice>
-        <p class="text-lg font-bold text-primary dark:text-accent">${{ product.price | number: '1.2-2' }}</p>
+        <p class="text-lg font-bold text-primary dark:text-accent">
+          {{ product.price | currency:'BDT':'symbol':'1.2-2' }}
+        </p>
       </ng-template>
     </div>
   </div>

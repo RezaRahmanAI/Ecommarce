@@ -10,7 +10,7 @@ import { ProductsService } from '../../admin/services/products.service';
 })
 export class CartService {
   private readonly productsService = inject(ProductsService);
-  private readonly freeShippingThreshold = 150;
+  private readonly freeShippingThreshold = 5000;
   private readonly taxRate = 0.08;
   private readonly storageKey = 'cart_items';
 
@@ -98,7 +98,7 @@ export class CartService {
   private calculateSummary(items: CartItem[]): CartSummary {
     const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
     const tax = Number((subtotal * this.taxRate).toFixed(2));
-    const shipping = subtotal >= this.freeShippingThreshold ? 0 : 12;
+    const shipping = subtotal >= this.freeShippingThreshold ? 0 : 120;
     const total = Number((subtotal + tax + shipping).toFixed(2));
     const freeShippingRemaining = Math.max(this.freeShippingThreshold - subtotal, 0);
     const freeShippingProgress = Math.min((subtotal / this.freeShippingThreshold) * 100, 100);
