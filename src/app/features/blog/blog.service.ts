@@ -70,7 +70,7 @@ const posts: BlogPost[] = [
     authorAvatar:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDOeayVSwQjnUOIlrLGb40bJACSOrgMhmcMNpmK5GLQ9_8PTCyQpj6JO-p_BFQwGzsKfydm1khc3mNBngB2EaGx13ARPVkkPtPjGSHyTp9kQhDmD9iBpOjwIMVZ0Yxi0w2WpZCoUH3mP8CrDXHo7mHA9_mCYcslil4Keoho0cJqWk9EVpuuvgJWpG8s6lHciOuuxhkH4oEauV5wUrvjfQhDCak3PoZFHwb4Kjt_i4KQ3aiHygfyjMIOm5kJoGv8krYpvhDcrain4yc',
     authorBio:
-      'Fashion enthusiast and content creator at Muslim. I love exploring the intersection of modesty and modern trends.',
+      'Fashion enthusiast and content creator at Arza. I love exploring the intersection of modesty and modern trends.',
     publishedAt: new Date('2024-05-15'),
     readTime: '5 min read',
     tags: ['ModestFashion', 'SummerStyle', 'Layering'],
@@ -147,7 +147,7 @@ const posts: BlogPost[] = [
     coverImage:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBp-E33MKU2ZtFYpexHyaFdAggRbYS3AEKiLrFwcKjnydqsFjgtGHONxq5em9I69mdginhZZYSjViKgALOgMTG7M7_598nNyjg9zhOXjfON-Esvr6WmxRxvFCLW6fg7R6XOSJqt9YV2DMqUo5do6Ifo_KJPUbx7WBZX5Dh4KO3KtSG68K_1pwqbBNvnsfh2p8y4FwUwtJBj9vOSI9U5N3V76hUBDbXW2cqHVDMSTLAOJo_6Cmj0iXzKViIiypwB7SHVHO9k9vd60A4',
     category: 'Collections',
-    authorName: 'Team Muslim',
+    authorName: 'Team Arza',
     authorAvatar:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDf_ijS-eALQK3gCysFjznX9Vn5re-Qo_sD3kJlBjrJme0eaSAyV17RE_qiGJ5H--vSYfhgf0AIJvTlbYbnDYNy3Nx1QLw56LQbszSR8ZzDlDxF0e1dcz9E4GOJwLX_YjUT-2UA7eTeXBs5PqBEFKE8X_3qhno6R41sDToZIJMwL7QLjwIJMNnQcVEzeDYXUcuJCY1l_YbvMk32st3H-EVwe4NcBhLQqCQcmlhDvfzkic1MMpKodYx1aPQgn0pBglSjEtJoORroWr4',
     authorBio: 'Our in-house team highlights seasonal collections and launches.',

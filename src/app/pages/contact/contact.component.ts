@@ -25,7 +25,7 @@ type InquiryTopic = {
   templateUrl: './contact.component.html',
 })
 export class ContactComponent {
-  supportEmail = 'salam@muslimbrand.com';
+  supportEmail = 'hello@arza.com';
   phone = '+1 (555) 123-4567';
   phoneDial = '+15551234567';
   address = '123 Modest Fashion Ave,\nNew York, NY 10012';
@@ -33,7 +33,7 @@ export class ContactComponent {
   officeHours = 'Mon-Fri, 9am - 6pm EST.';
 
   mapDetails = {
-    storeName: 'Muslim Flagship',
+    storeName: 'Arza Flagship',
     openHours: 'Open daily 10am - 8pm',
     locationLabel: 'New York City',
   };

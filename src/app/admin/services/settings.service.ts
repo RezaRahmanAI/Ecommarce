@@ -4,8 +4,8 @@ import { Observable, of } from 'rxjs';
 import { AdminSettings } from '../models/settings.models';
 
 const MOCK_SETTINGS: AdminSettings = {
-  storeName: 'Muslim Brand',
-  supportEmail: 'support@muslim-brand.com',
+  storeName: 'Arza',
+  supportEmail: 'support@arza.com',
   description: 'A modern modest clothing brand dedicated to quality and style.',
   stripeEnabled: true,
   paypalEnabled: false,
