@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, filter, map, switchMap, tap } from 'rxjs';
 
 import { ProductService } from '../../../../core/services/product.service';
-import { Product, RatingBreakdown } from '../../../../core/models/product';
+import { Product, ProductImage, RatingBreakdown } from '../../../../core/models/product';
 import { Review } from '../../../../core/models/review';
 import { CartService } from '../../../../core/services/cart.service';
 
@@ -24,6 +24,7 @@ export class ProductDetailsPageComponent {
   private readonly selectedColorSubject = new BehaviorSubject<string | null>(null);
   private readonly selectedSizeSubject = new BehaviorSubject<string | null>(null);
   private readonly quantitySubject = new BehaviorSubject<number>(1);
+  private readonly selectedMediaSubject = new BehaviorSubject<ProductImage | null>(null);
 
   product$ = this.route.paramMap.pipe(
     map((params) => Number(params.get('id')) || 1),
@@ -33,6 +34,7 @@ export class ProductDetailsPageComponent {
       this.selectedColorSubject.next(product.variants.colors[0]?.name ?? null);
       this.selectedSizeSubject.next(product.variants.sizes[0]?.label ?? null);
       this.quantitySubject.next(1);
+      this.selectedMediaSubject.next(product.images.mainImage);
     }),
   );
 
@@ -46,12 +48,15 @@ export class ProductDetailsPageComponent {
     this.selectedColorSubject,
     this.selectedSizeSubject,
     this.quantitySubject,
+    this.selectedMediaSubject,
   ]).pipe(
-    map(([product, selectedColor, selectedSize, quantity]) => ({
+    map(([product, selectedColor, selectedSize, quantity, selectedMedia]) => ({
       product,
       selectedColor,
       selectedSize,
       quantity,
+      selectedMedia: this.ensureSelectedMedia(product, selectedMedia),
+      gallery: this.buildGallery(product),
     })),
   );
 
@@ -87,6 +92,10 @@ export class ProductDetailsPageComponent {
   selectSize(sizeLabel: string): void {
     this.selectedSizeSubject.next(sizeLabel);
     this.selectionError = '';
+  }
+
+  selectMedia(media: ProductImage): void {
+    this.selectedMediaSubject.next(media);
   }
 
   increaseQuantity(): void {
@@ -125,5 +134,22 @@ export class ProductDetailsPageComponent {
 
   trackReview(_: number, review: Review): number {
     return review.id;
+  }
+
+  private buildGallery(product: Product): ProductImage[] {
+    const gallery = [product.images.mainImage, ...product.images.thumbnails];
+    const seen = new Set<string>();
+    return gallery.filter((item) => {
+      const key = `${item.type}-${item.url}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }
+
+  private ensureSelectedMedia(product: Product, selectedMedia: ProductImage | null): ProductImage {
+    return selectedMedia ?? product.images.mainImage;
   }
 }

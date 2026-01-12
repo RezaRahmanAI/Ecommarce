@@ -13,12 +13,25 @@
       <!-- Left Column: Image Gallery -->
       <div class="lg:col-span-7 flex flex-col gap-4">
         <div class="aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 relative group cursor-zoom-in">
-          <img
-            [alt]="vm.product.images.mainImage.alt"
-            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            [attr.data-alt]="vm.product.images.mainImage.alt"
-            [src]="vm.product.images.mainImage.url"
-          />
+          <ng-container [ngSwitch]="vm.selectedMedia.type">
+            <video
+              *ngSwitchCase="'video'"
+              class="h-full w-full object-cover"
+              [attr.aria-label]="vm.selectedMedia.alt"
+              [attr.data-alt]="vm.selectedMedia.alt"
+              [src]="vm.selectedMedia.url"
+              controls
+              muted
+              playsinline
+            ></video>
+            <img
+              *ngSwitchDefault
+              [alt]="vm.selectedMedia.alt"
+              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              [attr.data-alt]="vm.selectedMedia.alt"
+              [src]="vm.selectedMedia.url"
+            />
+          </ng-container>
           <div
             *ngIf="vm.product.badges.length"
             class="absolute top-4 left-4 bg-white/90 dark:bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary dark:text-white uppercase tracking-wider"
@@ -29,13 +42,15 @@
         <!-- Thumbnails -->
         <div class="grid grid-cols-4 gap-3 lg:gap-4">
           <button
-            *ngFor="let thumbnail of vm.product.images.thumbnails; let isFirst = first"
+            *ngFor="let thumbnail of vm.gallery"
             class="aspect-[3/4] rounded-lg overflow-hidden cursor-pointer relative"
             [ngClass]="
-              isFirst
+              thumbnail.url === vm.selectedMedia.url
                 ? 'border-2 border-primary'
                 : 'border border-transparent hover:border-primary/50'
             "
+            type="button"
+            (click)="selectMedia(thumbnail)"
           >
             <img
               [alt]="thumbnail.label"
