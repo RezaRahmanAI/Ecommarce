@@ -171,7 +171,7 @@ export class BlogDetailsComponent implements OnInit {
 
   private buildShareUrl(platform: 'pinterest' | 'facebook' | 'twitter'): string {
     const encodedUrl = encodeURIComponent(this.shareUrl);
-    const title = encodeURIComponent(this.post?.title ?? 'Muslim Blog');
+    const title = encodeURIComponent(this.post?.title ?? 'Arza Blog');
 
     switch (platform) {
       case 'pinterest':
