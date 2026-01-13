@@ -5,11 +5,12 @@ import { RouterLink } from '@angular/router';
 import { Product } from '../../../core/models/product';
 import { BadgeComponent } from '../badge/badge.component';
 import { IconButtonComponent } from '../icon-button/icon-button.component';
+import { PriceDisplayComponent } from '../price-display/price-display.component';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, RouterLink, BadgeComponent, IconButtonComponent],
+  imports: [CommonModule, RouterLink, BadgeComponent, IconButtonComponent, PriceDisplayComponent],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',
 })

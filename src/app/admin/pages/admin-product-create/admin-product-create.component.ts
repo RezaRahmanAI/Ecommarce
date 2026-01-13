@@ -14,6 +14,7 @@ import { switchMap } from 'rxjs/operators';
 import { ProductCreatePayload } from '../../models/products.models';
 import { ProductImage } from '../../../core/models/product';
 import { ProductsService } from '../../services/products.service';
+import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
 
 interface MediaFormValue {
   id: string;
@@ -28,7 +29,7 @@ interface MediaFormValue {
 @Component({
   selector: 'app-admin-product-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
   templateUrl: './admin-product-create.component.html',
 })
 export class AdminProductCreateComponent implements OnDestroy {

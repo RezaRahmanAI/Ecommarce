@@ -17,8 +17,7 @@
       {{ product.name }}
     </h3>
     <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedColorName }}</p>
-    <p class="text-base font-bold text-primary dark:text-white mt-1">
-      {{ product.price | currency:'BDT':'symbol':'1.2-2' }}
-    </p>
+    <app-price-display class="mt-1 text-primary dark:text-white" [amount]="product.price" size="md">
+    </app-price-display>
   </div>
 </a>

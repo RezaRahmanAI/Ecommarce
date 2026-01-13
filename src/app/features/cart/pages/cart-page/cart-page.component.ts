@@ -7,11 +7,12 @@ import { CartService } from '../../../../core/services/cart.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { CartItem } from '../../../../core/models/cart';
 import { Product } from '../../../../core/models/product';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-cart-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PriceDisplayComponent],
   templateUrl: './cart-page.component.html',
   styleUrl: './cart-page.component.css',
 })

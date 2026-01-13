@@ -197,7 +197,12 @@
                 </div>
                 <div class="ml-auto">
                   <span class="text-sm font-medium text-slate-900 dark:text-white">
-                    {{ shippingMethods[0].price === 0 ? 'Free' : (shippingMethods[0].price | currency:'BDT') }}
+                    <ng-container *ngIf="shippingMethods[0].price === 0; else standardShipping">
+                      Free
+                    </ng-container>
+                    <ng-template #standardShipping>
+                      <app-price-display [amount]="shippingMethods[0].price" size="sm"></app-price-display>
+                    </ng-template>
                   </span>
                 </div>
               </label>
@@ -218,7 +223,12 @@
                 </div>
                 <div class="ml-auto">
                   <span class="text-sm font-medium text-slate-900 dark:text-white">
-                    {{ shippingMethods[1].price === 0 ? 'Free' : (shippingMethods[1].price | currency:'BDT') }}
+                    <ng-container *ngIf="shippingMethods[1].price === 0; else expressShipping">
+                      Free
+                    </ng-container>
+                    <ng-template #expressShipping>
+                      <app-price-display [amount]="shippingMethods[1].price" size="sm"></app-price-display>
+                    </ng-template>
                   </span>
                 </div>
               </label>
@@ -404,7 +414,7 @@
                     <div>
                       <div class="flex justify-between text-base font-medium text-slate-900 dark:text-white">
                         <h3>{{ item.name }}</h3>
-                        <p class="ml-4">{{ item.price | currency:'BDT' }}</p>
+                        <app-price-display class="ml-4" [amount]="item.price" size="sm"></app-price-display>
                       </div>
                       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ item.color }}</p>
                       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Size: {{ item.size }}</p>
@@ -438,23 +448,39 @@
             <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 space-y-4">
               <div class="flex items-center justify-between">
                 <p class="text-sm text-slate-600 dark:text-slate-400">Subtotal</p>
-                <p class="text-sm font-medium text-slate-900 dark:text-white">{{ vm.summary.subtotal | currency:'BDT' }}</p>
+                <app-price-display
+                  class="text-sm font-medium text-slate-900 dark:text-white"
+                  [amount]="vm.summary.subtotal"
+                  size="sm"
+                ></app-price-display>
               </div>
               <div class="flex items-center justify-between">
                 <p class="text-sm text-slate-600 dark:text-slate-400">Shipping</p>
                 <p class="text-sm font-medium text-slate-900 dark:text-white">
-                  {{ vm.summary.shipping === 0 ? 'Free' : (vm.summary.shipping | currency:'BDT') }}
+                  <ng-container *ngIf="vm.summary.shipping === 0; else checkoutShipping">
+                    Free
+                  </ng-container>
+                  <ng-template #checkoutShipping>
+                    <app-price-display [amount]="vm.summary.shipping" size="sm"></app-price-display>
+                  </ng-template>
                 </p>
               </div>
               <div class="flex items-center justify-between">
                 <p class="text-sm text-slate-600 dark:text-slate-400">Taxes (estimated)</p>
-                <p class="text-sm font-medium text-slate-900 dark:text-white">{{ vm.summary.tax | currency:'BDT' }}</p>
+                <app-price-display
+                  class="text-sm font-medium text-slate-900 dark:text-white"
+                  [amount]="vm.summary.tax"
+                  size="sm"
+                ></app-price-display>
               </div>
               <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
                 <p class="text-base font-bold text-primary dark:text-white">Total</p>
                 <div class="text-right">
-                  <p class="text-sm text-slate-500 dark:text-slate-400">BDT</p>
-                  <p class="text-xl font-bold text-primary dark:text-white">{{ vm.summary.total | currency:'BDT' }}</p>
+                  <app-price-display
+                    class="text-primary dark:text-white"
+                    [amount]="vm.summary.total"
+                    size="lg"
+                  ></app-price-display>
                 </div>
               </div>
             </div>

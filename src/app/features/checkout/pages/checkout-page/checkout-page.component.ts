@@ -10,11 +10,12 @@ import { CheckoutService } from '../../../../core/services/checkout.service';
 import { SHIPPING_METHODS } from '../../../../core/data/mock-shipping-methods';
 import { CartItem } from '../../../../core/models/cart';
 import { ShippingMethod } from '../../../../core/models/checkout';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-checkout-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
   templateUrl: './checkout-page.component.html',
   styleUrl: './checkout-page.component.css',
 })

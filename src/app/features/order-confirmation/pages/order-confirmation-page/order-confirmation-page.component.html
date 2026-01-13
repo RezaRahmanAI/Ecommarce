@@ -102,7 +102,7 @@
               <div>
                 <div class="flex justify-between items-start">
                   <h3 class="font-semibold text-lg">{{ item.name }}</h3>
-                  <p class="font-bold">{{ item.price | currency:'BDT' }}</p>
+                  <app-price-display class="font-bold" [amount]="item.price" size="sm"></app-price-display>
                 </div>
                 <p class="text-sm text-gray-500 mt-1">{{ item.color }} / {{ item.size }}</p>
                 <p class="text-sm text-gray-400 mt-0.5">Ref: {{ item.sku }}</p>
@@ -176,21 +176,30 @@
           <div class="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
             <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Subtotal</span>
-              <span>{{ order.totals.subtotal | currency:'BDT' }}</span>
+              <app-price-display [amount]="order.totals.subtotal" size="sm"></app-price-display>
             </div>
             <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Shipping</span>
               <span class="text-green-600 font-medium">
-                {{ order.totals.shipping === 0 ? 'Free' : (order.totals.shipping | currency:'BDT') }}
+                <ng-container *ngIf="order.totals.shipping === 0; else confirmationShipping">
+                  Free
+                </ng-container>
+                <ng-template #confirmationShipping>
+                  <app-price-display [amount]="order.totals.shipping" size="sm"></app-price-display>
+                </ng-template>
               </span>
             </div>
             <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Tax</span>
-              <span>{{ order.totals.tax | currency:'BDT' }}</span>
+              <app-price-display [amount]="order.totals.tax" size="sm"></app-price-display>
             </div>
             <div class="pt-2 mt-2 border-t border-dashed border-gray-200 dark:border-gray-600 flex justify-between items-center">
               <span class="font-bold text-lg">Total</span>
-              <span class="font-bold text-xl text-primary dark:text-white">{{ order.totals.total | currency:'BDT' }}</span>
+              <app-price-display
+                class="font-bold text-primary dark:text-white"
+                [amount]="order.totals.total"
+                size="lg"
+              ></app-price-display>
             </div>
           </div>
         </div>
