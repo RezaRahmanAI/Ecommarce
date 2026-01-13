@@ -6,11 +6,12 @@ import { combineLatest, map } from 'rxjs';
 import { AuthStateService } from '../../../../core/services/auth-state.service';
 import { OrderService } from '../../../../core/services/order.service';
 import { Order } from '../../../../core/models/order';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PriceDisplayComponent],
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.css',
 })

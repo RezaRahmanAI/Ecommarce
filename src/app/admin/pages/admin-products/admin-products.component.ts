@@ -10,11 +10,12 @@ import {
   ProductsStatusTab,
 } from '../../models/products.models';
 import { ProductsService } from '../../services/products.service';
+import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
   templateUrl: './admin-products.component.html',
 })
 export class AdminProductsComponent implements OnInit, OnDestroy {

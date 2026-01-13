@@ -172,11 +172,15 @@
                   {{ product.name }}
                 </h3>
                 <div class="flex flex-col items-end" *ngIf="product.salePrice; else standardPrice">
-                  <span class="font-semibold text-red-600">${{ product.price | number: '1.2-2' }}</span>
-                  <span class="text-xs text-slate-400 line-through">${{ product.salePrice | number: '1.2-2' }}</span>
+                  <app-price-display class="text-red-600" [amount]="product.price" size="sm"></app-price-display>
+                  <app-price-display
+                    class="text-slate-400 line-through"
+                    [amount]="product.salePrice"
+                    size="sm"
+                  ></app-price-display>
                 </div>
                 <ng-template #standardPrice>
-                  <span class="font-semibold text-primary">${{ product.price | number: '1.2-2' }}</span>
+                  <app-price-display class="text-primary" [amount]="product.price" size="sm"></app-price-display>
                 </ng-template>
               </div>
               <p class="text-xs text-slate-500 mb-2">{{ product.tags.join(' • ') }}</p>

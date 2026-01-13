@@ -9,11 +9,12 @@ import {
   PopularProduct,
 } from '../../models/admin-dashboard.models';
 import { AdminDashboardService } from '../../services/admin-dashboard.service';
+import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PriceDisplayComponent],
   templateUrl: './dashboard-overview.component.html',
 })
 export class DashboardOverviewComponent {
@@ -34,7 +35,7 @@ export class DashboardOverviewComponent {
   exportRevenueReport(): void {
     const csvRows = [
       ['Range', 'Metric', 'Value'],
-      [this.selectedRange, 'Total Revenue', '$45,231'],
+      [this.selectedRange, 'Total Revenue', 'BDT 45,231'],
       [this.selectedRange, 'New Orders', '1,204'],
       [this.selectedRange, 'Active Customers', '892'],
     ];

@@ -15,9 +15,7 @@
     </div>
     <div>
       <p class="text-gray-500 text-sm font-medium mb-1">Total Revenue</p>
-      <h3 class="text-2xl font-bold text-primary tracking-tight">
-        {{ stats.totalRevenue }}
-      </h3>
+      <app-price-display class="text-primary" [amount]="stats.totalRevenue" size="lg"></app-price-display>
     </div>
   </div>
   <div
@@ -169,7 +167,9 @@
             <td class="px-6 py-4 text-sm font-medium text-primary">{{ order.id }}</td>
             <td class="px-6 py-4 text-sm text-gray-600">{{ order.customerName }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ order.date }}</td>
-            <td class="px-6 py-4 text-sm font-medium text-primary">{{ order.amount }}</td>
+            <td class="px-6 py-4 text-sm font-medium text-primary">
+              <app-price-display [amount]="order.amount" size="sm"></app-price-display>
+            </td>
             <td class="px-6 py-4">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
@@ -198,7 +198,9 @@
           <p class="text-sm font-semibold text-primary truncate">{{ product.name }}</p>
           <p class="text-xs text-gray-500">{{ product.soldCount }}</p>
         </div>
-        <div class="text-sm font-bold text-primary">{{ product.price }}</div>
+        <div class="text-sm font-bold text-primary">
+          <app-price-display [amount]="product.price" size="sm"></app-price-display>
+        </div>
       </div>
       <button
         class="w-full mt-2 py-2 text-sm text-primary font-medium bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"

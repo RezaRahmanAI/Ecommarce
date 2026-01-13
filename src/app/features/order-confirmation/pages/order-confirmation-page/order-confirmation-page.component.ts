@@ -5,11 +5,12 @@ import { combineLatest, map } from 'rxjs';
 
 import { OrderService } from '../../../../core/services/order.service';
 import { Order, OrderItem, OrderStatus } from '../../../../core/models/order';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-order-confirmation-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PriceDisplayComponent],
   templateUrl: './order-confirmation-page.component.html',
   styleUrl: './order-confirmation-page.component.css',
 })

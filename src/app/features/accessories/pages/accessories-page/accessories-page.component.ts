@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 
 import { ProductService } from '../../../../core/services/product.service';
 import { Product } from '../../../../core/models/product';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-accessories-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PriceDisplayComponent],
   templateUrl: './accessories-page.component.html',
   styleUrl: './accessories-page.component.css',
 })

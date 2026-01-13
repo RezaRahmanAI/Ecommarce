@@ -225,7 +225,7 @@
                     : 'text-slate-900 dark:text-white'
                 "
               >
-                ${{ product.price.toFixed(2) }}
+                <app-price-display [amount]="product.price" size="sm"></app-price-display>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">

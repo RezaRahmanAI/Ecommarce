@@ -12,6 +12,7 @@ import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 
 import { Order, OrderStatus, OrdersQueryParams } from '../../models/orders.models';
 import { OrdersService } from '../../services/orders.service';
+import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
 
 interface OrderStats {
   totalOrders: number;
@@ -23,7 +24,7 @@ interface OrderStats {
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
   templateUrl: './admin-orders.component.html',
 })
 export class AdminOrdersComponent implements OnInit, OnDestroy {

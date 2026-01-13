@@ -9,7 +9,13 @@
         <div class="bg-white dark:bg-surface-dark rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800">
           <div class="flex justify-between items-end mb-2">
             <p class="text-sm font-medium text-primary dark:text-white" *ngIf="vm.summary.freeShippingRemaining > 0; else freeShippingAchieved">
-              Spend <span class="font-bold">{{ vm.summary.freeShippingRemaining | currency:'BDT' }}</span> more for
+              Spend
+              <app-price-display
+                class="font-bold text-primary dark:text-white"
+                [amount]="vm.summary.freeShippingRemaining"
+                size="sm"
+              ></app-price-display>
+              more for
               <span class="text-primary dark:text-accent font-bold">Free Shipping</span>
             </p>
             <ng-template #freeShippingAchieved>
@@ -81,9 +87,11 @@
                     </button>
                   </div>
                 </div>
-                <p class="text-lg font-bold text-primary dark:text-white">
-                  {{ item.price * item.quantity | currency:'BDT' }}
-                </p>
+                <app-price-display
+                  class="text-primary dark:text-white"
+                  [amount]="item.price * item.quantity"
+                  size="md"
+                ></app-price-display>
               </div>
             </div>
           </div>
@@ -104,7 +112,11 @@
                 ></div>
               </div>
               <h4 class="text-sm font-medium text-slate-800 dark:text-white truncate">{{ product.name }}</h4>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{{ product.price | currency:'BDT' }}</p>
+              <app-price-display
+                class="text-slate-500 dark:text-slate-400"
+                [amount]="product.price"
+                size="sm"
+              ></app-price-display>
             </div>
           </div>
         </div>
@@ -116,22 +128,37 @@
             <div class="flex flex-col gap-4 pb-6 border-b border-dashed border-gray-200 dark:border-gray-700">
               <div class="flex justify-between text-sm">
                 <span class="text-slate-600 dark:text-slate-300">Subtotal</span>
-                <span class="font-medium text-slate-900 dark:text-white">{{ vm.summary.subtotal | currency:'BDT' }}</span>
+                <app-price-display
+                  class="font-medium text-slate-900 dark:text-white"
+                  [amount]="vm.summary.subtotal"
+                  size="sm"
+                ></app-price-display>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-slate-600 dark:text-slate-300">Shipping Estimate</span>
                 <span class="font-medium text-slate-900 dark:text-white">
-                  {{ vm.summary.shipping === 0 ? 'Free' : (vm.summary.shipping | currency:'BDT') }}
+                  <ng-container *ngIf="vm.summary.shipping === 0; else shippingPrice">Free</ng-container>
+                  <ng-template #shippingPrice>
+                    <app-price-display [amount]="vm.summary.shipping" size="sm"></app-price-display>
+                  </ng-template>
                 </span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-slate-600 dark:text-slate-300">Tax</span>
-                <span class="font-medium text-slate-900 dark:text-white">{{ vm.summary.tax | currency:'BDT' }}</span>
+                <app-price-display
+                  class="font-medium text-slate-900 dark:text-white"
+                  [amount]="vm.summary.tax"
+                  size="sm"
+                ></app-price-display>
               </div>
             </div>
             <div class="flex justify-between items-center py-6">
               <span class="text-base font-semibold text-slate-900 dark:text-white">Total</span>
-              <span class="text-2xl font-bold text-primary dark:text-white">{{ vm.summary.total | currency:'BDT' }}</span>
+              <app-price-display
+                class="text-primary dark:text-white"
+                [amount]="vm.summary.total"
+                size="lg"
+              ></app-price-display>
             </div>
             <button
               class="w-full bg-primary hover:bg-[#084050] text-white font-bold py-3.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"

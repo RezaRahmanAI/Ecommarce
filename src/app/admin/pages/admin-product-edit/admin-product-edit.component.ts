@@ -13,11 +13,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { Product, ProductUpdatePayload, ProductVariantEdit } from '../../models/products.models';
 import { ProductsService } from '../../services/products.service';
+import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-admin-product-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
   templateUrl: './admin-product-edit.component.html',
 })
 export class AdminProductEditComponent implements OnDestroy {

@@ -7,11 +7,12 @@ import { ProductService } from '../../../../core/services/product.service';
 import { Product, ProductImage, RatingBreakdown } from '../../../../core/models/product';
 import { Review } from '../../../../core/models/review';
 import { CartService } from '../../../../core/services/cart.service';
+import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
 
 @Component({
   selector: 'app-product-details-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PriceDisplayComponent],
   templateUrl: './product-details-page.component.html',
   styleUrl: './product-details-page.component.css',
 })

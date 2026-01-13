@@ -12,7 +12,9 @@
         <div>
           <p class="text-sm font-semibold text-primary dark:text-white">Order {{ order.id }}</p>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            {{ order.items.length }} items · {{ order.status }} · {{ order.totals.total | currency:'BDT' }}
+            {{ order.items.length }} items · {{ order.status }} ·
+            <app-price-display class="text-slate-500 dark:text-slate-400" [amount]="order.totals.total" size="sm">
+            </app-price-display>
           </p>
         </div>
         <a class="text-sm font-semibold text-primary hover:underline" [routerLink]="['/order-confirmation', order.id]">

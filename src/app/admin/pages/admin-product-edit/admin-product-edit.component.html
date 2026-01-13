@@ -158,7 +158,7 @@
                   {{ variant.get('label')?.value }}
                 </td>
                 <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                  ${{ variant.get('price')?.value | number: '1.2-2' }}
+                  <app-price-display [amount]="variant.get('price')?.value" size="sm"></app-price-display>
                 </td>
                 <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                   <div>{{ variant.get('sku')?.value }}</div>
@@ -211,7 +211,7 @@
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Base Price</span>
             <div class="relative">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <span class="text-slate-500 sm:text-sm">$</span>
+                <img class="h-4 w-4" src="assets/taka.svg" alt="Taka" />
               </div>
               <input
                 class="block w-full rounded-lg border-slate-300 pl-7 pr-12 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11"
@@ -222,12 +222,15 @@
                 <span class="text-slate-500 sm:text-sm">BDT</span>
               </div>
             </div>
+            <span class="text-xs text-slate-500">
+              <app-price-display [amount]="form.get('basePrice')?.value ?? 0" size="sm"></app-price-display>
+            </span>
           </label>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Sale Price</span>
             <div class="relative">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <span class="text-slate-500 sm:text-sm">$</span>
+                <img class="h-4 w-4" src="assets/taka.svg" alt="Taka" />
               </div>
               <input
                 class="block w-full rounded-lg border-slate-300 pl-7 pr-12 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11"
@@ -236,6 +239,9 @@
                 formControlName="salePrice"
               />
             </div>
+            <span class="text-xs text-slate-500">
+              <app-price-display [amount]="form.get('salePrice')?.value ?? 0" size="sm"></app-price-display>
+            </span>
           </label>
         </div>
       </div>

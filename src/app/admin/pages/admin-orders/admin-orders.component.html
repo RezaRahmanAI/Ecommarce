@@ -65,9 +65,8 @@
     >
       <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Revenue</p>
       <div class="flex items-end gap-2">
-        <p class="text-2xl font-bold text-primary dark:text-white">
-          {{ stats.totalRevenue | currency: 'BDT':'symbol':'1.0-0' }}
-        </p>
+        <app-price-display class="text-primary dark:text-white" [amount]="stats.totalRevenue" size="lg">
+        </app-price-display>
         <span
           class="text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded text-xs font-medium mb-1"
           >+18%</span
@@ -231,7 +230,8 @@
               {{ order.itemsCount }} item{{ order.itemsCount === 1 ? '' : 's' }}
             </td>
             <td class="p-4 font-medium text-primary dark:text-white">
-              {{ order.total | currency: 'BDT':'symbol':'1.2-2' }}
+              <app-price-display class="text-primary dark:text-white" [amount]="order.total" size="sm">
+              </app-price-display>
             </td>
             <td class="p-4">
               <span
