@@ -90,20 +90,25 @@ export class AdminProductsComponent implements OnInit, OnDestroy {
     if (!confirmed) {
       return;
     }
-    this.productsService.deleteProduct(product.id);
-    this.selectedProductIds.delete(product.id);
-    this.loadProducts();
+    this.productsService.deleteProduct(product.id).subscribe((success) => {
+      if (!success) {
+        return;
+      }
+      this.selectedProductIds.delete(product.id);
+      this.loadProducts();
+    });
   }
 
   exportProducts(): void {
-    const csv = this.productsService.exportProducts(this.buildQueryParams());
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'products.csv';
-    anchor.click();
-    URL.revokeObjectURL(url);
+    this.productsService.exportProducts(this.buildQueryParams()).subscribe((csv) => {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'products.csv';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   previousPage(): void {

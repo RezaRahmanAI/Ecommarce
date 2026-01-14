@@ -1,39 +1,163 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable, map, of } from 'rxjs';
 
-import { MOCK_PRODUCTS } from '../../core/data/mock-products';
 import { Product as StoreProduct } from '../../core/models/product';
 import {
   Product,
   ProductCreatePayload,
   ProductUpdatePayload,
-  ProductVariantEdit,
   ProductsQueryParams,
-  ProductsStatusTab,
 } from '../models/products.models';
+import { ApiHttpClient } from '../../core/http/http-client';
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
-  private products: Product[] = this.seedProducts(MOCK_PRODUCTS);
+  private readonly api = inject(ApiHttpClient);
+  private readonly catalogSubject = new BehaviorSubject<Product[]>([]);
+  private catalogLoaded = false;
+  private catalogLoading = false;
+
+  constructor() {
+    this.loadCatalog();
+  }
 
   getCatalogProducts(): Observable<Product[]> {
-    return of(this.products);
+    if (!this.catalogLoaded && !this.catalogLoading) {
+      this.loadCatalog();
+    }
+    return this.catalogSubject.asObservable();
   }
 
   getCatalogSnapshot(): Product[] {
-    return [...this.products];
+    return [...this.catalogSubject.getValue()];
   }
 
   getProducts(params: ProductsQueryParams): Observable<{ items: Product[]; total: number }> {
-    const filtered = this.filterProducts(params);
-    const total = filtered.length;
-    const startIndex = (params.page - 1) * params.pageSize;
-    const items = filtered.slice(startIndex, startIndex + params.pageSize);
-    return of({ items, total });
+    const queryParams = new HttpParams({
+      fromObject: {
+        searchTerm: params.searchTerm,
+        category: params.category,
+        statusTab: params.statusTab,
+        page: params.page,
+        pageSize: params.pageSize,
+      },
+    });
+    return this.api.get<{ items: Product[]; total: number }>('/admin/products', {
+      params: queryParams,
+    });
   }
 
-  exportProducts(params: ProductsQueryParams): string {
-    const rows = this.filterProducts(params);
+  getFilteredProducts(params: ProductsQueryParams): Observable<Product[]> {
+    const queryParams = new HttpParams({
+      fromObject: {
+        searchTerm: params.searchTerm,
+        category: params.category,
+        statusTab: params.statusTab,
+      },
+    });
+    return this.api.get<Product[]>('/admin/products/filtered', { params: queryParams });
+  }
+
+  exportProducts(params: ProductsQueryParams): Observable<string> {
+    return this.getFilteredProducts(params).pipe(map((rows) => this.buildCsv(rows)));
+  }
+
+  deleteProduct(productId: number): Observable<boolean> {
+    return this.api.delete<boolean>(`/admin/products/${productId}`).pipe(
+      map((success) => {
+        if (success) {
+          this.updateCatalogSnapshot((products) =>
+            products.filter((product) => product.id !== productId),
+          );
+        }
+        return success;
+      }),
+    );
+  }
+
+  createProduct(payload: ProductCreatePayload): Observable<Product> {
+    return this.api.post<Product>('/admin/products', payload).pipe(
+      map((created) => {
+        this.updateCatalogSnapshot((products) => [created, ...products]);
+        return created;
+      }),
+    );
+  }
+
+  getProductById(productId: number): Observable<Product> {
+    return this.api.get<Product>(`/admin/products/${productId}`);
+  }
+
+  updateProduct(productId: number, payload: ProductUpdatePayload): Observable<Product> {
+    return this.api.put<Product>(`/admin/products/${productId}`, payload).pipe(
+      map((updated) => {
+        this.updateCatalogSnapshot((products) => {
+          const index = products.findIndex((item) => item.id === productId);
+          if (index === -1) {
+            return [updated, ...products];
+          }
+          return [
+            ...products.slice(0, index),
+            updated,
+            ...products.slice(index + 1),
+          ];
+        });
+        return updated;
+      }),
+    );
+  }
+
+  uploadProductMedia(files: File[]): Observable<string[]> {
+    if (files.length === 0) {
+      return of([]);
+    }
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    return this.api.post<string[]>('/admin/products/media', formData);
+  }
+
+  removeProductMedia(productId: number, mediaUrl: string): Observable<boolean> {
+    return this.api.post<boolean>(`/admin/products/${productId}/media/remove`, { mediaUrl }).pipe(
+      map((success) => {
+        if (success) {
+          this.updateCatalogSnapshot((products) =>
+            products.map((product) =>
+              product.id === productId
+                ? this.removeMediaFromProduct(product, mediaUrl)
+                : product,
+            ),
+          );
+        }
+        return success;
+      }),
+    );
+  }
+
+  private loadCatalog(): void {
+    this.catalogLoading = true;
+    this.api.get<Product[]>('/admin/products/catalog').subscribe({
+      next: (products) => {
+        this.catalogLoaded = true;
+        this.catalogSubject.next(products);
+      },
+      error: () => {
+        this.catalogLoading = false;
+      },
+      complete: () => {
+        this.catalogLoading = false;
+      },
+    });
+  }
+
+  private updateCatalogSnapshot(updater: (products: Product[]) => Product[]): void {
+    const current = this.catalogSubject.getValue();
+    const next = updater(current);
+    this.catalogLoaded = true;
+    this.catalogSubject.next(next);
+  }
+
+  private buildCsv(rows: Product[]): string {
     const header = ['ID', 'Name', 'Category', 'SKU', 'Stock', 'Price', 'Status', 'Tags'];
     const csvRows = rows.map((product) => [
       product.id,
@@ -51,192 +175,17 @@ export class ProductsService {
       .join('\n');
   }
 
-  deleteProduct(productId: number): void {
-    this.products = this.products.filter((product) => product.id !== productId);
-  }
-
-  createProduct(payload: ProductCreatePayload): Observable<Product> {
-    const nextId = this.nextProductId();
-    const mediaUrls = [payload.media.mainImage.url, ...payload.media.thumbnails.map((item) => item.url)].filter(
-      Boolean,
-    );
-    const inventoryVariants = this.buildInventoryVariantsFromPayload(payload, nextId, mediaUrls[0]);
-    const stock = inventoryVariants.reduce((sum, variant) => sum + (variant.inventory ?? 0), 0);
-    const status = this.resolveStatus(payload.statusActive, stock);
-    const newProduct: Product = {
-      id: nextId,
-      name: payload.name,
-      description: payload.description,
-      category: payload.category,
-      subCategory: payload.subCategory,
-      tags: payload.tags,
-      badges: payload.badges,
-      price: payload.salePrice ?? payload.price,
-      salePrice: payload.salePrice,
-      gender: payload.gender,
-      ratings: payload.ratings,
-      images: payload.media,
-      variants: payload.variants,
-      meta: payload.meta,
-      relatedProducts: [],
-      featured: payload.featured,
-      newArrival: payload.newArrival,
-      sku: this.formatSku(nextId),
-      stock,
-      status,
-      imageUrl: mediaUrls[0],
-      statusActive: payload.statusActive,
-      mediaUrls,
-      basePrice: payload.price,
-      inventoryVariants,
-    };
-    this.products = [newProduct, ...this.products];
-    return of(newProduct);
-  }
-
-  getProductById(productId: number): Observable<Product> {
-    const product = this.products.find((item) => item.id === productId) ?? this.products[0];
-
-    if (!product) {
-      return of(this.buildEmptyProduct(productId));
-    }
-
-    return of(this.buildProductDetail(product));
-  }
-
-  updateProduct(productId: number, payload: ProductUpdatePayload): Observable<Product> {
-    const existingIndex = this.products.findIndex((item) => item.id === productId);
-    const existing = this.products[existingIndex];
-    const inventoryVariants = payload.inventoryVariants.length
-      ? payload.inventoryVariants
-      : existing?.inventoryVariants ?? [];
-    const stock = inventoryVariants.reduce((sum, variant) => sum + (variant.inventory ?? 0), 0);
-    const status = this.resolveStatus(payload.statusActive, stock);
-    const mediaUrls = payload.mediaUrls.length ? payload.mediaUrls : existing?.mediaUrls ?? [];
-    const images = this.buildImagesFromMedia(mediaUrls, payload.name, existing?.images);
-    const updatedProduct: Product = {
-      ...(existing ?? this.buildEmptyProduct(productId)),
-      id: productId,
-      name: payload.name,
-      description: payload.description,
-      category: payload.category,
-      subCategory: payload.subCategory ?? '',
-      tags: payload.tags,
-      badges: payload.badges,
-      gender: payload.gender,
-      featured: payload.featured,
-      newArrival: payload.newArrival,
-      basePrice: payload.basePrice,
-      salePrice: payload.salePrice,
-      price: payload.salePrice ?? payload.basePrice,
-      sku: inventoryVariants[0]?.sku ?? existing?.sku ?? this.formatSku(productId),
-      stock,
-      status,
-      statusActive: payload.statusActive,
-      mediaUrls,
-      imageUrl: mediaUrls[0],
-      inventoryVariants,
-      images,
-    };
-
-    if (existingIndex >= 0) {
-      this.products = [
-        ...this.products.slice(0, existingIndex),
-        updatedProduct,
-        ...this.products.slice(existingIndex + 1),
-      ];
-    } else {
-      this.products = [updatedProduct, ...this.products];
-    }
-
-    return of(updatedProduct);
-  }
-
-  uploadProductMedia(files: File[]): Observable<string[]> {
-    if (files.length === 0) {
-      return of([]);
-    }
-    const urls = files.map((file) => URL.createObjectURL(file));
-    return of(urls);
-  }
-
-  removeProductMedia(productId: number, mediaUrl: string): Observable<boolean> {
-    const product = this.products.find((item) => item.id === productId);
-    if (!product) {
-      return of(false);
-    }
+  private removeMediaFromProduct(product: Product, mediaUrl: string): Product {
     const updatedMedia = (product.mediaUrls ?? []).filter((url) => url !== mediaUrl);
-    product.mediaUrls = updatedMedia;
-    product.images = this.buildImagesFromMedia(updatedMedia, product.name, product.images);
-    if (product.imageUrl === mediaUrl) {
-      product.imageUrl = updatedMedia[0];
-    }
-    return of(true);
-  }
+    const images = this.buildImagesFromMedia(updatedMedia, product.name, product.images);
+    const imageUrl = product.imageUrl === mediaUrl ? updatedMedia[0] : product.imageUrl;
 
-  private seedProducts(products: StoreProduct[]): Product[] {
-    return products.map((product) => {
-      const inventoryVariants = this.buildInventoryVariants(product);
-      const stock = inventoryVariants.reduce((sum, variant) => sum + (variant.inventory ?? 0), 0);
-      const status = this.resolveStatus(true, stock);
-      const mediaUrls = [product.images.mainImage.url, ...product.images.thumbnails.map((item) => item.url)].filter(
-        Boolean,
-      );
-
-      const gender = (product.gender ?? 'women') as Product['gender'];
-
-      return {
-        ...product,
-        gender,
-        badges: product.badges ?? [],
-        tags: product.tags ?? [],
-        sku: this.formatSku(product.id),
-        stock,
-        status,
-        imageUrl: product.images.mainImage.url,
-        statusActive: status === 'Active',
-        mediaUrls,
-        basePrice: product.price,
-        inventoryVariants,
-      };
-    });
-  }
-
-  private buildInventoryVariants(product: StoreProduct): ProductVariantEdit[] {
-    const baseSku = this.formatSku(product.id);
-    const price = product.salePrice ?? product.price;
-    const mainImage = product.images.mainImage.url;
-    const primaryColor = product.variants.colors[0]?.name ?? 'Default';
-    const sizes = product.variants.sizes.length ? product.variants.sizes : [{ label: 'One Size', stock: 0, selected: true }];
-
-    return sizes.map((size, index) => ({
-      label: `${size.label} / ${primaryColor}`,
-      price,
-      sku: `${baseSku}-${index + 1}`,
-      inventory: Number(size.stock ?? 0),
-      imageUrl: mainImage,
-    }));
-  }
-
-  private buildInventoryVariantsFromPayload(
-    payload: ProductCreatePayload,
-    productId: number,
-    imageUrl?: string,
-  ): ProductVariantEdit[] {
-    const baseSku = this.formatSku(productId);
-    const price = payload.salePrice ?? payload.price;
-    const primaryColor = payload.variants.colors[0]?.name ?? 'Default';
-    const sizes = payload.variants.sizes.length
-      ? payload.variants.sizes
-      : [{ label: 'One Size', stock: 0, selected: true }];
-
-    return sizes.map((size, index) => ({
-      label: `${size.label} / ${primaryColor}`,
-      price,
-      sku: `${baseSku}-${index + 1}`,
-      inventory: Number(size.stock ?? 0),
+    return {
+      ...product,
+      mediaUrls: updatedMedia,
+      images,
       imageUrl,
-    }));
+    };
   }
 
   private buildImagesFromMedia(
@@ -264,144 +213,6 @@ export class ProductsService {
     return {
       mainImage,
       thumbnails: thumbnailImages,
-    };
-  }
-
-  private buildEmptyProduct(productId: number): Product {
-    return {
-      id: productId,
-      name: 'New Product',
-      description: '',
-      category: 'Women',
-      subCategory: '',
-      tags: [],
-      badges: [],
-      price: 0,
-      salePrice: undefined,
-      gender: 'women',
-      ratings: {
-        avgRating: 0,
-        reviewCount: 0,
-        ratingBreakdown: [
-          { rating: 5, percentage: 0 },
-          { rating: 4, percentage: 0 },
-          { rating: 3, percentage: 0 },
-          { rating: 2, percentage: 0 },
-          { rating: 1, percentage: 0 },
-        ],
-      },
-      images: {
-        mainImage: {
-          type: 'image',
-          label: 'Main',
-          url: 'https://via.placeholder.com/600x800?text=Product+Image',
-          alt: 'Product image',
-        },
-        thumbnails: [
-          {
-            type: 'image',
-            label: 'Gallery',
-            url: 'https://via.placeholder.com/600x800?text=Product+Image',
-            alt: 'Product image',
-          },
-        ],
-      },
-      variants: {
-        colors: [{ name: 'Default', hex: '#111827', selected: true }],
-        sizes: [{ label: 'One Size', stock: 0, selected: true }],
-      },
-      meta: {
-        fabricAndCare: '',
-        shippingAndReturns: '',
-      },
-      relatedProducts: [],
-      featured: false,
-      newArrival: false,
-      sku: this.formatSku(productId),
-      stock: 0,
-      status: 'Draft',
-      imageUrl: '',
-      statusActive: false,
-      mediaUrls: [],
-      basePrice: 0,
-      inventoryVariants: [],
-    };
-  }
-
-  private resolveStatus(statusActive: boolean, stock: number): Product['status'] {
-    if (!statusActive) {
-      return 'Draft';
-    }
-    if (stock === 0) {
-      return 'Out of Stock';
-    }
-    return 'Active';
-  }
-
-  private formatSku(productId: number): string {
-    return `SKU-${String(productId).padStart(5, '0')}`;
-  }
-
-  private nextProductId(): number {
-    const ids = this.products.map((product) => product.id);
-    return ids.length ? Math.max(...ids) + 1 : 1;
-  }
-
-  private filterProducts(params: ProductsQueryParams): Product[] {
-    const normalizedSearch = params.searchTerm.trim().toLowerCase();
-
-    return this.products.filter((product) => {
-      const matchesSearch = normalizedSearch
-        ? this.matchesSearch(product, normalizedSearch)
-        : true;
-      const matchesCategory =
-        params.category === 'All Categories' || product.category === params.category;
-      const matchesStatus = this.matchesStatus(product, params.statusTab);
-
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-  }
-
-  private matchesSearch(product: Product, searchTerm: string): boolean {
-    const haystack = [product.name, product.sku, ...(product.tags ?? [])]
-      .join(' ')
-      .toLowerCase();
-    return haystack.includes(searchTerm);
-  }
-
-  private matchesStatus(product: Product, statusTab: ProductsStatusTab): boolean {
-    switch (statusTab) {
-      case 'Active':
-        return product.status === 'Active';
-      case 'Drafts':
-        return product.status === 'Draft';
-      case 'Archived':
-        return product.status === 'Archived';
-      default:
-        return true;
-    }
-  }
-
-  private buildProductDetail(product: Product): Product {
-    const basePrice = product.basePrice ?? product.price ?? 0;
-    const salePrice = product.salePrice ?? undefined;
-    const mediaUrls = product.mediaUrls ?? (product.imageUrl ? [product.imageUrl] : []);
-    const inventoryVariants =
-      product.inventoryVariants?.length && product.inventoryVariants.length > 0
-        ? product.inventoryVariants
-        : this.buildInventoryVariants(product);
-
-    return {
-      ...product,
-      description:
-        product.description ??
-        'Elegant chiffon abaya perfect for special occasions. Features delicate embroidery on the sleeves and hemline. Includes matching shayla.',
-      subCategory: product.subCategory ?? 'Occasion Wear',
-      basePrice,
-      salePrice,
-      statusActive: product.statusActive ?? product.status === 'Active',
-      mediaUrls,
-      inventoryVariants,
     };
   }
 }

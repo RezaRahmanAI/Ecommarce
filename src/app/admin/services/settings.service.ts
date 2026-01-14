@@ -1,38 +1,30 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 
-import { AdminSettings } from '../models/settings.models';
-
-const MOCK_SETTINGS: AdminSettings = {
-  storeName: 'Arza',
-  supportEmail: 'support@arza.com',
-  description: 'A modern modest clothing brand dedicated to quality and style.',
-  stripeEnabled: true,
-  paypalEnabled: false,
-  stripePublishableKey: 'pk_live_51M...xYz2',
-  shippingZones: [
-    {
-      id: 1,
-      name: 'Domestic',
-      region: 'United States',
-      rates: ['Free Shipping (>$100)', 'Standard: $5.00'],
-    },
-    {
-      id: 2,
-      name: 'International',
-      region: 'Rest of World',
-      rates: ['Flat Rate: $25.00'],
-    },
-  ],
-};
+import { AdminSettings, ShippingZone } from '../models/settings.models';
+import { ApiHttpClient } from '../../core/http/http-client';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
+  private readonly api = inject(ApiHttpClient);
+
   getSettings(): Observable<AdminSettings> {
-    return of(MOCK_SETTINGS);
+    return this.api.get<AdminSettings>('/admin/settings');
   }
 
-  saveSettings(payload: AdminSettings): Observable<{ success: true }> {
-    return of({ success: true });
+  saveSettings(payload: AdminSettings): Observable<AdminSettings> {
+    return this.api.put<AdminSettings>('/admin/settings', payload);
+  }
+
+  createShippingZone(payload: ShippingZone): Observable<ShippingZone> {
+    return this.api.post<ShippingZone>('/admin/settings/shipping-zones', payload);
+  }
+
+  updateShippingZone(zoneId: number, payload: ShippingZone): Observable<ShippingZone> {
+    return this.api.put<ShippingZone>(`/admin/settings/shipping-zones/${zoneId}`, payload);
+  }
+
+  deleteShippingZone(zoneId: number): Observable<boolean> {
+    return this.api.delete<boolean>(`/admin/settings/shipping-zones/${zoneId}`);
   }
 }

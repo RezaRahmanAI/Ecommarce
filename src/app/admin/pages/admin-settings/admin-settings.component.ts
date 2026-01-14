@@ -98,9 +98,10 @@ export class AdminSettingsComponent implements OnInit {
       shippingZones: [...this.shippingZones],
     };
 
-    this.settingsService.saveSettings(payload).subscribe(() => {
+    this.settingsService.saveSettings(payload).subscribe((settings) => {
       this.saveMessage = 'Settings saved successfully.';
-      this.lastSettings = payload;
+      this.lastSettings = settings;
+      this.shippingZones = [...settings.shippingZones];
     });
   }
 
@@ -192,7 +193,7 @@ export class AdminSettingsComponent implements OnInit {
 
     const formValue = this.zoneForm.getRawValue();
     const updatedZone: ShippingZone = {
-      id: formValue.id ? formValue.id : this.nextZoneId(),
+      id: formValue.id ?? 0,
       name: formValue.name,
       region: formValue.region,
       rates: formValue.rates
@@ -202,16 +203,25 @@ export class AdminSettingsComponent implements OnInit {
     };
 
     if (this.editingZoneId) {
-      this.shippingZones = this.shippingZones.map((zone) =>
-        zone.id === this.editingZoneId ? updatedZone : zone,
-      );
-    } else {
-      this.shippingZones = [...this.shippingZones, updatedZone];
+      this.settingsService
+        .updateShippingZone(this.editingZoneId, updatedZone)
+        .subscribe((zone) => {
+          this.shippingZones = this.shippingZones.map((item) =>
+            item.id === zone.id ? zone : item,
+          );
+          this.zoneForm.reset({ id: 0, name: '', region: '', rates: '' });
+          this.showZoneForm = false;
+          this.editingZoneId = null;
+        });
+      return;
     }
 
-    this.zoneForm.reset({ id: 0, name: '', region: '', rates: '' });
-    this.showZoneForm = false;
-    this.editingZoneId = null;
+    this.settingsService.createShippingZone(updatedZone).subscribe((zone) => {
+      this.shippingZones = [...this.shippingZones, zone];
+      this.zoneForm.reset({ id: 0, name: '', region: '', rates: '' });
+      this.showZoneForm = false;
+      this.editingZoneId = null;
+    });
   }
 
   cancelZoneEdit(): void {
@@ -225,7 +235,12 @@ export class AdminSettingsComponent implements OnInit {
       return;
     }
 
-    this.shippingZones = this.shippingZones.filter((item) => item.id !== zone.id);
+    this.settingsService.deleteShippingZone(zone.id).subscribe((success) => {
+      if (!success) {
+        return;
+      }
+      this.shippingZones = this.shippingZones.filter((item) => item.id !== zone.id);
+    });
   }
 
   rateClass(rate: string): string {
@@ -236,9 +251,4 @@ export class AdminSettingsComponent implements OnInit {
     return 'px-2 py-1 bg-gray-100 text-text-secondary text-xs rounded-md font-medium';
   }
 
-  private nextZoneId(): number {
-    return this.shippingZones.length
-      ? Math.max(...this.shippingZones.map((zone) => zone.id)) + 1
-      : 1;
-  }
 }
