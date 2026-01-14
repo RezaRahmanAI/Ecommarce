@@ -1,0 +1,995 @@
+using System.Globalization;
+using Ecommarce.Api.Models;
+
+namespace Ecommarce.Api.Services;
+
+public class AdminDataStore
+{
+  private readonly object _sync = new();
+  private readonly List<Category> _categories;
+  private readonly List<Product> _products;
+  private readonly List<Order> _orders;
+  private AdminSettings _settings;
+
+  public AdminDataStore()
+  {
+    _categories = SeedCategories();
+    _products = SeedProducts();
+    _orders = SeedOrders();
+    _settings = SeedSettings();
+  }
+
+  public List<Category> GetCategories()
+  {
+    lock (_sync)
+    {
+      return _categories.Select(CloneCategory).ToList();
+    }
+  }
+
+  public Category? GetCategory(string id)
+  {
+    lock (_sync)
+    {
+      var category = _categories.FirstOrDefault(item => item.Id == id);
+      return category is null ? null : CloneCategory(category);
+    }
+  }
+
+  public Category CreateCategory(CategoryPayload payload)
+  {
+    lock (_sync)
+    {
+      var parentId = payload.ParentId;
+      var siblings = _categories.Where(item => item.ParentId == parentId).ToList();
+      var nextSortOrder = siblings.Count > 0 ? siblings.Max(item => item.SortOrder) + 1 : 1;
+
+      var category = new Category
+      {
+        Id = $"cat-{Guid.NewGuid():N}",
+        Name = payload.Name,
+        Slug = payload.Slug,
+        ParentId = parentId,
+        Description = payload.Description,
+        ImageUrl = payload.ImageUrl,
+        IsVisible = payload.IsVisible ?? true,
+        ProductCount = payload.ProductCount ?? 0,
+        SortOrder = payload.SortOrder ?? nextSortOrder
+      };
+
+      _categories.Add(category);
+      return CloneCategory(category);
+    }
+  }
+
+  public Category? UpdateCategory(string id, CategoryPayload payload)
+  {
+    lock (_sync)
+    {
+      var index = _categories.FindIndex(item => item.Id == id);
+      if (index < 0)
+      {
+        return null;
+      }
+
+      var existing = _categories[index];
+      existing.Name = payload.Name;
+      existing.Slug = payload.Slug;
+      existing.ParentId = payload.ParentId;
+      existing.Description = payload.Description;
+      existing.ImageUrl = payload.ImageUrl;
+      existing.IsVisible = payload.IsVisible ?? existing.IsVisible;
+      existing.SortOrder = payload.SortOrder ?? existing.SortOrder;
+
+      return CloneCategory(existing);
+    }
+  }
+
+  public bool DeleteCategory(string id)
+  {
+    lock (_sync)
+    {
+      var removed = _categories.RemoveAll(item => item.Id == id);
+      return removed > 0;
+    }
+  }
+
+  public bool ReorderCategories(ReorderPayload payload)
+  {
+    lock (_sync)
+    {
+      foreach (var category in _categories)
+      {
+        if ((category.ParentId ?? null) != (payload.ParentId ?? null))
+        {
+          continue;
+        }
+
+        var index = payload.OrderedIds.IndexOf(category.Id);
+        if (index < 0)
+        {
+          continue;
+        }
+        category.SortOrder = index + 1;
+      }
+      return true;
+    }
+  }
+
+  public List<CategoryNode> GetCategoryTree()
+  {
+    return BuildCategoryTree(GetCategories());
+  }
+
+  public List<Product> GetProducts()
+  {
+    lock (_sync)
+    {
+      return _products.Select(CloneProduct).ToList();
+    }
+  }
+
+  public Product? GetProduct(int id)
+  {
+    lock (_sync)
+    {
+      var product = _products.FirstOrDefault(item => item.Id == id);
+      return product is null ? null : CloneProduct(product);
+    }
+  }
+
+  public Product CreateProduct(ProductCreatePayload payload)
+  {
+    lock (_sync)
+    {
+      var nextId = _products.Count > 0 ? _products.Max(item => item.Id) + 1 : 1;
+      var mediaUrls = BuildMediaUrls(payload.Media);
+      var mainImageUrl = mediaUrls.FirstOrDefault() ?? payload.Media.MainImage.Url;
+      var inventoryVariants = BuildInventoryVariants(payload, nextId, mainImageUrl);
+      var stock = inventoryVariants.Sum(variant => variant.Inventory);
+      var status = ResolveStatus(payload.StatusActive, stock);
+
+      var product = new Product
+      {
+        Id = nextId,
+        Name = payload.Name,
+        Description = payload.Description,
+        Category = payload.Category,
+        SubCategory = payload.SubCategory,
+        Tags = payload.Tags,
+        Badges = payload.Badges,
+        Price = payload.SalePrice ?? payload.Price,
+        SalePrice = payload.SalePrice,
+        Gender = payload.Gender,
+        Ratings = payload.Ratings,
+        Images = payload.Media,
+        Variants = payload.Variants,
+        Meta = payload.Meta,
+        RelatedProducts = [],
+        Featured = payload.Featured,
+        NewArrival = payload.NewArrival,
+        Sku = FormatSku(nextId),
+        Stock = stock,
+        Status = status,
+        ImageUrl = mainImageUrl,
+        StatusActive = payload.StatusActive,
+        MediaUrls = mediaUrls,
+        BasePrice = payload.Price,
+        InventoryVariants = inventoryVariants
+      };
+
+      _products.Insert(0, product);
+      return CloneProduct(product);
+    }
+  }
+
+  public Product? UpdateProduct(int id, ProductUpdatePayload payload)
+  {
+    lock (_sync)
+    {
+      var index = _products.FindIndex(item => item.Id == id);
+      var existing = index >= 0 ? _products[index] : null;
+      var inventoryVariants = payload.InventoryVariants.Count > 0
+        ? payload.InventoryVariants
+        : existing?.InventoryVariants ?? [];
+      var stock = inventoryVariants.Sum(variant => variant.Inventory);
+      var status = ResolveStatus(payload.StatusActive, stock);
+      var mediaUrls = payload.MediaUrls.Count > 0 ? payload.MediaUrls : existing?.MediaUrls ?? [];
+      var images = BuildImagesFromMedia(mediaUrls, payload.Name, existing?.Images);
+      var sku = inventoryVariants.Count > 0
+        ? inventoryVariants[0].Sku
+        : existing?.Sku ?? FormatSku(id);
+
+      var product = new Product
+      {
+        Id = id,
+        Name = payload.Name,
+        Description = payload.Description,
+        Category = payload.Category,
+        SubCategory = payload.SubCategory ?? string.Empty,
+        Tags = payload.Tags,
+        Badges = payload.Badges,
+        Price = payload.SalePrice ?? payload.BasePrice,
+        SalePrice = payload.SalePrice,
+        Gender = payload.Gender,
+        Ratings = existing?.Ratings ?? BuildDefaultRatings(),
+        Images = images,
+        Variants = existing?.Variants ?? new ProductVariants([], []),
+        Meta = existing?.Meta ?? new ProductMeta(string.Empty, string.Empty),
+        RelatedProducts = existing?.RelatedProducts ?? [],
+        Featured = payload.Featured,
+        NewArrival = payload.NewArrival,
+        Sku = sku,
+        Stock = stock,
+        Status = status,
+        ImageUrl = mediaUrls.FirstOrDefault(),
+        StatusActive = payload.StatusActive,
+        MediaUrls = mediaUrls,
+        BasePrice = payload.BasePrice,
+        InventoryVariants = inventoryVariants
+      };
+
+      if (index >= 0)
+      {
+        _products[index] = product;
+      }
+      else
+      {
+        _products.Insert(0, product);
+      }
+
+      return CloneProduct(product);
+    }
+  }
+
+  public bool DeleteProduct(int id)
+  {
+    lock (_sync)
+    {
+      var removed = _products.RemoveAll(item => item.Id == id);
+      return removed > 0;
+    }
+  }
+
+  public bool RemoveProductMedia(int id, string mediaUrl)
+  {
+    lock (_sync)
+    {
+      var product = _products.FirstOrDefault(item => item.Id == id);
+      if (product is null)
+      {
+        return false;
+      }
+
+      var updatedMedia = product.MediaUrls.Where(url => url != mediaUrl).ToList();
+      product.MediaUrls = updatedMedia;
+      product.Images = BuildImagesFromMedia(updatedMedia, product.Name, product.Images);
+      if (product.ImageUrl == mediaUrl)
+      {
+        product.ImageUrl = updatedMedia.FirstOrDefault();
+      }
+      return true;
+    }
+  }
+
+  public List<Order> GetOrders()
+  {
+    lock (_sync)
+    {
+      return _orders.Select(CloneOrder).ToList();
+    }
+  }
+
+  public Order CreateOrder(OrderCreatePayload payload)
+  {
+    lock (_sync)
+    {
+      var nextId = _orders.Count > 0 ? _orders.Max(item => item.Id) + 1 : 1;
+      var order = new Order
+      {
+        Id = nextId,
+        OrderId = payload.OrderId,
+        CustomerName = payload.CustomerName,
+        CustomerInitials = payload.CustomerInitials,
+        Date = payload.Date,
+        ItemsCount = payload.ItemsCount,
+        Total = payload.Total,
+        Status = payload.Status
+      };
+
+      _orders.Insert(0, order);
+      return CloneOrder(order);
+    }
+  }
+
+  public Order? UpdateOrderStatus(int id, OrderStatus status)
+  {
+    lock (_sync)
+    {
+      var order = _orders.FirstOrDefault(item => item.Id == id);
+      if (order is null)
+      {
+        return null;
+      }
+
+      order.Status = status;
+      return CloneOrder(order);
+    }
+  }
+
+  public bool DeleteOrder(int id)
+  {
+    lock (_sync)
+    {
+      var removed = _orders.RemoveAll(item => item.Id == id);
+      return removed > 0;
+    }
+  }
+
+  public AdminSettings GetSettings()
+  {
+    lock (_sync)
+    {
+      return CloneSettings(_settings);
+    }
+  }
+
+  public AdminSettings SaveSettings(AdminSettings payload)
+  {
+    lock (_sync)
+    {
+      _settings = CloneSettings(payload);
+      return CloneSettings(_settings);
+    }
+  }
+
+  public ShippingZone CreateShippingZone(ShippingZone payload)
+  {
+    lock (_sync)
+    {
+      var nextId = _settings.ShippingZones.Count > 0
+        ? _settings.ShippingZones.Max(zone => zone.Id) + 1
+        : 1;
+      var zone = new ShippingZone
+      {
+        Id = nextId,
+        Name = payload.Name,
+        Region = payload.Region,
+        Rates = payload.Rates
+      };
+      _settings.ShippingZones.Add(zone);
+      return CloneShippingZone(zone);
+    }
+  }
+
+  public ShippingZone? UpdateShippingZone(int id, ShippingZone payload)
+  {
+    lock (_sync)
+    {
+      var zone = _settings.ShippingZones.FirstOrDefault(item => item.Id == id);
+      if (zone is null)
+      {
+        return null;
+      }
+
+      zone.Name = payload.Name;
+      zone.Region = payload.Region;
+      zone.Rates = payload.Rates;
+      return CloneShippingZone(zone);
+    }
+  }
+
+  public bool DeleteShippingZone(int id)
+  {
+    lock (_sync)
+    {
+      var removed = _settings.ShippingZones.RemoveAll(zone => zone.Id == id);
+      return removed > 0;
+    }
+  }
+
+  public List<Order> FilterOrders(string? searchTerm, string status, string dateRange)
+  {
+    var orders = GetOrders();
+    var normalizedSearch = searchTerm?.Trim().ToLowerInvariant() ?? string.Empty;
+    var now = DateTime.UtcNow.Date;
+
+    return orders.Where(order =>
+    {
+      var matchesSearch = string.IsNullOrWhiteSpace(normalizedSearch)
+        || order.OrderId.ToLowerInvariant().Contains(normalizedSearch)
+        || order.CustomerName.ToLowerInvariant().Contains(normalizedSearch);
+
+      var matchesStatus = status == "All" || order.Status.ToString() == status;
+
+      var orderDate = DateTime.ParseExact(order.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+      var matchesDate = dateRange switch
+      {
+        "Last 7 Days" => orderDate >= now.AddDays(-7),
+        "Last 30 Days" => orderDate >= now.AddDays(-30),
+        "This Year" => orderDate >= new DateTime(now.Year, 1, 1),
+        _ => true
+      };
+
+      return matchesSearch && matchesStatus && matchesDate;
+    }).ToList();
+  }
+
+  public (List<Product> Items, int Total) FilterProducts(string? searchTerm, string category, string statusTab, int page, int pageSize)
+  {
+    var filtered = FilterProducts(searchTerm, category, statusTab);
+    var total = filtered.Count;
+    var startIndex = (page - 1) * pageSize;
+    var items = filtered.Skip(startIndex).Take(pageSize).ToList();
+    return (items, total);
+  }
+
+  public List<Product> FilterProducts(string? searchTerm, string category, string statusTab)
+  {
+    var normalizedSearch = searchTerm?.Trim().ToLowerInvariant() ?? string.Empty;
+    return GetProducts().Where(product =>
+    {
+      var matchesSearch = string.IsNullOrWhiteSpace(normalizedSearch)
+        || string.Join(' ', new[] { product.Name, product.Sku }.Concat(product.Tags)).ToLowerInvariant().Contains(normalizedSearch);
+      var matchesCategory = category == "All Categories" || product.Category == category;
+      var matchesStatus = statusTab switch
+      {
+        "Active" => product.Status == "Active",
+        "Drafts" => product.Status == "Draft",
+        "Archived" => product.Status == "Archived",
+        _ => true
+      };
+      return matchesSearch && matchesCategory && matchesStatus;
+    }).ToList();
+  }
+
+  public DashboardStats GetDashboardStats()
+  {
+    var orders = GetOrders();
+    var totalRevenue = orders.Sum(order => order.Total);
+    var newOrders = orders.Count(order => DateTime.ParseExact(order.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture) >= DateTime.UtcNow.AddDays(-30));
+    var activeCustomers = orders.Select(order => order.CustomerName).Distinct().Count();
+    var lowStock = GetProducts().Count(product => product.Stock <= 5);
+
+    return new DashboardStats(
+      TotalRevenue: totalRevenue,
+      RevenueTrend: "+12.4%",
+      NewOrders: newOrders.ToString(CultureInfo.InvariantCulture),
+      OrdersTrend: "+6.2%",
+      ActiveCustomers: activeCustomers.ToString(CultureInfo.InvariantCulture),
+      CustomersTrend: "+3.1%",
+      LowStock: lowStock.ToString(CultureInfo.InvariantCulture),
+      LowStockTrend: "-1.4%"
+    );
+  }
+
+  public List<OrderItem> GetRecentOrders()
+  {
+    return GetOrders()
+      .OrderByDescending(order => order.Date)
+      .Take(5)
+      .Select(order => new OrderItem(
+        Id: order.OrderId,
+        CustomerName: order.CustomerName,
+        Date: order.Date,
+        Amount: order.Total,
+        Status: order.Status switch
+        {
+          OrderStatus.Processing => "Pending",
+          OrderStatus.Shipped => "Shipped",
+          _ => "Completed"
+        }
+      ))
+      .ToList();
+  }
+
+  public List<PopularProduct> GetPopularProducts()
+  {
+    return GetProducts()
+      .Where(product => product.Featured || product.NewArrival)
+      .Take(4)
+      .Select((product, index) => new PopularProduct(
+        Id: product.Id.ToString(CultureInfo.InvariantCulture),
+        Name: product.Name,
+        SoldCount: $"{120 + index * 15} sold",
+        Price: product.Price,
+        ImageUrl: product.ImageUrl ?? product.Images.MainImage.Url
+      ))
+      .ToList();
+  }
+
+  public static List<CategoryNode> BuildCategoryTree(List<Category> categories)
+  {
+    var grouped = new Dictionary<string?, List<Category>>();
+    foreach (var category in categories)
+    {
+      var key = category.ParentId;
+      if (!grouped.TryGetValue(key, out var list))
+      {
+        list = [];
+        grouped[key] = list;
+      }
+      list.Add(category);
+    }
+
+    List<CategoryNode> BuildNodes(string? parentId)
+    {
+      var items = grouped.TryGetValue(parentId, out var list) ? list : [];
+      return items
+        .OrderBy(item => item.SortOrder)
+        .Select(item => new CategoryNode(item, BuildNodes(item.Id)))
+        .ToList();
+    }
+
+    return BuildNodes(null);
+  }
+
+  private static Category CloneCategory(Category category)
+  {
+    return new Category
+    {
+      Id = category.Id,
+      Name = category.Name,
+      Slug = category.Slug,
+      ParentId = category.ParentId,
+      Description = category.Description,
+      ImageUrl = category.ImageUrl,
+      IsVisible = category.IsVisible,
+      ProductCount = category.ProductCount,
+      SortOrder = category.SortOrder
+    };
+  }
+
+  private static Product CloneProduct(Product product)
+  {
+    return new Product
+    {
+      Id = product.Id,
+      Name = product.Name,
+      Description = product.Description,
+      Category = product.Category,
+      SubCategory = product.SubCategory,
+      Tags = [.. product.Tags],
+      Badges = [.. product.Badges],
+      Price = product.Price,
+      SalePrice = product.SalePrice,
+      Gender = product.Gender,
+      Ratings = product.Ratings,
+      Images = product.Images,
+      Variants = product.Variants,
+      Meta = product.Meta,
+      RelatedProducts = [.. product.RelatedProducts],
+      Featured = product.Featured,
+      NewArrival = product.NewArrival,
+      Sku = product.Sku,
+      Stock = product.Stock,
+      Status = product.Status,
+      ImageUrl = product.ImageUrl,
+      StatusActive = product.StatusActive,
+      MediaUrls = [.. product.MediaUrls],
+      BasePrice = product.BasePrice,
+      InventoryVariants = [.. product.InventoryVariants]
+    };
+  }
+
+  private static Order CloneOrder(Order order)
+  {
+    return new Order
+    {
+      Id = order.Id,
+      OrderId = order.OrderId,
+      CustomerName = order.CustomerName,
+      CustomerInitials = order.CustomerInitials,
+      Date = order.Date,
+      ItemsCount = order.ItemsCount,
+      Total = order.Total,
+      Status = order.Status
+    };
+  }
+
+  private static AdminSettings CloneSettings(AdminSettings settings)
+  {
+    return new AdminSettings
+    {
+      StoreName = settings.StoreName,
+      SupportEmail = settings.SupportEmail,
+      Description = settings.Description,
+      StripeEnabled = settings.StripeEnabled,
+      PaypalEnabled = settings.PaypalEnabled,
+      StripePublishableKey = settings.StripePublishableKey,
+      ShippingZones = settings.ShippingZones.Select(CloneShippingZone).ToList()
+    };
+  }
+
+  private static ShippingZone CloneShippingZone(ShippingZone zone)
+  {
+    return new ShippingZone
+    {
+      Id = zone.Id,
+      Name = zone.Name,
+      Region = zone.Region,
+      Rates = [.. zone.Rates]
+    };
+  }
+
+  private static List<Category> SeedCategories()
+  {
+    return
+    [
+      new Category
+      {
+        Id = "cat-1",
+        Name = "Abayas",
+        Slug = "abayas",
+        ParentId = null,
+        Description = "Elegant modest abayas for everyday wear.",
+        ImageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuC9pYfBZcPDiI5ZJ7g9bIgbGImV-Z1wsYdU5hcfBfdEHJUIA0yeF5Q5qQI6mfKh7VdmufIaDi7X23_5EYjDRCi0UCrWC6gbCQ7gNkeI-Epa7SZrHIcx5yyx0wSlEAgaO7zrAXPlRqThlZlECnyTcS74iDBNslyVfA0C63QZsyzh2Gyw1fTMDReYDksXD73-ImXaOfdBYvAJwiVKAssIZxr5QZoMtfn3CdZGQZFpc3Zgb4zmlHn7e7a7a3PecaGoA6ntPBh_8x0wKKA",
+        IsVisible = true,
+        ProductCount = 154,
+        SortOrder = 1
+      },
+      new Category
+      {
+        Id = "cat-1-1",
+        Name = "Open Front Abayas",
+        Slug = "abayas/open-front-abayas",
+        ParentId = "cat-1",
+        Description = "Lightweight open front styles for layering.",
+        ImageUrl = string.Empty,
+        IsVisible = true,
+        ProductCount = 42,
+        SortOrder = 1
+      },
+      new Category
+      {
+        Id = "cat-1-2",
+        Name = "Butterfly Abayas",
+        Slug = "abayas/butterfly-abayas",
+        ParentId = "cat-1",
+        Description = "Wide sleeve butterfly silhouettes.",
+        ImageUrl = string.Empty,
+        IsVisible = true,
+        ProductCount = 28,
+        SortOrder = 2
+      },
+      new Category
+      {
+        Id = "cat-2",
+        Name = "Hijabs",
+        Slug = "hijabs",
+        ParentId = null,
+        Description = "Daily essentials for every occasion.",
+        ImageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCyh4AvQGNIapihCyaGbGouOjjAgGzopp36rET2CWil9wRmjTTBwhVcPgepNyOPBMi_FjTENRkYr0oi4MRzgMtkQN0TET_r16n9n-FMdHg-BWMffB5CsduKF_f-1_y46Hr5nwmdlbZLLCMZU5tEdUV-Qgc7St7Cpp7f6PmXuWs7EkNvvznp6_M40XENtAP2AHuRw8QU3xBLLn0cQkfm7Z1lkhZNDewkW0Y4aB1joQ8hvqoAZfSOSDY9jja-PRqudFCfybtMw5X46hY",
+        IsVisible = true,
+        ProductCount = 120,
+        SortOrder = 2
+      },
+      new Category
+      {
+        Id = "cat-2-1",
+        Name = "Silk Hijabs",
+        Slug = "hijabs/silk-hijabs",
+        ParentId = "cat-2",
+        Description = "Luxurious silk blends in signature shades.",
+        ImageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuDsixXrbLTEQulEO2JHUTqx9QjIIBwROpUY33CR-iaWciLR270YgLMYNlZOb3-dfXPtFupK8pZ2ra_Wg_rXgQX2z4gZduwlmHjPi4UgUYfV_iVH0JJcvhkN8-U5iU1bwEM-gpMj87g87EoisJAsZp-9hpsqYB5G83LHQcC82I_kwViyGE3EgB0tflDNfPQpA2rQCA4Oej9YDRwkPKubcuuYlq1N6xFKCaHcR3nl7CC6bF3bKQfBWrWTsxA4NfHzyr8DnWLoN5lbpEM",
+        IsVisible = true,
+        ProductCount = 45,
+        SortOrder = 1
+      },
+      new Category
+      {
+        Id = "cat-2-2",
+        Name = "Chiffon Hijabs",
+        Slug = "hijabs/chiffon-hijabs",
+        ParentId = "cat-2",
+        Description = "Lightweight chiffon styles for everyday looks.",
+        ImageUrl = string.Empty,
+        IsVisible = true,
+        ProductCount = 32,
+        SortOrder = 2
+      },
+      new Category
+      {
+        Id = "cat-3",
+        Name = "Prayer Sets",
+        Slug = "prayer-sets",
+        ParentId = null,
+        Description = "Comfortable sets for prayer time.",
+        ImageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuBkKNrLH2kccVXQw-LGx9aFn8RTb6MpnSOqiR3KFGem15Vi2MhsXR0vl22JwuYxPh3_nA3P1so4NkrKOT68KL7vcTFzsIB95gtxjLup28ZXWVz1D7WqcAaoOWbDbNE9PwxHcac4XoVAvZkWOjGZ_eXlVHIpYfaC4Cq_iodTJazXx13JueHNZWg5yj-WRvIjg16MEFSJl_dOtFN18b1t2S-WRS5bI_lq9-8sz7J0OiQyr88KNAWC1O3AtxzRDhFA00I3tMJEfCbsX5U",
+        IsVisible = true,
+        ProductCount = 8,
+        SortOrder = 3
+      },
+      new Category
+      {
+        Id = "cat-3-1",
+        Name = "Travel Prayer Sets",
+        Slug = "prayer-sets/travel-sets",
+        ParentId = "cat-3",
+        Description = "Compact sets for travel and on-the-go.",
+        ImageUrl = string.Empty,
+        IsVisible = true,
+        ProductCount = 5,
+        SortOrder = 1
+      }
+    ];
+  }
+
+  private static List<Product> SeedProducts()
+  {
+    var ratings = BuildDefaultRatings();
+
+    return
+    [
+      BuildProduct(
+        id: 1,
+        name: "Luxe Embroidered Abaya",
+        description: "Flowing chiffon abaya with embroidered cuffs.",
+        category: "Women",
+        subCategory: "Occasion Wear",
+        price: 199.00m,
+        salePrice: 149.00m,
+        gender: "women",
+        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80",
+        featured: true,
+        newArrival: true,
+        ratings: ratings
+      ),
+      BuildProduct(
+        id: 2,
+        name: "Classic Linen Abaya",
+        description: "Breathable linen blend for daily wear.",
+        category: "Women",
+        subCategory: "Everyday",
+        price: 129.00m,
+        salePrice: null,
+        gender: "women",
+        imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+        featured: false,
+        newArrival: true,
+        ratings: ratings
+      ),
+      BuildProduct(
+        id: 3,
+        name: "Essential Jersey Hijab",
+        description: "Soft stretch jersey hijab in neutral tones.",
+        category: "Accessories",
+        subCategory: "Hijabs",
+        price: 29.00m,
+        salePrice: null,
+        gender: "accessories",
+        imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+        featured: true,
+        newArrival: false,
+        ratings: ratings
+      ),
+      BuildProduct(
+        id: 4,
+        name: "Structured Prayer Set",
+        description: "Two-piece prayer set with matching pouch.",
+        category: "Women",
+        subCategory: "Prayer Sets",
+        price: 89.00m,
+        salePrice: null,
+        gender: "women",
+        imageUrl: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=600&q=80",
+        featured: false,
+        newArrival: false,
+        ratings: ratings
+      )
+    ];
+  }
+
+  private static Product BuildProduct(
+    int id,
+    string name,
+    string description,
+    string category,
+    string subCategory,
+    decimal price,
+    decimal? salePrice,
+    string gender,
+    string imageUrl,
+    bool featured,
+    bool newArrival,
+    ProductRatings ratings)
+  {
+    var basePrice = price;
+    var currentPrice = salePrice ?? price;
+    var images = new ProductImages(
+      new ProductImage("image", "Main", imageUrl, $"{name} image"),
+      new List<ProductImage>
+      {
+        new("image", "Gallery 1", imageUrl, $"{name} gallery 1")
+      }
+    );
+    var variants = new ProductVariants(
+      new List<VariantColor>
+      {
+        new("Midnight", "#111827", true)
+      },
+      new List<VariantSize>
+      {
+        new("One Size", 12, true)
+      }
+    );
+    var inventoryVariants = new List<ProductVariantEdit>
+    {
+      new("One Size / Midnight", currentPrice, $"SKU-{id:D5}-1", 12, imageUrl)
+    };
+    var stock = inventoryVariants.Sum(item => item.Inventory);
+
+    return new Product
+    {
+      Id = id,
+      Name = name,
+      Description = description,
+      Category = category,
+      SubCategory = subCategory,
+      Tags = ["modest", "exclusive"],
+      Badges = featured ? ["Featured"] : [],
+      Price = currentPrice,
+      SalePrice = salePrice,
+      Gender = gender,
+      Ratings = ratings,
+      Images = images,
+      Variants = variants,
+      Meta = new ProductMeta("Dry clean only", "Ships in 2-3 business days"),
+      RelatedProducts = [],
+      Featured = featured,
+      NewArrival = newArrival,
+      Sku = $"SKU-{id:D5}",
+      Stock = stock,
+      Status = stock == 0 ? "Out of Stock" : "Active",
+      ImageUrl = imageUrl,
+      StatusActive = true,
+      MediaUrls = [imageUrl],
+      BasePrice = basePrice,
+      InventoryVariants = inventoryVariants
+    };
+  }
+
+  private static List<Order> SeedOrders()
+  {
+    string DaysAgo(int days) => DateTime.UtcNow.Date.AddDays(-days).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    return
+    [
+      new Order { Id = 1, OrderId = "#ORD-7782", CustomerName = "Ayesha Khan", CustomerInitials = "AK", Date = DaysAgo(1), ItemsCount = 3, Total = 145.00m, Status = OrderStatus.Processing },
+      new Order { Id = 2, OrderId = "#ORD-7781", CustomerName = "Fatima Ahmed", CustomerInitials = "FA", Date = DaysAgo(2), ItemsCount = 1, Total = 89.50m, Status = OrderStatus.Shipped },
+      new Order { Id = 3, OrderId = "#ORD-7780", CustomerName = "Zainab Malik", CustomerInitials = "ZM", Date = DaysAgo(2), ItemsCount = 5, Total = 210.00m, Status = OrderStatus.Delivered },
+      new Order { Id = 4, OrderId = "#ORD-7779", CustomerName = "Omar Farooq", CustomerInitials = "OF", Date = DaysAgo(3), ItemsCount = 1, Total = 55.00m, Status = OrderStatus.Cancelled },
+      new Order { Id = 5, OrderId = "#ORD-7778", CustomerName = "Noura Bashir", CustomerInitials = "NB", Date = DaysAgo(4), ItemsCount = 2, Total = 120.00m, Status = OrderStatus.Processing },
+      new Order { Id = 6, OrderId = "#ORD-7777", CustomerName = "Maryam Yusuf", CustomerInitials = "MY", Date = DaysAgo(5), ItemsCount = 4, Total = 275.00m, Status = OrderStatus.Delivered },
+      new Order { Id = 7, OrderId = "#ORD-7776", CustomerName = "Hassan Ali", CustomerInitials = "HA", Date = DaysAgo(6), ItemsCount = 2, Total = 98.00m, Status = OrderStatus.Processing },
+      new Order { Id = 8, OrderId = "#ORD-7775", CustomerName = "Sara Noor", CustomerInitials = "SN", Date = DaysAgo(7), ItemsCount = 1, Total = 45.00m, Status = OrderStatus.Refund },
+      new Order { Id = 9, OrderId = "#ORD-7774", CustomerName = "Bilal Aziz", CustomerInitials = "BA", Date = DaysAgo(8), ItemsCount = 6, Total = 320.00m, Status = OrderStatus.Shipped },
+      new Order { Id = 10, OrderId = "#ORD-7773", CustomerName = "Iman Rashid", CustomerInitials = "IR", Date = DaysAgo(9), ItemsCount = 2, Total = 110.00m, Status = OrderStatus.Delivered },
+      new Order { Id = 11, OrderId = "#ORD-7772", CustomerName = "Khadija Noor", CustomerInitials = "KN", Date = DaysAgo(10), ItemsCount = 3, Total = 150.00m, Status = OrderStatus.Processing },
+      new Order { Id = 12, OrderId = "#ORD-7771", CustomerName = "Usman Tariq", CustomerInitials = "UT", Date = DaysAgo(11), ItemsCount = 1, Total = 75.00m, Status = OrderStatus.Cancelled },
+      new Order { Id = 13, OrderId = "#ORD-7770", CustomerName = "Rania Saleh", CustomerInitials = "RS", Date = DaysAgo(12), ItemsCount = 4, Total = 210.00m, Status = OrderStatus.Shipped },
+      new Order { Id = 14, OrderId = "#ORD-7769", CustomerName = "Yasmin Rahim", CustomerInitials = "YR", Date = DaysAgo(13), ItemsCount = 2, Total = 130.00m, Status = OrderStatus.Processing },
+      new Order { Id = 15, OrderId = "#ORD-7768", CustomerName = "Salim Hadi", CustomerInitials = "SH", Date = DaysAgo(14), ItemsCount = 1, Total = 60.00m, Status = OrderStatus.Refund },
+      new Order { Id = 16, OrderId = "#ORD-7767", CustomerName = "Lina Qureshi", CustomerInitials = "LQ", Date = DaysAgo(15), ItemsCount = 3, Total = 190.00m, Status = OrderStatus.Delivered },
+      new Order { Id = 17, OrderId = "#ORD-7766", CustomerName = "Faris Zahid", CustomerInitials = "FZ", Date = DaysAgo(16), ItemsCount = 2, Total = 95.00m, Status = OrderStatus.Processing },
+      new Order { Id = 18, OrderId = "#ORD-7765", CustomerName = "Hiba Latif", CustomerInitials = "HL", Date = DaysAgo(17), ItemsCount = 5, Total = 260.00m, Status = OrderStatus.Shipped },
+      new Order { Id = 19, OrderId = "#ORD-7764", CustomerName = "Ola Kareem", CustomerInitials = "OK", Date = DaysAgo(18), ItemsCount = 3, Total = 140.00m, Status = OrderStatus.Delivered },
+      new Order { Id = 20, OrderId = "#ORD-7763", CustomerName = "Samiya Ali", CustomerInitials = "SA", Date = DaysAgo(19), ItemsCount = 2, Total = 105.00m, Status = OrderStatus.Processing },
+      new Order { Id = 21, OrderId = "#ORD-7762", CustomerName = "Musa Ibrahim", CustomerInitials = "MI", Date = DaysAgo(20), ItemsCount = 1, Total = 70.00m, Status = OrderStatus.Cancelled }
+    ];
+  }
+
+  private static AdminSettings SeedSettings()
+  {
+    return new AdminSettings
+    {
+      StoreName = "Arza",
+      SupportEmail = "support@arza.com",
+      Description = "A modern modest clothing brand dedicated to quality and style.",
+      StripeEnabled = true,
+      PaypalEnabled = false,
+      StripePublishableKey = "pk_live_51M...xYz2",
+      ShippingZones =
+      [
+        new ShippingZone
+        {
+          Id = 1,
+          Name = "Domestic",
+          Region = "United States",
+          Rates = ["Free Shipping (>$100)", "Standard: $5.00"]
+        },
+        new ShippingZone
+        {
+          Id = 2,
+          Name = "International",
+          Region = "Rest of World",
+          Rates = ["Flat Rate: $25.00"]
+        }
+      ]
+    };
+  }
+
+  private static ProductRatings BuildDefaultRatings()
+  {
+    return new ProductRatings(
+      4.6m,
+      128,
+      [
+        new RatingBreakdown(5, 70),
+        new RatingBreakdown(4, 20),
+        new RatingBreakdown(3, 7),
+        new RatingBreakdown(2, 2),
+        new RatingBreakdown(1, 1)
+      ]
+    );
+  }
+
+  private static List<string> BuildMediaUrls(ProductImages media)
+  {
+    var urls = new List<string> { media.MainImage.Url };
+    urls.AddRange(media.Thumbnails.Select(item => item.Url));
+    return urls.Where(url => !string.IsNullOrWhiteSpace(url)).Distinct().ToList();
+  }
+
+  private static List<ProductVariantEdit> BuildInventoryVariants(ProductCreatePayload payload, int productId, string? imageUrl)
+  {
+    var baseSku = FormatSku(productId);
+    var price = payload.SalePrice ?? payload.Price;
+    var primaryColor = payload.Variants.Colors.FirstOrDefault()?.Name ?? "Default";
+    var sizes = payload.Variants.Sizes.Count > 0
+      ? payload.Variants.Sizes
+      : new List<VariantSize> { new("One Size", 0, true) };
+
+    return sizes.Select((size, index) => new ProductVariantEdit(
+      $"{size.Label} / {primaryColor}",
+      price,
+      $"{baseSku}-{index + 1}",
+      size.Stock,
+      imageUrl
+    )).ToList();
+  }
+
+  private static ProductImages BuildImagesFromMedia(List<string> mediaUrls, string name, ProductImages? existing)
+  {
+    var media = mediaUrls.Count > 0 ? mediaUrls : new List<string> { existing?.MainImage.Url ?? string.Empty };
+    var valid = media.Where(url => !string.IsNullOrWhiteSpace(url)).ToList();
+    if (valid.Count == 0)
+    {
+      valid.Add(string.Empty);
+    }
+
+    var mainUrl = valid[0];
+    var thumbnails = valid.Count > 1 ? valid.Skip(1).ToList() : new List<string> { mainUrl };
+
+    var mainImage = new ProductImage(
+      existing?.MainImage.Type ?? "image",
+      existing?.MainImage.Label ?? "Main",
+      mainUrl,
+      existing?.MainImage.Alt ?? $"{name} image"
+    );
+
+    var thumbnailImages = thumbnails.Select((url, index) => new ProductImage(
+      "image",
+      existing?.Thumbnails.ElementAtOrDefault(index)?.Label ?? $"Gallery {index + 1}",
+      url,
+      existing?.Thumbnails.ElementAtOrDefault(index)?.Alt ?? $"{name} gallery {index + 1}"
+    )).ToList();
+
+    return new ProductImages(mainImage, thumbnailImages);
+  }
+
+  private static string ResolveStatus(bool statusActive, int stock)
+  {
+    if (!statusActive)
+    {
+      return "Draft";
+    }
+
+    return stock == 0 ? "Out of Stock" : "Active";
+  }
+
+  private static string FormatSku(int productId)
+  {
+    return $"SKU-{productId:D5}";
+  }
+}

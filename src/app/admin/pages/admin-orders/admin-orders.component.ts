@@ -173,8 +173,9 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     const nextStatus = this.getNextStatus(order.status);
     if (nextStatus) {
-      this.ordersService.updateStatus(order.id, nextStatus);
-      this.loadOrders(false);
+      this.ordersService.updateStatus(order.id, nextStatus).subscribe(() => {
+        this.loadOrders(false);
+      });
     }
     this.actionMenuOpenId = null;
   }
@@ -183,21 +184,23 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     const shouldCancel = window.confirm('Cancel this order?');
     if (shouldCancel) {
-      this.ordersService.updateStatus(order.id, 'Cancelled');
-      this.loadOrders(false);
+      this.ordersService.updateStatus(order.id, 'Cancelled').subscribe(() => {
+        this.loadOrders(false);
+      });
     }
     this.actionMenuOpenId = null;
   }
 
   exportOrders(): void {
-    const csv = this.ordersService.exportOrders(this.buildParams());
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'orders-export.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    this.ordersService.exportOrders(this.buildParams()).subscribe((csv) => {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'orders-export.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   printOrders(): void {
