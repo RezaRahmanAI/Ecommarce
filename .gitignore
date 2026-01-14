@@ -29,3 +29,5 @@ yarn-error.log*
 /backend/Ecommarce.Api/.vs
 /backend/Ecommarce.Api/bin/Debug/net8.0
 /backend/Ecommarce.Api/obj
+/frontend/node_modules
+/frontend/dist/ecommarce
