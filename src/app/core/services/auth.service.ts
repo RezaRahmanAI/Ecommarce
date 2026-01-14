@@ -1,195 +1,150 @@
-import { Injectable } from '@angular/core';
-import { defer, Observable, of, throwError } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, map, throwError } from 'rxjs';
+
+import { ApiHttpClient } from '../http/http-client';
+import { AuthSessionService } from './auth-session.service';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  role?: string;
 }
 
 export interface AuthSession {
   token: string;
+  refreshToken?: string;
+  expiresAt?: string;
   user: AuthUser;
 }
 
-interface DemoUser extends AuthUser {
-  username: string;
-  password: string;
+interface AuthResponseDto {
+  accessToken?: string;
+  token?: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  user: {
+    id: string;
+    name?: string;
+    fullName?: string;
+    email: string;
+    role?: string;
+  };
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly storageKey = 'auth_session';
-  private readonly usersStorageKey = 'demo_users';
-
-  private demoUsers: DemoUser[] = [];
-
-  constructor() {
-    this.demoUsers = this.loadUsers();
-  }
+  private readonly api = inject(ApiHttpClient);
+  private readonly sessionStorage = inject(AuthSessionService);
 
   login(emailOrUsername: string, password: string): Observable<AuthSession> {
-    return defer(() => {
-      const matchedUser = this.demoUsers.find(
-        (user) =>
-          (user.email.toLowerCase() === emailOrUsername.toLowerCase() ||
-            user.username.toLowerCase() === emailOrUsername.toLowerCase()) &&
-          user.password === password,
+    return this.api
+      .post<AuthResponseDto>('/auth/login', {
+        emailOrUsername: emailOrUsername.trim(),
+        password,
+      })
+      .pipe(
+        map((response) => this.normalizeSession(response)),
+        catchError((error) => this.handleAuthError(error, 'Invalid credentials')),
       );
-
-      if (!matchedUser) {
-        return throwError(() => new Error('Invalid credentials'));
-      }
-
-      const session: AuthSession = {
-        token: `mock-token-${matchedUser.id}`,
-        user: {
-          id: matchedUser.id,
-          name: matchedUser.name,
-          email: matchedUser.email,
-        },
-      };
-
-      return of(session);
-    });
   }
 
   register(fullName: string, email: string, password: string): Observable<AuthSession> {
-    return defer(() => {
-      const normalizedEmail = email.trim().toLowerCase();
-      const existingUser = this.demoUsers.find(
-        (user) => user.email.toLowerCase() === normalizedEmail,
-      );
-
-      if (existingUser) {
-        return throwError(() => new Error('Email already in use'));
-      }
-
-      const baseUsername =
-        normalizedEmail.split('@')[0] ||
-        fullName
-          .trim()
-          .toLowerCase()
-          .replace(/\\s+/g, '');
-      let username = baseUsername || `user${this.demoUsers.length + 1}`;
-      let suffix = 1;
-
-      while (this.demoUsers.some((user) => user.username.toLowerCase() === username.toLowerCase())) {
-        username = `${baseUsername}${suffix}`;
-        suffix += 1;
-      }
-
-      const newUser: DemoUser = {
-        id: `user-${this.demoUsers.length + 1}`,
-        name: fullName.trim(),
-        email: normalizedEmail,
-        username,
+    return this.api
+      .post<AuthResponseDto>('/auth/register', {
+        fullName: fullName.trim(),
+        email: email.trim(),
         password,
-      };
-
-      this.demoUsers.push(newUser);
-      this.storeUsers();
-
-      const session: AuthSession = {
-        token: `mock-token-${newUser.id}`,
-        user: {
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-        },
-      };
-
-      return of(session);
-    });
+      })
+      .pipe(
+        map((response) => this.normalizeSession(response)),
+        catchError((error) => this.handleAuthError(error, 'Registration failed')),
+      );
   }
 
   storeSession(session: AuthSession, rememberMe: boolean): void {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem(this.storageKey, JSON.stringify(session));
+    this.sessionStorage.storeSession(session, rememberMe);
   }
 
   updateSession(session: AuthSession): void {
-    if (localStorage.getItem(this.storageKey)) {
-      localStorage.setItem(this.storageKey, JSON.stringify(session));
-      return;
-    }
-    if (sessionStorage.getItem(this.storageKey)) {
-      sessionStorage.setItem(this.storageKey, JSON.stringify(session));
-      return;
-    }
-    localStorage.setItem(this.storageKey, JSON.stringify(session));
+    this.sessionStorage.updateSession(session);
   }
 
   clearSession(): void {
-    localStorage.removeItem(this.storageKey);
-    sessionStorage.removeItem(this.storageKey);
+    this.sessionStorage.clearSession();
   }
 
   getSession(): AuthSession | null {
-    const stored = localStorage.getItem(this.storageKey) ?? sessionStorage.getItem(this.storageKey);
-    if (!stored) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(stored) as AuthSession;
-    } catch {
-      return null;
-    }
+    return this.sessionStorage.getSession();
   }
 
   isAuthenticated(): boolean {
-    return this.getSession() !== null;
+    return this.sessionStorage.isAuthenticated();
   }
 
   isLoggedIn(): boolean {
-    return this.isAuthenticated() || localStorage.getItem('is_logged_in') === 'true';
+    return this.isAuthenticated();
   }
 
   getRole(): string {
-    return localStorage.getItem('user_role') ?? 'user';
+    return this.getSession()?.user.role ?? 'user';
   }
 
   logout(): void {
     this.clearSession();
-    localStorage.removeItem('is_logged_in');
-    localStorage.removeItem('user_role');
   }
 
-  private loadUsers(): DemoUser[] {
-    const stored = localStorage.getItem(this.usersStorageKey);
-    if (stored) {
-      try {
-        return JSON.parse(stored) as DemoUser[];
-      } catch {
-        // fall through to defaults
+  private normalizeSession(response: AuthResponseDto): AuthSession {
+    const token = response.accessToken ?? response.token;
+    if (!token) {
+      throw new Error('Authentication token not provided');
+    }
+
+    const name = response.user.name ?? response.user.fullName ?? response.user.email;
+
+    return {
+      token,
+      refreshToken: response.refreshToken,
+      expiresAt: response.expiresAt,
+      user: {
+        id: response.user.id,
+        name,
+        email: response.user.email,
+        role: response.user.role,
+      },
+    };
+  }
+
+  private handleAuthError(error: unknown, fallbackMessage: string): Observable<never> {
+    if (error instanceof HttpErrorResponse) {
+      const message = this.getErrorMessage(error) ?? fallbackMessage;
+      return throwError(() => new Error(message));
+    }
+
+    return throwError(() => new Error(fallbackMessage));
+  }
+
+  private getErrorMessage(error: HttpErrorResponse): string | null {
+    const apiError = error.error;
+
+    if (typeof apiError === 'string') {
+      return apiError;
+    }
+
+    if (apiError?.message) {
+      return apiError.message as string;
+    }
+
+    if (apiError?.errors && typeof apiError.errors === 'object') {
+      const entries = Object.values(apiError.errors as Record<string, string[]>).flat();
+      if (entries.length) {
+        return entries.join(' ');
       }
     }
 
-    const defaults: DemoUser[] = [
-      {
-        id: 'user-1',
-        name: 'Amina Noor',
-        email: 'amina@example.com',
-        username: 'amina',
-        password: 'password123',
-      },
-      {
-        id: 'user-2',
-        name: 'Layla Farah',
-        email: 'layla@example.com',
-        username: 'layla',
-        password: 'style2024',
-      },
-    ];
-
-    localStorage.setItem(this.usersStorageKey, JSON.stringify(defaults));
-    return defaults;
-  }
-
-  private storeUsers(): void {
-    localStorage.setItem(this.usersStorageKey, JSON.stringify(this.demoUsers));
+    return null;
   }
 }
