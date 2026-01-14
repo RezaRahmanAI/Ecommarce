@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, map, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 
 import { AuthService, AuthSession } from './auth.service';
 import { UserService } from './user.service';
@@ -44,7 +44,7 @@ export class AuthStateService {
   }
 
   logout(): void {
-    this.authService.clearSession();
+    this.authService.logout();
     this.sessionSubject.next(null);
   }
 
