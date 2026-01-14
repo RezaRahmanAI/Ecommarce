@@ -1,10 +1,14 @@
 using System.Text.Json.Serialization;
+using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
 using Ecommarce.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<AdminDataStore>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
   options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
