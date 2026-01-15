@@ -18,8 +18,8 @@
 <div class="w-full max-w-[480px]">
 <!-- Page Heading -->
 <div class="mb-10">
-<h1 class="text-primary dark:text-white tracking-tight text-[32px] font-bold leading-tight mb-3">Welcome Back</h1>
-<p class="text-[#4d8799] dark:text-gray-400 text-sm font-normal leading-normal">Sign in to access your orders and wishlist</p>
+<h1 class="text-primary dark:text-white tracking-tight text-[32px] font-bold leading-tight mb-3">Admin Access</h1>
+<p class="text-[#4d8799] dark:text-gray-400 text-sm font-normal leading-normal">Sign in to manage the store dashboard.</p>
 </div>
 <!-- Form -->
 <form class="flex flex-col gap-5" [formGroup]="loginForm" (ngSubmit)="submit()">
@@ -48,7 +48,6 @@
 <input class="h-5 w-5 rounded border-[#d0e2e7] dark:border-gray-600 bg-transparent text-primary checked:bg-primary focus:ring-offset-0 focus:ring-accent" type="checkbox" formControlName="rememberMe"/>
 <span class="text-[#0e181b] dark:text-gray-300 text-base font-normal">Remember me</span>
 </label>
-<a class="text-base font-medium text-primary hover:underline dark:text-accent" routerLink="/forgot-password">Forgot Password?</a>
 </div>
 <!-- Submit Button -->
 <button class="mt-4 w-full h-14 bg-primary hover:bg-primary/90 text-white text-base font-bold rounded-lg shadow-lg shadow-primary/20 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2" type="submit" [disabled]="loginForm.invalid || isLoading">
@@ -56,22 +55,6 @@
                     </button>
 <span class="text-sm text-red-500 text-center" *ngIf="errorMessage">{{ errorMessage }}</span>
 </form>
-<!-- Divider -->
-<div class="relative py-8">
-<div class="absolute inset-0 flex items-center">
-<div class="w-full border-t border-[#d0e2e7] dark:border-gray-700"></div>
-</div>
-<div class="relative flex justify-center">
-<span class="bg-background-light dark:bg-background-dark px-4 text-sm text-[#4d8799]">Or</span>
-</div>
-</div>
-<!-- Registration CTA -->
-<div class="text-center">
-<p class="text-[#0e181b] dark:text-gray-300 text-base mb-4">New to our store?</p>
-<a class="flex w-full h-14 items-center justify-center rounded-lg border-2 border-[#d0e2e7] dark:border-gray-700 bg-transparent hover:bg-[#e7f0f3] dark:hover:bg-gray-800 text-primary dark:text-white text-base font-bold transition-colors" routerLink="/register">
-                        Create an Account
-                    </a>
-</div>
 </div>
 </div>
 </main>

@@ -17,12 +17,22 @@ export class NavbarComponent {
   private readonly authState = inject(AuthStateService);
   private readonly cartService = inject(CartService);
 
+  isMenuOpen = false;
+
   readonly vm$ = combineLatest([this.authState.user$, this.cartService.summary$]).pipe(
     map(([user, summary]) => ({
       user,
       cartCount: summary.itemsCount,
     })),
   );
+
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen = false;
+  }
 
   logout(): void {
     this.authState.logout();

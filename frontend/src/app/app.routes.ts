@@ -15,7 +15,6 @@ import { BlogDetailsComponent } from './features/blog/pages/blog-details/blog-de
 import { BlogListComponent } from './features/blog/pages/blog-list/blog-list.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
 import { OfferDetailsPageComponent } from './features/offers/pages/offer-details-page/offer-details-page.component';
-import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
 import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
 import { DashboardOverviewComponent } from './admin/pages/dashboard-overview/dashboard-overview.component';
@@ -60,10 +59,7 @@ export const appRoutes: Routes = [
     data: { title: 'Track Order', description: 'Order tracking experience coming soon.' },
   },
   { path: 'login', component: LoginPageComponent },
-  {
-    path: 'register',
-    component: RegisterPageComponent,
-  },
+  { path: 'register', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'forgot-password',
     component: PlaceholderComponent,
@@ -90,7 +86,7 @@ export const appRoutes: Routes = [
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    //canActivate: [AdminGuard],
+    canActivate: [AdminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {

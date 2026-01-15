@@ -1,6 +1,7 @@
 using Ecommarce.Api.Dtos;
 using Ecommarce.Api.Models;
 using Ecommarce.Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,38 +26,9 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
+    public ActionResult<AuthResponse> Register(RegisterRequest request)
     {
-        var (firstName, lastName) = ResolveName(request);
-        if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
-        {
-            return ValidationProblem(new ValidationProblemDetails(new Dictionary<string, string[]>
-            {
-                { nameof(RegisterRequest.FullName), new[] { "Name is required." } }
-            }));
-        }
-
-        var user = new ApplicationUser
-        {
-            Email = request.Email,
-            UserName = request.Email,
-            FirstName = firstName,
-            LastName = lastName
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return ValidationProblem(new ValidationProblemDetails(result.Errors
-                .GroupBy(error => error.Code)
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.Select(error => error.Description).ToArray())));
-        }
-
-        var (token, expiresAt) = _tokenService.CreateToken(user);
-        var response = await BuildResponse(user, token, expiresAt);
-        return Ok(response);
+        return StatusCode(StatusCodes.Status403Forbidden, new { message = "Customer registration is disabled." });
     }
 
     [HttpPost("login")]
@@ -72,6 +44,11 @@ public sealed class AuthController : ControllerBase
         if (!result.Succeeded)
         {
             return Unauthorized();
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, "admin"))
+        {
+            return Unauthorized("Admin access required.");
         }
 
         var (token, expiresAt) = _tokenService.CreateToken(user);
@@ -103,19 +80,4 @@ public sealed class AuthController : ControllerBase
         };
     }
 
-    private static (string FirstName, string LastName) ResolveName(RegisterRequest request)
-    {
-        if (!string.IsNullOrWhiteSpace(request.FullName))
-        {
-            var parts = request.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 1)
-            {
-                return (parts[0], string.Empty);
-            }
-
-            return (parts[0], string.Join(' ', parts.Skip(1)));
-        }
-
-        return (request.FirstName?.Trim() ?? string.Empty, request.LastName?.Trim() ?? string.Empty);
-    }
 }
