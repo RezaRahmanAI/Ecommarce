@@ -12,7 +12,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     private static readonly ValueConverter<List<string>, string> StringListConverter = new(
         value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
-        value => JsonSerializer.Deserialize<List<string>>(value, (JsonSerializerOptions?)null) ?? []);
+        value => JsonSerializer.Deserialize<List<string>>(value, (JsonSerializerOptions?)null) ?? new List<string>());
 
     private static readonly ValueComparer<List<string>> StringListComparer = new(
         (left, right) => left.SequenceEqual(right),
