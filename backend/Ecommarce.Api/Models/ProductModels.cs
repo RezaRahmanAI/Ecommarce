@@ -11,6 +11,7 @@ public class Product
   public List<string> Badges { get; set; } = [];
   public decimal Price { get; set; }
   public decimal? SalePrice { get; set; }
+  public decimal PurchaseRate { get; set; }
   public required string Gender { get; set; }
   public required ProductRatings Ratings { get; set; }
   public required ProductImages Images { get; set; }
@@ -61,6 +62,7 @@ public class ProductCreatePayload
   public List<string> Badges { get; set; } = [];
   public decimal Price { get; set; }
   public decimal? SalePrice { get; set; }
+  public decimal PurchaseRate { get; set; }
   public bool Featured { get; set; }
   public bool NewArrival { get; set; }
   public required ProductRatings Ratings { get; set; }
@@ -83,6 +85,7 @@ public class ProductUpdatePayload
   public bool NewArrival { get; set; }
   public decimal BasePrice { get; set; }
   public decimal? SalePrice { get; set; }
+  public decimal PurchaseRate { get; set; }
   public List<string> MediaUrls { get; set; } = [];
   public List<ProductVariantEdit> InventoryVariants { get; set; } = [];
 }

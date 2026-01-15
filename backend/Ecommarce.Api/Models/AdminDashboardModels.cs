@@ -6,7 +6,11 @@ public record DashboardStats(
   string DeliveredOrders,
   string OrdersLeft,
   string ReturnedOrders,
-  string CustomerQueries
+  string CustomerQueries,
+  decimal TotalPurchaseCost,
+  decimal AverageSellingPrice,
+  decimal ReturnValue,
+  string ReturnRate
 );
 
 public record OrderItem(

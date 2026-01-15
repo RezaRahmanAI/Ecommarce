@@ -160,6 +160,7 @@ public class AdminDataStore
         Badges = payload.Badges,
         Price = payload.SalePrice ?? payload.Price,
         SalePrice = payload.SalePrice,
+        PurchaseRate = payload.PurchaseRate,
         Gender = payload.Gender,
         Ratings = payload.Ratings,
         Images = payload.Media,
@@ -211,6 +212,7 @@ public class AdminDataStore
         Badges = payload.Badges,
         Price = payload.SalePrice ?? payload.BasePrice,
         SalePrice = payload.SalePrice,
+        PurchaseRate = payload.PurchaseRate,
         Gender = payload.Gender,
         Ratings = existing?.Ratings ?? BuildDefaultRatings(),
         Images = images,
@@ -446,12 +448,21 @@ public class AdminDataStore
   public DashboardStats GetDashboardStats()
   {
     var orders = GetOrders();
+    var products = GetProducts();
     var totalRevenue = orders.Sum(order => order.Total);
     var totalOrders = orders.Count;
     var deliveredOrders = orders.Count(order => order.Status == OrderStatus.Delivered);
     var ordersLeft = orders.Count(order => order.Status is OrderStatus.Processing or OrderStatus.Shipped);
     var returnedOrders = orders.Count(order => order.Status == OrderStatus.Refund);
     var customerQueries = Math.Max(3, orders.Select(order => order.CustomerName).Distinct().Count() / 2);
+    var totalItems = orders.Sum(order => order.ItemsCount);
+    var averageSellingPrice = totalItems > 0 ? totalRevenue / totalItems : 0m;
+    var averagePurchaseRate = products.Count > 0 ? products.Average(product => product.PurchaseRate) : 0m;
+    var totalPurchaseCost = averagePurchaseRate * totalItems;
+    var returnValue = orders.Where(order => order.Status == OrderStatus.Refund).Sum(order => order.Total);
+    var returnRate = totalRevenue > 0m
+      ? $"{Math.Round((returnValue / totalRevenue) * 100, 1).ToString(CultureInfo.InvariantCulture)}%"
+      : "0%";
 
     return new DashboardStats(
       TotalRevenue: totalRevenue,
@@ -459,7 +470,11 @@ public class AdminDataStore
       DeliveredOrders: deliveredOrders.ToString(CultureInfo.InvariantCulture),
       OrdersLeft: ordersLeft.ToString(CultureInfo.InvariantCulture),
       ReturnedOrders: returnedOrders.ToString(CultureInfo.InvariantCulture),
-      CustomerQueries: customerQueries.ToString(CultureInfo.InvariantCulture)
+      CustomerQueries: customerQueries.ToString(CultureInfo.InvariantCulture),
+      TotalPurchaseCost: totalPurchaseCost,
+      AverageSellingPrice: averageSellingPrice,
+      ReturnValue: returnValue,
+      ReturnRate: returnRate
     );
   }
 
@@ -553,6 +568,7 @@ public class AdminDataStore
       Badges = [.. product.Badges],
       Price = product.Price,
       SalePrice = product.SalePrice,
+      PurchaseRate = product.PurchaseRate,
       Gender = product.Gender,
       Ratings = product.Ratings,
       Images = product.Images,
@@ -729,6 +745,7 @@ public class AdminDataStore
         subCategory: "Occasion Wear",
         price: 199.00m,
         salePrice: 149.00m,
+        purchaseRate: 110.00m,
         gender: "women",
         imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80",
         featured: true,
@@ -743,6 +760,7 @@ public class AdminDataStore
         subCategory: "Everyday",
         price: 129.00m,
         salePrice: null,
+        purchaseRate: 78.00m,
         gender: "women",
         imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
         featured: false,
@@ -757,6 +775,7 @@ public class AdminDataStore
         subCategory: "Hijabs",
         price: 29.00m,
         salePrice: null,
+        purchaseRate: 12.00m,
         gender: "accessories",
         imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
         featured: true,
@@ -771,6 +790,7 @@ public class AdminDataStore
         subCategory: "Prayer Sets",
         price: 89.00m,
         salePrice: null,
+        purchaseRate: 52.00m,
         gender: "women",
         imageUrl: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=600&q=80",
         featured: false,
@@ -788,6 +808,7 @@ public class AdminDataStore
     string subCategory,
     decimal price,
     decimal? salePrice,
+    decimal purchaseRate,
     string gender,
     string imageUrl,
     bool featured,
@@ -830,6 +851,7 @@ public class AdminDataStore
       Badges = featured ? ["Featured"] : [],
       Price = currentPrice,
       SalePrice = salePrice,
+      PurchaseRate = purchaseRate,
       Gender = gender,
       Ratings = ratings,
       Images = images,

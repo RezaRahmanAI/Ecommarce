@@ -41,6 +41,7 @@ export class AdminProductEditComponent implements OnDestroy {
       statusActive: this.formBuilder.control(true),
       basePrice: this.formBuilder.control(0, [Validators.required, Validators.min(0)]),
       salePrice: this.formBuilder.control<number | null>(null, [Validators.min(0)]),
+      purchaseRate: this.formBuilder.control(0, [Validators.required, Validators.min(0)]),
       category: this.formBuilder.control('', Validators.required),
       subCategory: this.formBuilder.control(''),
       gender: this.formBuilder.control('women', Validators.required),
@@ -239,6 +240,7 @@ export class AdminProductEditComponent implements OnDestroy {
       newArrival: product.newArrival ?? false,
       basePrice: product.basePrice ?? product.price ?? 0,
       salePrice: product.salePrice ?? undefined,
+      purchaseRate: product.purchaseRate ?? product.basePrice ?? product.price ?? 0,
       mediaUrls: product.mediaUrls ?? (product.imageUrl ? [product.imageUrl] : []),
       inventoryVariants: product.inventoryVariants ?? [],
     };
@@ -251,6 +253,7 @@ export class AdminProductEditComponent implements OnDestroy {
       statusActive: payload.statusActive,
       basePrice: payload.basePrice,
       salePrice: payload.salePrice ?? null,
+      purchaseRate: payload.purchaseRate,
       category: payload.category,
       subCategory: payload.subCategory ?? '',
       gender: payload.gender,
@@ -320,6 +323,7 @@ export class AdminProductEditComponent implements OnDestroy {
       newArrival: Boolean(this.form.get('newArrival')?.value),
       basePrice,
       salePrice,
+      purchaseRate: Number(this.form.get('purchaseRate')?.value ?? basePrice),
       mediaUrls,
       inventoryVariants: variants,
     };
