@@ -34,7 +34,21 @@ public record ProductRatings(decimal AvgRating, int ReviewCount, List<RatingBrea
 
 public record RatingBreakdown(int Rating, int Percentage);
 
-public record ProductImages(ProductImage MainImage, List<ProductImage> Thumbnails);
+public class ProductImages
+{
+  public ProductImages()
+  {
+  }
+
+  public ProductImages(ProductImage mainImage, List<ProductImage> thumbnails)
+  {
+    MainImage = mainImage;
+    Thumbnails = thumbnails;
+  }
+
+  public required ProductImage MainImage { get; set; }
+  public List<ProductImage> Thumbnails { get; set; } = [];
+}
 
 public record ProductImage(string Type, string Label, string Url, string Alt);
 
