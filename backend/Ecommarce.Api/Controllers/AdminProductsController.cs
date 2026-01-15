@@ -9,16 +9,21 @@ namespace Ecommarce.Api.Controllers;
 public sealed class AdminProductsController : ControllerBase
 {
     private readonly IAdminCatalogService _catalogService;
+    private readonly IImageStorageService _imageStorage;
 
-    public AdminProductsController(IAdminCatalogService catalogService)
+    public AdminProductsController(IAdminCatalogService catalogService, IImageStorageService imageStorage)
     {
         _catalogService = catalogService;
+        _imageStorage = imageStorage;
     }
 
     [HttpGet("catalog")]
     public IActionResult GetCatalog()
     {
-        return Ok(_catalogService.GetProducts());
+        var products = _catalogService.GetProducts()
+            .Select(MapProduct)
+            .ToList();
+        return Ok(products);
     }
 
     [HttpGet]
@@ -30,7 +35,8 @@ public sealed class AdminProductsController : ControllerBase
         [FromQuery] int pageSize = 10)
     {
         var (items, total) = _catalogService.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty, page, pageSize);
-        return Ok(new { items, total });
+        var mappedItems = items.Select(MapProduct).ToList();
+        return Ok(new { items = mappedItems, total });
     }
 
     [HttpGet("filtered")]
@@ -39,7 +45,9 @@ public sealed class AdminProductsController : ControllerBase
         [FromQuery] string? category,
         [FromQuery] string? statusTab)
     {
-        var items = _catalogService.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty);
+        var items = _catalogService.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty)
+            .Select(MapProduct)
+            .ToList();
         return Ok(items);
     }
 
@@ -47,20 +55,20 @@ public sealed class AdminProductsController : ControllerBase
     public IActionResult GetProduct(int id)
     {
         var product = _catalogService.GetProduct(id);
-        return product is null ? NotFound() : Ok(product);
+        return product is null ? NotFound() : Ok(MapProduct(product));
     }
 
     [HttpPost]
     public IActionResult CreateProduct(ProductCreatePayload payload)
     {
-        return Ok(_catalogService.CreateProduct(payload));
+        return Ok(MapProduct(_catalogService.CreateProduct(payload)));
     }
 
     [HttpPut("{id:int}")]
     public IActionResult UpdateProduct(int id, ProductUpdatePayload payload)
     {
         var product = _catalogService.UpdateProduct(id, payload);
-        return product is null ? NotFound() : Ok(product);
+        return product is null ? NotFound() : Ok(MapProduct(product));
     }
 
     [HttpDelete("{id:int}")]
@@ -87,10 +95,12 @@ public sealed class AdminProductsController : ControllerBase
         var results = new List<string>();
         foreach (var file in files)
         {
-            await using var stream = new MemoryStream();
-            await file.CopyToAsync(stream);
-            var base64 = Convert.ToBase64String(stream.ToArray());
-            results.Add($"data:{file.ContentType};base64,{base64}");
+            var fileName = await _imageStorage.SaveAsync(file, HttpContext.RequestAborted);
+            var url = _imageStorage.BuildPublicUrl(Request, fileName);
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                results.Add(url);
+            }
         }
 
         return Ok(results);
@@ -99,6 +109,76 @@ public sealed class AdminProductsController : ControllerBase
     [HttpPost("{id:int}/media/remove")]
     public IActionResult RemoveMedia(int id, ProductMediaRemovePayload payload)
     {
-        return Ok(_catalogService.RemoveProductMedia(id, payload.MediaUrl));
+        var normalized = _imageStorage.NormalizeImageName(payload.MediaUrl) ?? payload.MediaUrl;
+        return Ok(_catalogService.RemoveProductMedia(id, normalized));
+    }
+
+    private Product MapProduct(Product product)
+    {
+        var mappedMediaUrls = product.MediaUrls
+            .Select(url => _imageStorage.BuildPublicUrl(Request, url))
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .Select(url => url!)
+            .ToList();
+
+        var mainImage = product.Images.MainImage;
+        var mappedMainImage = new ProductImage(
+            mainImage.Type,
+            mainImage.Label,
+            _imageStorage.BuildPublicUrl(Request, mainImage.Url) ?? mainImage.Url,
+            mainImage.Alt
+        );
+        var mappedThumbnails = product.Images.Thumbnails.Select(item => new ProductImage(
+            item.Type,
+            item.Label,
+            _imageStorage.BuildPublicUrl(Request, item.Url) ?? item.Url,
+            item.Alt
+        )).ToList();
+        var mappedImages = new ProductImages(mappedMainImage, mappedThumbnails);
+
+        var mappedVariants = product.InventoryVariants.Select(variant => new ProductVariantEdit(
+            variant.Label,
+            variant.Price,
+            variant.Sku,
+            variant.Inventory,
+            _imageStorage.BuildPublicUrl(Request, variant.ImageUrl) ?? variant.ImageUrl
+        )).ToList();
+
+        var mappedRelated = product.RelatedProducts.Select(related => new RelatedProduct(
+            related.Id,
+            related.Name,
+            related.Price,
+            _imageStorage.BuildPublicUrl(Request, related.ImageUrl) ?? related.ImageUrl
+        )).ToList();
+
+        return new Product
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Category = product.Category,
+            SubCategory = product.SubCategory,
+            Tags = [.. product.Tags],
+            Badges = [.. product.Badges],
+            Price = product.Price,
+            SalePrice = product.SalePrice,
+            PurchaseRate = product.PurchaseRate,
+            Gender = product.Gender,
+            Ratings = product.Ratings,
+            Images = mappedImages,
+            Variants = product.Variants,
+            Meta = product.Meta,
+            RelatedProducts = mappedRelated,
+            Featured = product.Featured,
+            NewArrival = product.NewArrival,
+            Sku = product.Sku,
+            Stock = product.Stock,
+            Status = product.Status,
+            ImageUrl = _imageStorage.BuildPublicUrl(Request, product.ImageUrl) ?? product.ImageUrl,
+            StatusActive = product.StatusActive,
+            MediaUrls = mappedMediaUrls,
+            BasePrice = product.BasePrice,
+            InventoryVariants = mappedVariants
+        };
     }
 }

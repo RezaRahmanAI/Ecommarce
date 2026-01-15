@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IAdminRepository, AdminRepository>();
 builder.Services.AddSingleton<ICustomerOrderRepository, CustomerOrderRepository>();
+builder.Services.AddSingleton<IImageStorageService, ImageStorageService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -66,6 +67,7 @@ var app = builder.Build();
 
 app.UseCors("AppCors");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
