@@ -686,10 +686,11 @@ public sealed class AdminRepository : IAdminRepository
 
   public static List<CategoryNode> BuildCategoryTree(List<Category> categories)
   {
-    var grouped = new Dictionary<string?, List<Category>>();
+    const string RootKey = "";
+    var grouped = new Dictionary<string, List<Category>>();
     foreach (var category in categories)
     {
-      var key = category.ParentId;
+      var key = category.ParentId ?? RootKey;
       if (!grouped.TryGetValue(key, out var list))
       {
         list = [];
@@ -700,7 +701,7 @@ public sealed class AdminRepository : IAdminRepository
 
     List<CategoryNode> BuildNodes(string? parentId)
     {
-      var items = grouped.TryGetValue(parentId, out var list) ? list : [];
+      var items = grouped.TryGetValue(parentId ?? RootKey, out var list) ? list : [];
       return items
         .OrderBy(item => item.SortOrder)
         .Select(item => new CategoryNode(item, BuildNodes(item.Id)))
