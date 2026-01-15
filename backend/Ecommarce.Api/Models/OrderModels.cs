@@ -18,6 +18,7 @@ public class Order
   public required string Date { get; set; }
   public int ItemsCount { get; set; }
   public decimal Total { get; set; }
+  public string DeliveryDetails { get; set; } = string.Empty;
   public OrderStatus Status { get; set; }
 }
 
@@ -31,5 +32,6 @@ public class OrderCreatePayload
   public required string Date { get; set; }
   public int ItemsCount { get; set; }
   public decimal Total { get; set; }
+  public string DeliveryDetails { get; set; } = string.Empty;
   public OrderStatus Status { get; set; }
 }

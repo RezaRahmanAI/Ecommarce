@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 import { HeroComponent } from '../../components/hero/hero.component';
 import { CategoryGridComponent } from '../../components/category-grid/category-grid.component';
@@ -15,6 +16,7 @@ import { NewsletterComponent } from '../../components/newsletter/newsletter.comp
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     HeroComponent,
     CategoryGridComponent,
     NewArrivalsComponent,

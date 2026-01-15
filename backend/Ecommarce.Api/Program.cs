@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
@@ -276,8 +277,28 @@ app.MapGet("/api/customers/lookup", (string phone, CustomerOrderStore store) =>
   });
 });
 
-app.MapPost("/api/orders", (CustomerOrderRequest payload, CustomerOrderStore store) =>
-  Results.Ok(store.CreateOrder(payload)));
+app.MapPost("/api/orders", (CustomerOrderRequest payload, CustomerOrderStore store, AdminDataStore adminStore) =>
+{
+  var response = store.CreateOrder(payload);
+  var initials = string.Join(string.Empty, payload.Name
+    .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    .Take(2)
+    .Select(part => char.ToUpperInvariant(part[0])));
+
+  adminStore.CreateOrder(new OrderCreatePayload
+  {
+    OrderId = response.OrderId,
+    CustomerName = payload.Name.Trim(),
+    CustomerInitials = string.IsNullOrWhiteSpace(initials) ? "NA" : initials,
+    Date = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+    ItemsCount = payload.ItemsCount,
+    Total = payload.Total,
+    DeliveryDetails = payload.DeliveryDetails,
+    Status = OrderStatus.Processing
+  });
+
+  return Results.Ok(response);
+});
 
 app.MapControllers();
 

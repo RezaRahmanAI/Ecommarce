@@ -298,6 +298,7 @@ public class AdminDataStore
         Date = payload.Date,
         ItemsCount = payload.ItemsCount,
         Total = payload.Total,
+        DeliveryDetails = payload.DeliveryDetails,
         Status = payload.Status
       };
 
@@ -762,6 +763,7 @@ public class AdminDataStore
       Date = order.Date,
       ItemsCount = order.ItemsCount,
       Total = order.Total,
+      DeliveryDetails = order.DeliveryDetails,
       Status = order.Status
     };
   }
@@ -1082,27 +1084,27 @@ public class AdminDataStore
 
     return
     [
-      new Order { Id = 1, OrderId = "#ORD-7782", CustomerName = "Ayesha Khan", CustomerInitials = "AK", Date = DaysAgo(1), ItemsCount = 3, Total = 145.00m, Status = OrderStatus.Processing },
-      new Order { Id = 2, OrderId = "#ORD-7781", CustomerName = "Fatima Ahmed", CustomerInitials = "FA", Date = DaysAgo(2), ItemsCount = 1, Total = 89.50m, Status = OrderStatus.Shipped },
-      new Order { Id = 3, OrderId = "#ORD-7780", CustomerName = "Zainab Malik", CustomerInitials = "ZM", Date = DaysAgo(2), ItemsCount = 5, Total = 210.00m, Status = OrderStatus.Delivered },
-      new Order { Id = 4, OrderId = "#ORD-7779", CustomerName = "Omar Farooq", CustomerInitials = "OF", Date = DaysAgo(3), ItemsCount = 1, Total = 55.00m, Status = OrderStatus.Cancelled },
-      new Order { Id = 5, OrderId = "#ORD-7778", CustomerName = "Noura Bashir", CustomerInitials = "NB", Date = DaysAgo(4), ItemsCount = 2, Total = 120.00m, Status = OrderStatus.Processing },
-      new Order { Id = 6, OrderId = "#ORD-7777", CustomerName = "Maryam Yusuf", CustomerInitials = "MY", Date = DaysAgo(5), ItemsCount = 4, Total = 275.00m, Status = OrderStatus.Delivered },
-      new Order { Id = 7, OrderId = "#ORD-7776", CustomerName = "Hassan Ali", CustomerInitials = "HA", Date = DaysAgo(6), ItemsCount = 2, Total = 98.00m, Status = OrderStatus.Processing },
-      new Order { Id = 8, OrderId = "#ORD-7775", CustomerName = "Sara Noor", CustomerInitials = "SN", Date = DaysAgo(7), ItemsCount = 1, Total = 45.00m, Status = OrderStatus.Refund },
-      new Order { Id = 9, OrderId = "#ORD-7774", CustomerName = "Bilal Aziz", CustomerInitials = "BA", Date = DaysAgo(8), ItemsCount = 6, Total = 320.00m, Status = OrderStatus.Shipped },
-      new Order { Id = 10, OrderId = "#ORD-7773", CustomerName = "Iman Rashid", CustomerInitials = "IR", Date = DaysAgo(9), ItemsCount = 2, Total = 110.00m, Status = OrderStatus.Delivered },
-      new Order { Id = 11, OrderId = "#ORD-7772", CustomerName = "Khadija Noor", CustomerInitials = "KN", Date = DaysAgo(10), ItemsCount = 3, Total = 150.00m, Status = OrderStatus.Processing },
-      new Order { Id = 12, OrderId = "#ORD-7771", CustomerName = "Usman Tariq", CustomerInitials = "UT", Date = DaysAgo(11), ItemsCount = 1, Total = 75.00m, Status = OrderStatus.Cancelled },
-      new Order { Id = 13, OrderId = "#ORD-7770", CustomerName = "Rania Saleh", CustomerInitials = "RS", Date = DaysAgo(12), ItemsCount = 4, Total = 210.00m, Status = OrderStatus.Shipped },
-      new Order { Id = 14, OrderId = "#ORD-7769", CustomerName = "Yasmin Rahim", CustomerInitials = "YR", Date = DaysAgo(13), ItemsCount = 2, Total = 130.00m, Status = OrderStatus.Processing },
-      new Order { Id = 15, OrderId = "#ORD-7768", CustomerName = "Salim Hadi", CustomerInitials = "SH", Date = DaysAgo(14), ItemsCount = 1, Total = 60.00m, Status = OrderStatus.Refund },
-      new Order { Id = 16, OrderId = "#ORD-7767", CustomerName = "Lina Qureshi", CustomerInitials = "LQ", Date = DaysAgo(15), ItemsCount = 3, Total = 190.00m, Status = OrderStatus.Delivered },
-      new Order { Id = 17, OrderId = "#ORD-7766", CustomerName = "Faris Zahid", CustomerInitials = "FZ", Date = DaysAgo(16), ItemsCount = 2, Total = 95.00m, Status = OrderStatus.Processing },
-      new Order { Id = 18, OrderId = "#ORD-7765", CustomerName = "Hiba Latif", CustomerInitials = "HL", Date = DaysAgo(17), ItemsCount = 5, Total = 260.00m, Status = OrderStatus.Shipped },
-      new Order { Id = 19, OrderId = "#ORD-7764", CustomerName = "Ola Kareem", CustomerInitials = "OK", Date = DaysAgo(18), ItemsCount = 3, Total = 140.00m, Status = OrderStatus.Delivered },
-      new Order { Id = 20, OrderId = "#ORD-7763", CustomerName = "Samiya Ali", CustomerInitials = "SA", Date = DaysAgo(19), ItemsCount = 2, Total = 105.00m, Status = OrderStatus.Processing },
-      new Order { Id = 21, OrderId = "#ORD-7762", CustomerName = "Musa Ibrahim", CustomerInitials = "MI", Date = DaysAgo(20), ItemsCount = 1, Total = 70.00m, Status = OrderStatus.Cancelled }
+      new Order { Id = 1, OrderId = "#ORD-7782", CustomerName = "Ayesha Khan", CustomerInitials = "AK", Date = DaysAgo(1), ItemsCount = 3, Total = 145.00m, DeliveryDetails = "Size: M | Notes: Weekend pickup", Status = OrderStatus.Processing },
+      new Order { Id = 2, OrderId = "#ORD-7781", CustomerName = "Fatima Ahmed", CustomerInitials = "FA", Date = DaysAgo(2), ItemsCount = 1, Total = 89.50m, DeliveryDetails = "Size: S", Status = OrderStatus.Shipped },
+      new Order { Id = 3, OrderId = "#ORD-7780", CustomerName = "Zainab Malik", CustomerInitials = "ZM", Date = DaysAgo(2), ItemsCount = 5, Total = 210.00m, DeliveryDetails = "Size: XL | Notes: Gift wrap", Status = OrderStatus.Delivered },
+      new Order { Id = 4, OrderId = "#ORD-7779", CustomerName = "Omar Farooq", CustomerInitials = "OF", Date = DaysAgo(3), ItemsCount = 1, Total = 55.00m, DeliveryDetails = "Size: L", Status = OrderStatus.Cancelled },
+      new Order { Id = 5, OrderId = "#ORD-7778", CustomerName = "Noura Bashir", CustomerInitials = "NB", Date = DaysAgo(4), ItemsCount = 2, Total = 120.00m, DeliveryDetails = "Size: M | Notes: Leave at front desk", Status = OrderStatus.Processing },
+      new Order { Id = 6, OrderId = "#ORD-7777", CustomerName = "Maryam Yusuf", CustomerInitials = "MY", Date = DaysAgo(5), ItemsCount = 4, Total = 275.00m, DeliveryDetails = "Size: XS", Status = OrderStatus.Delivered },
+      new Order { Id = 7, OrderId = "#ORD-7776", CustomerName = "Hassan Ali", CustomerInitials = "HA", Date = DaysAgo(6), ItemsCount = 2, Total = 98.00m, DeliveryDetails = "Size: L", Status = OrderStatus.Processing },
+      new Order { Id = 8, OrderId = "#ORD-7775", CustomerName = "Sara Noor", CustomerInitials = "SN", Date = DaysAgo(7), ItemsCount = 1, Total = 45.00m, DeliveryDetails = "Size: M | Notes: Call on arrival", Status = OrderStatus.Refund },
+      new Order { Id = 9, OrderId = "#ORD-7774", CustomerName = "Bilal Aziz", CustomerInitials = "BA", Date = DaysAgo(8), ItemsCount = 6, Total = 320.00m, DeliveryDetails = "Size: XL", Status = OrderStatus.Shipped },
+      new Order { Id = 10, OrderId = "#ORD-7773", CustomerName = "Iman Rashid", CustomerInitials = "IR", Date = DaysAgo(9), ItemsCount = 2, Total = 110.00m, DeliveryDetails = "Size: S", Status = OrderStatus.Delivered },
+      new Order { Id = 11, OrderId = "#ORD-7772", CustomerName = "Khadija Noor", CustomerInitials = "KN", Date = DaysAgo(10), ItemsCount = 3, Total = 150.00m, DeliveryDetails = "Size: M | Notes: Gate code 221", Status = OrderStatus.Processing },
+      new Order { Id = 12, OrderId = "#ORD-7771", CustomerName = "Usman Tariq", CustomerInitials = "UT", Date = DaysAgo(11), ItemsCount = 1, Total = 75.00m, DeliveryDetails = "Size: L", Status = OrderStatus.Cancelled },
+      new Order { Id = 13, OrderId = "#ORD-7770", CustomerName = "Rania Saleh", CustomerInitials = "RS", Date = DaysAgo(12), ItemsCount = 4, Total = 210.00m, DeliveryDetails = "Size: M | Notes: Deliver after 5pm", Status = OrderStatus.Shipped },
+      new Order { Id = 14, OrderId = "#ORD-7769", CustomerName = "Yasmin Rahim", CustomerInitials = "YR", Date = DaysAgo(13), ItemsCount = 2, Total = 130.00m, DeliveryDetails = "Size: XS", Status = OrderStatus.Processing },
+      new Order { Id = 15, OrderId = "#ORD-7768", CustomerName = "Salim Hadi", CustomerInitials = "SH", Date = DaysAgo(14), ItemsCount = 1, Total = 60.00m, DeliveryDetails = "Size: M", Status = OrderStatus.Refund },
+      new Order { Id = 16, OrderId = "#ORD-7767", CustomerName = "Lina Qureshi", CustomerInitials = "LQ", Date = DaysAgo(15), ItemsCount = 3, Total = 190.00m, DeliveryDetails = "Size: L", Status = OrderStatus.Delivered },
+      new Order { Id = 17, OrderId = "#ORD-7766", CustomerName = "Faris Zahid", CustomerInitials = "FZ", Date = DaysAgo(16), ItemsCount = 2, Total = 95.00m, DeliveryDetails = "Size: S | Notes: Leave with neighbor", Status = OrderStatus.Processing },
+      new Order { Id = 18, OrderId = "#ORD-7765", CustomerName = "Hiba Latif", CustomerInitials = "HL", Date = DaysAgo(17), ItemsCount = 5, Total = 260.00m, DeliveryDetails = "Size: XL", Status = OrderStatus.Shipped },
+      new Order { Id = 19, OrderId = "#ORD-7764", CustomerName = "Ola Kareem", CustomerInitials = "OK", Date = DaysAgo(18), ItemsCount = 3, Total = 140.00m, DeliveryDetails = "Size: M", Status = OrderStatus.Delivered },
+      new Order { Id = 20, OrderId = "#ORD-7763", CustomerName = "Samiya Ali", CustomerInitials = "SA", Date = DaysAgo(19), ItemsCount = 2, Total = 105.00m, DeliveryDetails = "Size: S | Notes: Ring bell twice", Status = OrderStatus.Processing },
+      new Order { Id = 21, OrderId = "#ORD-7762", CustomerName = "Musa Ibrahim", CustomerInitials = "MI", Date = DaysAgo(20), ItemsCount = 1, Total = 70.00m, DeliveryDetails = "Size: L", Status = OrderStatus.Cancelled }
     ];
   }
 
