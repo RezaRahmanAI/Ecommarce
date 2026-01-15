@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ecommarce.Api.Models;
 
 public class Product
@@ -40,6 +42,7 @@ public class ProductImages
   {
   }
 
+  [SetsRequiredMembers]
   public ProductImages(ProductImage mainImage, List<ProductImage> thumbnails)
   {
     MainImage = mainImage;
