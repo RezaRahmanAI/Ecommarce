@@ -2,13 +2,34 @@ using System.Text.Json.Serialization;
 using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
 using Ecommarce.Api.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<AdminDataStore>();
+builder.Services.AddSingleton<CustomerOrderStore>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+  {
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+  })
+  .AddRoles<IdentityRole>()
+  .AddEntityFrameworkStores<ApplicationDbContext>()
+  .AddSignInManager();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.Configure<AdminUserSettings>(builder.Configuration.GetSection(AdminUserSettings.SectionName));
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddControllers();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
   options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -34,12 +55,16 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AppCors");
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
   app.UseSwaggerUI();
 }
+
+await SeedAdminUserAsync(app.Services);
 
 app.MapGet("/api/admin/dashboard/stats", (AdminDataStore store) => Results.Ok(store.GetDashboardStats()));
 app.MapGet("/api/admin/dashboard/orders/recent", (AdminDataStore store) => Results.Ok(store.GetRecentOrders()));
@@ -230,4 +255,71 @@ app.MapPut("/api/admin/settings/shipping-zones/{id:int}", (int id, ShippingZone 
 app.MapDelete("/api/admin/settings/shipping-zones/{id:int}", (int id, AdminDataStore store) =>
   Results.Ok(store.DeleteShippingZone(id)));
 
+app.MapGet("/api/customers/lookup", (string phone, CustomerOrderStore store) =>
+{
+  if (string.IsNullOrWhiteSpace(phone))
+  {
+    return Results.BadRequest("Phone number is required.");
+  }
+
+  var profile = store.GetProfile(phone);
+  if (profile is null)
+  {
+    return Results.NotFound();
+  }
+
+  return Results.Ok(new CustomerLookupResponse
+  {
+    Name = profile.Name,
+    Phone = profile.Phone,
+    Address = profile.Address
+  });
+});
+
+app.MapPost("/api/orders", (CustomerOrderRequest payload, CustomerOrderStore store) =>
+  Results.Ok(store.CreateOrder(payload)));
+
+app.MapControllers();
+
 app.Run();
+
+static async Task SeedAdminUserAsync(IServiceProvider services)
+{
+  await using var scope = services.CreateAsyncScope();
+  var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+  var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+  var settings = scope.ServiceProvider.GetRequiredService<IOptions<AdminUserSettings>>().Value;
+
+  if (string.IsNullOrWhiteSpace(settings.Email) || string.IsNullOrWhiteSpace(settings.Password))
+  {
+    return;
+  }
+
+  if (!await roleManager.RoleExistsAsync("admin"))
+  {
+    await roleManager.CreateAsync(new IdentityRole("admin"));
+  }
+
+  var user = await userManager.FindByEmailAsync(settings.Email);
+  if (user is null)
+  {
+    user = new ApplicationUser
+    {
+      UserName = settings.Email,
+      Email = settings.Email,
+      FirstName = settings.FirstName,
+      LastName = settings.LastName
+    };
+
+    var result = await userManager.CreateAsync(user, settings.Password);
+    if (!result.Succeeded)
+    {
+      return;
+    }
+  }
+
+  if (!await userManager.IsInRoleAsync(user, "admin"))
+  {
+    await userManager.AddToRoleAsync(user, "admin");
+  }
+}

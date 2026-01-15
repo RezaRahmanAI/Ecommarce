@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map, of, tap } from 'rxjs';
 
 import { CheckoutState } from '../models/checkout';
 import { CartService } from './cart.service';
 import { OrderService } from './order.service';
-import { AuthStateService } from './auth-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,75 +19,50 @@ export class CheckoutService {
   constructor(
     private readonly cartService: CartService,
     private readonly orderService: OrderService,
-    private readonly authState: AuthStateService,
   ) {
-    this.authState.user$.subscribe((user) => {
-      this.activeStorageKey = user ? `${this.storageBaseKey}_${user.id}` : this.storageBaseKey;
-      const storedState = this.loadState();
-      this.stateSubject.next(storedState ?? this.buildDefaultState(user?.email ?? ''));
-    });
+    const storedState = this.loadState();
+    this.stateSubject.next(storedState ?? this.buildDefaultState());
 
     this.state$.subscribe((state) => {
       localStorage.setItem(this.activeStorageKey, JSON.stringify(state));
     });
   }
 
-  setStep(step: number): void {
-    this.stateSubject.next({ ...this.stateSubject.getValue(), currentStep: step });
-  }
-
   updateState(partial: Partial<CheckoutState>): void {
     this.stateSubject.next({ ...this.stateSubject.getValue(), ...partial });
   }
 
-  createOrder(): string | null {
+  createOrder(): Observable<string | null> {
     const state = this.stateSubject.getValue();
     const cartItems = this.cartService.getCartSnapshot();
     const summary = this.cartService.getSummarySnapshot();
-    const userId = this.authState.getUserSnapshot()?.id;
     if (!cartItems.length) {
-      return null;
+      return of(null);
     }
-    const order = this.orderService.placeOrder({ state, cartItems, summary, userId });
-    this.cartService.clearCart();
-    this.resetState();
-    return order.id;
+
+    return this.orderService.placeOrder({ state, cartItems, summary }).pipe(
+      tap(() => {
+        this.cartService.clearCart();
+        this.resetState();
+      }),
+      map((order) => order.id),
+    );
   }
 
   resetState(): void {
-    const email = this.authState.getUserSnapshot()?.email ?? '';
-    this.stateSubject.next(this.buildDefaultState(email));
+    this.stateSubject.next(this.buildDefaultState());
   }
 
   getStateSnapshot(): CheckoutState {
     return this.stateSubject.getValue();
   }
 
-  private buildDefaultState(email = ''): CheckoutState {
+  private buildDefaultState(): CheckoutState {
     return {
-      currentStep: 1,
-      email,
-      newsletter: true,
-      shippingAddress: {
-        firstName: '',
-        lastName: '',
-        address: '',
-        apartment: '',
-        city: '',
-        region: '',
-        postalCode: '',
-        country: 'United States',
-      },
-      shippingMethodId: 'standard',
-      promoCode: '',
-      payment: {
-        cardholderName: '',
-        cardNumber: '',
-        expMonth: '',
-        expYear: '',
-        cvc: '',
-        saveCard: false,
-      },
+      fullName: '',
+      phone: '',
+      address: '',
+      deliveryDetails: '',
     };
   }
 

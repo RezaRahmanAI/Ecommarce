@@ -23,8 +23,8 @@ export class AuthStateService {
     }
   }
 
-  login(emailOrUsername: string, password: string, rememberMe: boolean): Observable<AuthSession> {
-    return this.authService.login(emailOrUsername, password).pipe(
+  login(email: string, password: string, rememberMe: boolean): Observable<AuthSession> {
+    return this.authService.login(email, password).pipe(
       tap((session) => {
         this.authService.storeSession(session, rememberMe);
         this.sessionSubject.next(session);

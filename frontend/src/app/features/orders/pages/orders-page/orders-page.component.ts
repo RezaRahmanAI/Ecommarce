@@ -20,12 +20,7 @@ export class OrdersPageComponent {
   private readonly orderService = inject(OrderService);
 
   readonly orders$ = combineLatest([this.authState.user$, this.orderService.orders$]).pipe(
-    map(([user, orders]) => {
-      if (!user) {
-        return [];
-      }
-      return orders.filter((order) => order.userId === user.id || order.email === user.email);
-    }),
+    map(([user, orders]) => (user ? orders : [])),
   );
 
   trackOrder(_: number, order: Order): string {

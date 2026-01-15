@@ -19,7 +19,7 @@ export class LoginPageComponent {
   private readonly route = inject(ActivatedRoute);
 
   readonly loginForm = this.formBuilder.nonNullable.group({
-    emailOrUsername: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     rememberMe: false,
   });
@@ -28,8 +28,8 @@ export class LoginPageComponent {
   isLoading = false;
   errorMessage = '';
 
-  get emailOrUsername() {
-    return this.loginForm.controls.emailOrUsername;
+  get email() {
+    return this.loginForm.controls.email;
   }
 
   get password() {
@@ -49,10 +49,10 @@ export class LoginPageComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const { emailOrUsername, password, rememberMe } = this.loginForm.getRawValue();
+    const { email, password, rememberMe } = this.loginForm.getRawValue();
 
     this.authState
-      .login(emailOrUsername, password, rememberMe)
+      .login(email, password, rememberMe)
       .pipe(
         take(1),
         finalize(() => {

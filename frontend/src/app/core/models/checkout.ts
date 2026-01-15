@@ -1,12 +1,8 @@
-export interface ShippingAddress {
-  firstName: string;
-  lastName: string;
+export interface CheckoutState {
+  fullName: string;
+  phone: string;
   address: string;
-  apartment?: string;
-  city: string;
-  region: string;
-  postalCode: string;
-  country: string;
+  deliveryDetails: string;
 }
 
 export interface ShippingMethod {
@@ -15,23 +11,4 @@ export interface ShippingMethod {
   description: string;
   price: number;
   estimatedDelivery: string;
-}
-
-export interface PaymentDetails {
-  cardholderName: string;
-  cardNumber: string;
-  expMonth: string;
-  expYear: string;
-  cvc: string;
-  saveCard: boolean;
-}
-
-export interface CheckoutState {
-  currentStep: number;
-  email: string;
-  newsletter: boolean;
-  shippingAddress: ShippingAddress;
-  shippingMethodId: string;
-  promoCode: string;
-  payment: PaymentDetails;
 }
