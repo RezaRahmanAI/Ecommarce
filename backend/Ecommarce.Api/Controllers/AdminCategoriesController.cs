@@ -9,42 +9,50 @@ namespace Ecommarce.Api.Controllers;
 public sealed class AdminCategoriesController : ControllerBase
 {
     private readonly IAdminCatalogService _catalogService;
+    private readonly IImageStorageService _imageStorage;
 
-    public AdminCategoriesController(IAdminCatalogService catalogService)
+    public AdminCategoriesController(IAdminCatalogService catalogService, IImageStorageService imageStorage)
     {
         _catalogService = catalogService;
+        _imageStorage = imageStorage;
     }
 
     [HttpGet]
     public IActionResult GetCategories()
     {
-        return Ok(_catalogService.GetCategories());
+        var categories = _catalogService.GetCategories()
+            .Select(MapCategory)
+            .ToList();
+        return Ok(categories);
     }
 
     [HttpGet("tree")]
     public IActionResult GetCategoryTree()
     {
-        return Ok(_catalogService.GetCategoryTree());
+        var tree = _catalogService.GetCategoryTree()
+            .Select(MapCategoryNode)
+            .ToList();
+        return Ok(tree);
     }
 
     [HttpGet("{id}")]
     public IActionResult GetCategory(string id)
     {
         var category = _catalogService.GetCategory(id);
-        return category is null ? NotFound() : Ok(category);
+        return category is null ? NotFound() : Ok(MapCategory(category));
     }
 
     [HttpPost]
     public IActionResult CreateCategory(CategoryPayload payload)
     {
-        return Ok(_catalogService.CreateCategory(payload));
+        return Ok(MapCategory(_catalogService.CreateCategory(payload)));
     }
 
     [HttpPut("{id}")]
     public IActionResult UpdateCategory(string id, CategoryPayload payload)
     {
         var category = _catalogService.UpdateCategory(id, payload);
-        return category is null ? NotFound() : Ok(category);
+        return category is null ? NotFound() : Ok(MapCategory(category));
     }
 
     [HttpDelete("{id}")]
@@ -74,10 +82,30 @@ public sealed class AdminCategoriesController : ControllerBase
             return BadRequest("No file uploaded.");
         }
 
-        await using var stream = new MemoryStream();
-        await file.CopyToAsync(stream);
-        var base64 = Convert.ToBase64String(stream.ToArray());
-        var dataUrl = $"data:{file.ContentType};base64,{base64}";
-        return Ok(dataUrl);
+        var fileName = await _imageStorage.SaveAsync(file, HttpContext.RequestAborted);
+        var url = _imageStorage.BuildPublicUrl(Request, fileName);
+        return Ok(url);
+    }
+
+    private Category MapCategory(Category category)
+    {
+        return new Category
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Slug = category.Slug,
+            ParentId = category.ParentId,
+            Description = category.Description,
+            ImageUrl = _imageStorage.BuildPublicUrl(Request, category.ImageUrl),
+            IsVisible = category.IsVisible,
+            ProductCount = category.ProductCount,
+            SortOrder = category.SortOrder
+        };
+    }
+
+    private CategoryNode MapCategoryNode(CategoryNode node)
+    {
+        var children = node.Children.Select(MapCategoryNode).ToList();
+        return new CategoryNode(MapCategory(node.Category), children);
     }
 }

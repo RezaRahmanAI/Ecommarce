@@ -1,19 +1,22 @@
 using System.Globalization;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 
 namespace Ecommarce.Api.Repositories;
 
 public sealed class AdminRepository : IAdminRepository
 {
   private readonly object _sync = new();
+  private readonly IImageStorageService _imageStorage;
   private readonly List<Category> _categories;
   private readonly List<Product> _products;
   private readonly List<Order> _orders;
   private readonly List<BlogPost> _blogPosts;
   private AdminSettings _settings;
 
-  public AdminRepository()
+  public AdminRepository(IImageStorageService imageStorage)
   {
+    _imageStorage = imageStorage;
     _categories = SeedCategories();
     _products = SeedProducts();
     _orders = SeedOrders();
@@ -53,7 +56,7 @@ public sealed class AdminRepository : IAdminRepository
         Slug = payload.Slug,
         ParentId = parentId,
         Description = payload.Description,
-        ImageUrl = payload.ImageUrl,
+        ImageUrl = _imageStorage.NormalizeImageName(payload.ImageUrl),
         IsVisible = payload.IsVisible ?? true,
         ProductCount = payload.ProductCount ?? 0,
         SortOrder = payload.SortOrder ?? nextSortOrder
@@ -79,7 +82,7 @@ public sealed class AdminRepository : IAdminRepository
       existing.Slug = payload.Slug;
       existing.ParentId = payload.ParentId;
       existing.Description = payload.Description;
-      existing.ImageUrl = payload.ImageUrl;
+      existing.ImageUrl = _imageStorage.NormalizeImageName(payload.ImageUrl);
       existing.IsVisible = payload.IsVisible ?? existing.IsVisible;
       existing.SortOrder = payload.SortOrder ?? existing.SortOrder;
 
@@ -145,8 +148,9 @@ public sealed class AdminRepository : IAdminRepository
     lock (_sync)
     {
       var nextId = _products.Count > 0 ? _products.Max(item => item.Id) + 1 : 1;
-      var mediaUrls = BuildMediaUrls(payload.Media);
-      var mainImageUrl = mediaUrls.FirstOrDefault() ?? payload.Media.MainImage.Url;
+      var normalizedMedia = NormalizeProductImages(payload.Media);
+      var mediaUrls = BuildMediaUrls(normalizedMedia);
+      var mainImageUrl = mediaUrls.FirstOrDefault() ?? normalizedMedia.MainImage.Url;
       var inventoryVariants = BuildInventoryVariants(payload, nextId, mainImageUrl);
       var stock = inventoryVariants.Sum(variant => variant.Inventory);
       var status = ResolveStatus(payload.StatusActive, stock);
@@ -165,7 +169,7 @@ public sealed class AdminRepository : IAdminRepository
         PurchaseRate = payload.PurchaseRate,
         Gender = payload.Gender,
         Ratings = payload.Ratings,
-        Images = payload.Media,
+        Images = normalizedMedia,
         Variants = payload.Variants,
         Meta = payload.Meta,
         RelatedProducts = [],
@@ -197,7 +201,9 @@ public sealed class AdminRepository : IAdminRepository
         : existing?.InventoryVariants ?? [];
       var stock = inventoryVariants.Sum(variant => variant.Inventory);
       var status = ResolveStatus(payload.StatusActive, stock);
-      var mediaUrls = payload.MediaUrls.Count > 0 ? payload.MediaUrls : existing?.MediaUrls ?? [];
+      var mediaUrls = payload.MediaUrls.Count > 0
+        ? NormalizeMediaUrls(payload.MediaUrls)
+        : existing?.MediaUrls ?? [];
       var images = BuildImagesFromMedia(mediaUrls, payload.Name, existing?.Images);
       var sku = inventoryVariants.Count > 0
         ? inventoryVariants[0].Sku
@@ -265,10 +271,11 @@ public sealed class AdminRepository : IAdminRepository
         return false;
       }
 
-      var updatedMedia = product.MediaUrls.Where(url => url != mediaUrl).ToList();
+      var normalizedMediaUrl = _imageStorage.NormalizeImageName(mediaUrl);
+      var updatedMedia = product.MediaUrls.Where(url => url != normalizedMediaUrl).ToList();
       product.MediaUrls = updatedMedia;
       product.Images = BuildImagesFromMedia(updatedMedia, product.Name, product.Images);
-      if (product.ImageUrl == mediaUrl)
+      if (product.ImageUrl == normalizedMediaUrl)
       {
         product.ImageUrl = updatedMedia.FirstOrDefault();
       }
@@ -1433,10 +1440,13 @@ public sealed class AdminRepository : IAdminRepository
     );
   }
 
-  private static List<string> BuildMediaUrls(ProductImages media)
+  private List<string> BuildMediaUrls(ProductImages media)
   {
-    var urls = new List<string> { media.MainImage.Url };
-    urls.AddRange(media.Thumbnails.Select(item => item.Url));
+    var urls = new List<string>
+    {
+      _imageStorage.NormalizeImageName(media.MainImage.Url) ?? string.Empty
+    };
+    urls.AddRange(media.Thumbnails.Select(item => _imageStorage.NormalizeImageName(item.Url) ?? string.Empty));
     return urls.Where(url => !string.IsNullOrWhiteSpace(url)).Distinct().ToList();
   }
 
@@ -1485,6 +1495,33 @@ public sealed class AdminRepository : IAdminRepository
     )).ToList();
 
     return new ProductImages(mainImage, thumbnailImages);
+  }
+
+  private List<string> NormalizeMediaUrls(IEnumerable<string> mediaUrls)
+  {
+    return mediaUrls
+      .Select(url => _imageStorage.NormalizeImageName(url))
+      .Where(url => !string.IsNullOrWhiteSpace(url))
+      .Distinct()
+      .Select(url => url!)
+      .ToList();
+  }
+
+  private ProductImages NormalizeProductImages(ProductImages media)
+  {
+    var mainImage = new ProductImage(
+      media.MainImage.Type,
+      media.MainImage.Label,
+      _imageStorage.NormalizeImageName(media.MainImage.Url) ?? string.Empty,
+      media.MainImage.Alt
+    );
+    var thumbnails = media.Thumbnails.Select(item => new ProductImage(
+      item.Type,
+      item.Label,
+      _imageStorage.NormalizeImageName(item.Url) ?? string.Empty,
+      item.Alt
+    )).ToList();
+    return new ProductImages(mainImage, thumbnails);
   }
 
   private static string ResolveStatus(bool statusActive, int stock)
