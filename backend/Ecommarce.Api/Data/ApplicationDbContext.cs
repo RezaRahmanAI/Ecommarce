@@ -10,6 +10,10 @@ namespace Ecommarce.Api.Data;
 
 public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
+    private const int MoneyPrecision = 18;
+    private const int MoneyScale = 2;
+    private const int RatingPrecision = 4;
+    private const int RatingScale = 2;
     private static readonly ValueConverter<List<string>, string> StringListConverter = new(
         value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
         value => JsonSerializer.Deserialize<List<string>>(value, (JsonSerializerOptions?)null) ?? new List<string>());
@@ -60,9 +64,23 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasConversion(StringListConverter)
                 .Metadata.SetValueComparer(StringListComparer);
 
+            entity.Property(product => product.Price)
+                .HasPrecision(MoneyPrecision, MoneyScale);
+
+            entity.Property(product => product.SalePrice)
+                .HasPrecision(MoneyPrecision, MoneyScale);
+
+            entity.Property(product => product.PurchaseRate)
+                .HasPrecision(MoneyPrecision, MoneyScale);
+
+            entity.Property(product => product.BasePrice)
+                .HasPrecision(MoneyPrecision, MoneyScale);
+
             entity.OwnsOne(product => product.Ratings, ratings =>
             {
                 ratings.ToJson();
+                ratings.Property(item => item.AvgRating)
+                    .HasPrecision(RatingPrecision, RatingScale);
                 ratings.OwnsMany(item => item.RatingBreakdown);
             });
 
@@ -88,12 +106,28 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.OwnsMany(product => product.RelatedProducts, related =>
             {
                 related.ToJson();
+                related.Property(item => item.Price)
+                    .HasPrecision(MoneyPrecision, MoneyScale);
             });
 
             entity.OwnsMany(product => product.InventoryVariants, inventory =>
             {
                 inventory.ToJson();
+                inventory.Property(item => item.Price)
+                    .HasPrecision(MoneyPrecision, MoneyScale);
             });
+        });
+
+        builder.Entity<CustomerOrder>(entity =>
+        {
+            entity.Property(order => order.Total)
+                .HasPrecision(MoneyPrecision, MoneyScale);
+        });
+
+        builder.Entity<Order>(entity =>
+        {
+            entity.Property(order => order.Total)
+                .HasPrecision(MoneyPrecision, MoneyScale);
         });
     }
 }
