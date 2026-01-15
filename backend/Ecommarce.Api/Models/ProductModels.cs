@@ -71,7 +71,11 @@ public class ProductImages
 
 public record ProductImage(string Type, string Label, string Url, string Alt);
 
-public record ProductVariants(List<VariantColor> Colors, List<VariantSize> Sizes);
+public class ProductVariants
+{
+  public List<VariantColor> Colors { get; set; } = [];
+  public List<VariantSize> Sizes { get; set; } = [];
+}
 
 public record VariantColor(string Name, string Hex, bool Selected);
 
