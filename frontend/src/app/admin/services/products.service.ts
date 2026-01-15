@@ -158,7 +158,17 @@ export class ProductsService {
   }
 
   private buildCsv(rows: Product[]): string {
-    const header = ['ID', 'Name', 'Category', 'SKU', 'Stock', 'Price', 'Status', 'Tags'];
+    const header = [
+      'ID',
+      'Name',
+      'Category',
+      'SKU',
+      'Stock',
+      'Price',
+      'Purchase Rate',
+      'Status',
+      'Tags',
+    ];
     const csvRows = rows.map((product) => [
       product.id,
       product.name,
@@ -166,6 +176,7 @@ export class ProductsService {
       product.sku,
       String(product.stock),
       product.price.toFixed(2),
+      (product.purchaseRate ?? 0).toFixed(2),
       product.status,
       (product.tags ?? []).join('|'),
     ]);

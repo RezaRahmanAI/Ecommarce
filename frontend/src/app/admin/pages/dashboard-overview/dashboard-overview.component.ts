@@ -42,6 +42,10 @@ export class DashboardOverviewComponent {
       [this.selectedRange, 'Orders Left', stats.ordersLeft],
       [this.selectedRange, 'Returned Orders', stats.returnedOrders],
       [this.selectedRange, 'Customer Queries', stats.customerQueries],
+      [this.selectedRange, 'Total Purchase Cost', stats.totalPurchaseCost.toFixed(2)],
+      [this.selectedRange, 'Average Selling Price', stats.averageSellingPrice.toFixed(2)],
+      [this.selectedRange, 'Return Value', stats.returnValue.toFixed(2)],
+      [this.selectedRange, 'Return Rate', stats.returnRate],
     ];
 
     const csvContent = csvRows.map((row) => row.join(',')).join('\n');

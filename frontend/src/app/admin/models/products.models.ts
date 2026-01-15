@@ -27,6 +27,7 @@ export interface Product {
   badges: string[];
   price: number;
   salePrice?: number;
+  purchaseRate?: number;
   gender: 'men' | 'women' | 'kids' | 'accessories';
   ratings: ProductRatings;
   images: {
@@ -74,6 +75,7 @@ export interface ProductCreatePayload {
   badges: string[];
   price: number;
   salePrice?: number;
+  purchaseRate: number;
   featured: boolean;
   newArrival: boolean;
   ratings: ProductRatings;
@@ -101,6 +103,7 @@ export interface ProductUpdatePayload {
   newArrival: boolean;
   basePrice: number;
   salePrice?: number;
+  purchaseRate: number;
   mediaUrls: string[];
   inventoryVariants: ProductVariantEdit[];
 }

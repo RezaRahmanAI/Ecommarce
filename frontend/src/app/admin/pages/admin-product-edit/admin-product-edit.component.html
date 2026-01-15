@@ -227,6 +227,23 @@
             </span>
           </label>
           <label class="block space-y-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Purchase Rate</span>
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <img class="h-4 w-4" src="assets/taka.svg" alt="Taka" />
+              </div>
+              <input
+                class="block w-full rounded-lg border-slate-300 pl-7 pr-12 focus:border-primary focus:ring-primary sm:text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white h-11"
+                type="number"
+                formControlName="purchaseRate"
+              />
+            </div>
+            <span class="text-xs text-slate-500">
+              <app-price-display [amount]="form.get('purchaseRate')?.value ?? 0" size="sm"></app-price-display>
+            </span>
+            <span class="text-xs text-slate-500">Visible only to admins.</span>
+          </label>
+          <label class="block space-y-2">
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Sale Price</span>
             <div class="relative">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

@@ -450,6 +450,26 @@
             </span>
           </label>
           <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Purchase Rate</span>
+            <div class="relative">
+              <img
+                class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
+                src="assets/taka.svg"
+                alt="Taka"
+              />
+              <input
+                class="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-2.5 pl-7 pr-4 text-text-main-light dark:text-text-main-dark focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="0.00"
+                type="number"
+                formControlName="purchaseRate"
+              />
+            </div>
+            <span class="text-xs text-text-secondary-light">
+              <app-price-display [amount]="form.get('purchaseRate')?.value ?? 0" size="sm"></app-price-display>
+            </span>
+            <span class="text-xs text-text-secondary-light">Visible only to admins.</span>
+          </label>
+          <label class="flex flex-col gap-1.5">
             <span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">Sale Price</span>
             <div class="relative">
               <img

@@ -5,6 +5,10 @@ export interface DashboardStats {
   ordersLeft: string;
   returnedOrders: string;
   customerQueries: string;
+  totalPurchaseCost: number;
+  averageSellingPrice: number;
+  returnValue: number;
+  returnRate: string;
 }
 
 export interface OrderItem {
