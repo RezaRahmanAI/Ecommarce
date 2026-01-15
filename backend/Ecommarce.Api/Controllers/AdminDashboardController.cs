@@ -1,4 +1,4 @@
-using Ecommarce.Api.Data;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -7,28 +7,28 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/admin/dashboard")]
 public sealed class AdminDashboardController : ControllerBase
 {
-    private readonly AdminDataStore _store;
+    private readonly IAdminDashboardService _dashboardService;
 
-    public AdminDashboardController(AdminDataStore store)
+    public AdminDashboardController(IAdminDashboardService dashboardService)
     {
-        _store = store;
+        _dashboardService = dashboardService;
     }
 
     [HttpGet("stats")]
     public IActionResult GetStats()
     {
-        return Ok(_store.GetDashboardStats());
+        return Ok(_dashboardService.GetDashboardStats());
     }
 
     [HttpGet("orders/recent")]
     public IActionResult GetRecentOrders()
     {
-        return Ok(_store.GetRecentOrders());
+        return Ok(_dashboardService.GetRecentOrders());
     }
 
     [HttpGet("products/popular")]
     public IActionResult GetPopularProducts()
     {
-        return Ok(_store.GetPopularProducts());
+        return Ok(_dashboardService.GetPopularProducts());
     }
 }

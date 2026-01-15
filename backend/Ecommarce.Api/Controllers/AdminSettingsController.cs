@@ -1,5 +1,5 @@
-using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -8,41 +8,41 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/admin/settings")]
 public sealed class AdminSettingsController : ControllerBase
 {
-    private readonly AdminDataStore _store;
+    private readonly IAdminSettingsService _settingsService;
 
-    public AdminSettingsController(AdminDataStore store)
+    public AdminSettingsController(IAdminSettingsService settingsService)
     {
-        _store = store;
+        _settingsService = settingsService;
     }
 
     [HttpGet]
     public IActionResult GetSettings()
     {
-        return Ok(_store.GetSettings());
+        return Ok(_settingsService.GetSettings());
     }
 
     [HttpPut]
     public IActionResult SaveSettings(AdminSettings payload)
     {
-        return Ok(_store.SaveSettings(payload));
+        return Ok(_settingsService.SaveSettings(payload));
     }
 
     [HttpPost("shipping-zones")]
     public IActionResult CreateShippingZone(ShippingZone payload)
     {
-        return Ok(_store.CreateShippingZone(payload));
+        return Ok(_settingsService.CreateShippingZone(payload));
     }
 
     [HttpPut("shipping-zones/{id:int}")]
     public IActionResult UpdateShippingZone(int id, ShippingZone payload)
     {
-        var zone = _store.UpdateShippingZone(id, payload);
+        var zone = _settingsService.UpdateShippingZone(id, payload);
         return zone is null ? NotFound() : Ok(zone);
     }
 
     [HttpDelete("shipping-zones/{id:int}")]
     public IActionResult DeleteShippingZone(int id)
     {
-        return Ok(_store.DeleteShippingZone(id));
+        return Ok(_settingsService.DeleteShippingZone(id));
     }
 }

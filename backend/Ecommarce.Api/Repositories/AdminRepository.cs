@@ -1,9 +1,9 @@
 using System.Globalization;
 using Ecommarce.Api.Models;
 
-namespace Ecommarce.Api.Services;
+namespace Ecommarce.Api.Repositories;
 
-public class AdminDataStore
+public sealed class AdminRepository : IAdminRepository
 {
   private readonly object _sync = new();
   private readonly List<Category> _categories;
@@ -12,7 +12,7 @@ public class AdminDataStore
   private readonly List<BlogPost> _blogPosts;
   private AdminSettings _settings;
 
-  public AdminDataStore()
+  public AdminRepository()
   {
     _categories = SeedCategories();
     _products = SeedProducts();

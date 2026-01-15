@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using Ecommarce.Api.Models;
 
-namespace Ecommarce.Api.Services;
+namespace Ecommarce.Api.Repositories;
 
-public sealed class CustomerOrderStore
+public sealed class CustomerOrderRepository : ICustomerOrderRepository
 {
     private readonly ConcurrentDictionary<string, CustomerProfile> _profiles = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<CustomerOrder> _orders = [];
