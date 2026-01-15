@@ -8,6 +8,7 @@ export interface Order {
   date: string;
   itemsCount: number;
   total: number;
+  deliveryDetails: string;
   status: OrderStatus;
 }
 

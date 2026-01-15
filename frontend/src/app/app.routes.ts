@@ -14,6 +14,7 @@ import { PlaceholderComponent } from './features/placeholder/placeholder.compone
 import { BlogDetailsComponent } from './features/blog/pages/blog-details/blog-details.component';
 import { BlogListComponent } from './features/blog/pages/blog-list/blog-list.component';
 import { ProductDetailsPageComponent } from './features/product-details/pages/product-details-page/product-details-page.component';
+import { OfferDetailsPageComponent } from './features/offers/pages/offer-details-page/offer-details-page.component';
 import { RegisterPageComponent } from './features/register/pages/register-page/register.page';
 import { WomenProductsPageComponent } from './features/women/pages/women-products-page/women-products-page.component';
 import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
@@ -45,6 +46,10 @@ export const appRoutes: Routes = [
   {
     path: 'product/:id',
     component: ProductDetailsPageComponent,
+  },
+  {
+    path: 'offer/:slug',
+    component: OfferDetailsPageComponent,
   },
   { path: 'cart', component: CartPageComponent },
   { path: 'checkout', component: CheckoutPageComponent },

@@ -1,5 +1,33 @@
 <main class="flex-1">
   <app-hero></app-hero>
+  <section class="px-4 md:px-8 py-10 bg-gradient-to-r from-primary/5 via-white to-accent/10">
+    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-6">
+      <div class="flex-1">
+        <p class="text-xs uppercase tracking-[0.2em] text-primary font-semibold">Pop-up offer</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-primary mt-2">
+          Midnight Luxe Co-Ord Set
+        </h2>
+        <p class="text-gray-600 mt-3 max-w-xl">
+          A limited-time product drop you can share on social ads. Clicking the offer opens a
+          dedicated pop-up page with full details and a quick order form.
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          class="px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-sm hover:bg-primary-hover transition"
+          routerLink="/offer/midnight-luxe-set"
+        >
+          View the pop-up offer
+        </a>
+        <a
+          class="px-5 py-3 rounded-full border border-primary text-primary font-semibold hover:bg-primary/10 transition"
+          routerLink="/offer/midnight-luxe-set"
+        >
+          Copy offer link
+        </a>
+      </div>
+    </div>
+  </section>
   <app-category-grid></app-category-grid>
   <app-new-arrivals></app-new-arrivals>
   <app-promo-banner></app-promo-banner>

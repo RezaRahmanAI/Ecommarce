@@ -52,12 +52,13 @@ export class OrdersService {
   }
 
   private buildCsv(rows: Order[]): string {
-    const header = ['Order ID', 'Customer Name', 'Date', 'Items', 'Total', 'Status'];
+    const header = ['Order ID', 'Customer Name', 'Date', 'Items', 'Details', 'Total', 'Status'];
     const csvRows = rows.map((order) => [
       order.orderId,
       order.customerName,
       order.date,
       order.itemsCount.toString(),
+      order.deliveryDetails,
       order.total.toFixed(2),
       order.status,
     ]);
