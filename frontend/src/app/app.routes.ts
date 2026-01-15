@@ -59,7 +59,6 @@ export const appRoutes: Routes = [
     data: { title: 'Track Order', description: 'Order tracking experience coming soon.' },
   },
   { path: 'login', component: LoginPageComponent },
-  { path: 'register', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'forgot-password',
     component: PlaceholderComponent,

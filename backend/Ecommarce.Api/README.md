@@ -23,10 +23,11 @@ The API will be available at `https://localhost:7201` (or `http://localhost:5201
 - Update `JwtSettings:SigningKey` in `appsettings.json` with a strong secret.
 - Adjust `AllowedOrigins` to match the Angular host.
 - Set `ConnectionStrings:DefaultConnection` if you want to use another database.
+- The default admin credentials are configured under `AdminUser` in `appsettings.json`.
 
 ## Endpoints
 
-- `POST /api/auth/register`
+- Registration is disabled; only admin logins are permitted.
 - `POST /api/auth/login`
 - `GET /api/dashboard/summary` (requires authentication)
 - `GET /api/dashboard/widgets` (requires authentication)
