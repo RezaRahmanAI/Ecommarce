@@ -32,7 +32,23 @@ public class Product
   public List<ProductVariantEdit> InventoryVariants { get; set; } = [];
 }
 
-public record ProductRatings(decimal AvgRating, int ReviewCount, List<RatingBreakdown> RatingBreakdown);
+public class ProductRatings
+{
+  public ProductRatings()
+  {
+  }
+
+  public ProductRatings(decimal avgRating, int reviewCount, List<RatingBreakdown> ratingBreakdown)
+  {
+    AvgRating = avgRating;
+    ReviewCount = reviewCount;
+    RatingBreakdown = ratingBreakdown;
+  }
+
+  public decimal AvgRating { get; set; }
+  public int ReviewCount { get; set; }
+  public List<RatingBreakdown> RatingBreakdown { get; set; } = [];
+}
 
 public record RatingBreakdown(int Rating, int Percentage);
 
