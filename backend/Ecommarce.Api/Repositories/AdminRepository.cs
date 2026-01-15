@@ -224,7 +224,7 @@ public sealed class AdminRepository : IAdminRepository
         Gender = payload.Gender,
         Ratings = existing?.Ratings ?? BuildDefaultRatings(),
         Images = images,
-        Variants = existing?.Variants ?? new ProductVariants([], []),
+        Variants = existing?.Variants ?? new ProductVariants(),
         Meta = existing?.Meta ?? new ProductMeta(string.Empty, string.Empty),
         RelatedProducts = existing?.RelatedProducts ?? [],
         Featured = payload.Featured,
@@ -1039,16 +1039,17 @@ public sealed class AdminRepository : IAdminRepository
         new("image", "Gallery 1", imageUrl, $"{name} gallery 1")
       }
     );
-    var variants = new ProductVariants(
-      new List<VariantColor>
+    var variants = new ProductVariants
+    {
+      Colors = new List<VariantColor>
       {
         new("Midnight", "#111827", true)
       },
-      new List<VariantSize>
+      Sizes = new List<VariantSize>
       {
         new("One Size", 12, true)
       }
-    );
+    };
     var inventoryVariants = new List<ProductVariantEdit>
     {
       new("One Size / Midnight", currentPrice, $"SKU-{id:D5}-1", 12, imageUrl)
