@@ -52,19 +52,6 @@ export class AuthService {
       );
   }
 
-  register(fullName: string, email: string, password: string): Observable<AuthSession> {
-    return this.api
-      .post<AuthResponseDto>('/auth/register', {
-        fullName: fullName.trim(),
-        email: email.trim(),
-        password,
-      })
-      .pipe(
-        map((response) => this.normalizeSession(response)),
-        catchError((error) => this.handleAuthError(error, 'Registration failed')),
-      );
-  }
-
   storeSession(session: AuthSession, rememberMe: boolean): void {
     this.sessionStorage.storeSession(session, rememberMe);
   }

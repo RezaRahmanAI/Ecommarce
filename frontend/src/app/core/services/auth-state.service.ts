@@ -33,16 +33,6 @@ export class AuthStateService {
     );
   }
 
-  register(fullName: string, email: string, password: string): Observable<AuthSession> {
-    return this.authService.register(fullName, email, password).pipe(
-      tap((session) => {
-        this.authService.storeSession(session, true);
-        this.sessionSubject.next(session);
-        this.userService.ensureUserProfile(session.user);
-      }),
-    );
-  }
-
   logout(): void {
     this.authService.logout();
     this.sessionSubject.next(null);
