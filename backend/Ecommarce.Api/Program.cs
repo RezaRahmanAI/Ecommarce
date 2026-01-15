@@ -65,6 +65,7 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerUI();
 }
 
+await ApplyDatabaseMigrationsAsync(app.Services);
 await SeedAdminUserAsync(app.Services);
 
 app.MapGet("/api/admin/dashboard/stats", (AdminDataStore store) => Results.Ok(store.GetDashboardStats()));
@@ -303,6 +304,13 @@ app.MapPost("/api/orders", (CustomerOrderRequest payload, CustomerOrderStore sto
 app.MapControllers();
 
 app.Run();
+
+static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services)
+{
+  await using var scope = services.CreateAsyncScope();
+  var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+  await dbContext.Database.MigrateAsync();
+}
 
 static async Task SeedAdminUserAsync(IServiceProvider services)
 {
