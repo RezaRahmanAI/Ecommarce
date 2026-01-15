@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, shareReplay, switchMap, timer } from 'rxjs';
 
 import {
   DashboardStats,
@@ -19,11 +20,18 @@ import { PriceDisplayComponent } from '../../../shared/components/price-display/
 })
 export class DashboardOverviewComponent {
   private adminDashboardService = inject(AdminDashboardService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly refreshIntervalMs = 15000;
 
-  stats$: Observable<DashboardStats> = this.adminDashboardService.getStats();
-  recentOrders$: Observable<OrderItem[]> = this.adminDashboardService.getRecentOrders();
-  popularProducts$: Observable<PopularProduct[]> =
-    this.adminDashboardService.getPopularProducts();
+  stats$: Observable<DashboardStats> = this.createLiveStream(() =>
+    this.adminDashboardService.getStats(),
+  );
+  recentOrders$: Observable<OrderItem[]> = this.createLiveStream(() =>
+    this.adminDashboardService.getRecentOrders(),
+  );
+  popularProducts$: Observable<PopularProduct[]> = this.createLiveStream(() =>
+    this.adminDashboardService.getPopularProducts(),
+  );
 
   timeRanges = ['Last 30 Days', 'Last 7 Days', 'This Year'];
   selectedRange = this.timeRanges[0];
@@ -69,5 +77,13 @@ export class DashboardOverviewComponent {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  private createLiveStream<T>(source: () => Observable<T>): Observable<T> {
+    return timer(0, this.refreshIntervalMs).pipe(
+      switchMap(() => source()),
+      takeUntilDestroyed(this.destroyRef),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
   }
 }
