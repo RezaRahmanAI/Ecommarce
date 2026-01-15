@@ -30,10 +30,10 @@ public sealed class AuthController : ControllerBase
         var (firstName, lastName) = ResolveName(request);
         if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
         {
-            return ValidationProblem(new Dictionary<string, string[]>
+            return ValidationProblem(new ValidationProblemDetails(new Dictionary<string, string[]>
             {
                 { nameof(RegisterRequest.FullName), new[] { "Name is required." } }
-            });
+            }));
         }
 
         var user = new ApplicationUser
