@@ -1,5 +1,5 @@
-using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -8,42 +8,42 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/admin/blog/posts")]
 public sealed class AdminBlogPostsController : ControllerBase
 {
-    private readonly AdminDataStore _store;
+    private readonly IAdminBlogService _blogService;
 
-    public AdminBlogPostsController(AdminDataStore store)
+    public AdminBlogPostsController(IAdminBlogService blogService)
     {
-        _store = store;
+        _blogService = blogService;
     }
 
     [HttpGet]
     public IActionResult GetPosts()
     {
-        return Ok(_store.GetBlogPosts());
+        return Ok(_blogService.GetBlogPosts());
     }
 
     [HttpGet("{id:int}")]
     public IActionResult GetPost(int id)
     {
-        var post = _store.GetBlogPost(id);
+        var post = _blogService.GetBlogPost(id);
         return post is null ? NotFound() : Ok(post);
     }
 
     [HttpPost]
     public IActionResult CreatePost(BlogPostPayload payload)
     {
-        return Ok(_store.CreateBlogPost(payload));
+        return Ok(_blogService.CreateBlogPost(payload));
     }
 
     [HttpPut("{id:int}")]
     public IActionResult UpdatePost(int id, BlogPostPayload payload)
     {
-        var post = _store.UpdateBlogPost(id, payload);
+        var post = _blogService.UpdateBlogPost(id, payload);
         return post is null ? NotFound() : Ok(post);
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult DeletePost(int id)
     {
-        return Ok(_store.DeleteBlogPost(id));
+        return Ok(_blogService.DeleteBlogPost(id));
     }
 }

@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
 using Ecommarce.Api.Data;
+using Ecommarce.Api.Middleware;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Repositories;
 using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +10,8 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<AdminDataStore>();
-builder.Services.AddSingleton<CustomerOrderStore>();
+builder.Services.AddSingleton<IAdminRepository, AdminRepository>();
+builder.Services.AddSingleton<ICustomerOrderRepository, CustomerOrderRepository>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -27,6 +29,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 builder.Services.Configure<AdminUserSettings>(builder.Configuration.GetSection(AdminUserSettings.SectionName));
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAdminCatalogService, AdminCatalogService>();
+builder.Services.AddScoped<IAdminOrderService, AdminOrderService>();
+builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+builder.Services.AddScoped<IAdminSettingsService, AdminSettingsService>();
+builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -55,6 +65,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AppCors");
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

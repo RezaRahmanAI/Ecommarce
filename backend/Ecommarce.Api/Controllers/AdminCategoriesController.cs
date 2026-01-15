@@ -1,5 +1,5 @@
-using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -8,55 +8,55 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/admin/categories")]
 public sealed class AdminCategoriesController : ControllerBase
 {
-    private readonly AdminDataStore _store;
+    private readonly IAdminCatalogService _catalogService;
 
-    public AdminCategoriesController(AdminDataStore store)
+    public AdminCategoriesController(IAdminCatalogService catalogService)
     {
-        _store = store;
+        _catalogService = catalogService;
     }
 
     [HttpGet]
     public IActionResult GetCategories()
     {
-        return Ok(_store.GetCategories());
+        return Ok(_catalogService.GetCategories());
     }
 
     [HttpGet("tree")]
     public IActionResult GetCategoryTree()
     {
-        return Ok(_store.GetCategoryTree());
+        return Ok(_catalogService.GetCategoryTree());
     }
 
     [HttpGet("{id}")]
     public IActionResult GetCategory(string id)
     {
-        var category = _store.GetCategory(id);
+        var category = _catalogService.GetCategory(id);
         return category is null ? NotFound() : Ok(category);
     }
 
     [HttpPost]
     public IActionResult CreateCategory(CategoryPayload payload)
     {
-        return Ok(_store.CreateCategory(payload));
+        return Ok(_catalogService.CreateCategory(payload));
     }
 
     [HttpPut("{id}")]
     public IActionResult UpdateCategory(string id, CategoryPayload payload)
     {
-        var category = _store.UpdateCategory(id, payload);
+        var category = _catalogService.UpdateCategory(id, payload);
         return category is null ? NotFound() : Ok(category);
     }
 
     [HttpDelete("{id}")]
     public IActionResult DeleteCategory(string id)
     {
-        return Ok(_store.DeleteCategory(id));
+        return Ok(_catalogService.DeleteCategory(id));
     }
 
     [HttpPost("reorder")]
     public IActionResult ReorderCategories(ReorderPayload payload)
     {
-        return Ok(_store.ReorderCategories(payload));
+        return Ok(_catalogService.ReorderCategories(payload));
     }
 
     [HttpPost("image")]

@@ -1,5 +1,5 @@
-using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -8,17 +8,17 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/admin/products")]
 public sealed class AdminProductsController : ControllerBase
 {
-    private readonly AdminDataStore _store;
+    private readonly IAdminCatalogService _catalogService;
 
-    public AdminProductsController(AdminDataStore store)
+    public AdminProductsController(IAdminCatalogService catalogService)
     {
-        _store = store;
+        _catalogService = catalogService;
     }
 
     [HttpGet("catalog")]
     public IActionResult GetCatalog()
     {
-        return Ok(_store.GetProducts());
+        return Ok(_catalogService.GetProducts());
     }
 
     [HttpGet]
@@ -29,7 +29,7 @@ public sealed class AdminProductsController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var (items, total) = _store.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty, page, pageSize);
+        var (items, total) = _catalogService.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty, page, pageSize);
         return Ok(new { items, total });
     }
 
@@ -39,34 +39,34 @@ public sealed class AdminProductsController : ControllerBase
         [FromQuery] string? category,
         [FromQuery] string? statusTab)
     {
-        var items = _store.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty);
+        var items = _catalogService.FilterProducts(searchTerm ?? string.Empty, category ?? string.Empty, statusTab ?? string.Empty);
         return Ok(items);
     }
 
     [HttpGet("{id:int}")]
     public IActionResult GetProduct(int id)
     {
-        var product = _store.GetProduct(id);
+        var product = _catalogService.GetProduct(id);
         return product is null ? NotFound() : Ok(product);
     }
 
     [HttpPost]
     public IActionResult CreateProduct(ProductCreatePayload payload)
     {
-        return Ok(_store.CreateProduct(payload));
+        return Ok(_catalogService.CreateProduct(payload));
     }
 
     [HttpPut("{id:int}")]
     public IActionResult UpdateProduct(int id, ProductUpdatePayload payload)
     {
-        var product = _store.UpdateProduct(id, payload);
+        var product = _catalogService.UpdateProduct(id, payload);
         return product is null ? NotFound() : Ok(product);
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult DeleteProduct(int id)
     {
-        return Ok(_store.DeleteProduct(id));
+        return Ok(_catalogService.DeleteProduct(id));
     }
 
     [HttpPost("media")]
@@ -99,6 +99,6 @@ public sealed class AdminProductsController : ControllerBase
     [HttpPost("{id:int}/media/remove")]
     public IActionResult RemoveMedia(int id, ProductMediaRemovePayload payload)
     {
-        return Ok(_store.RemoveProductMedia(id, payload.MediaUrl));
+        return Ok(_catalogService.RemoveProductMedia(id, payload.MediaUrl));
     }
 }

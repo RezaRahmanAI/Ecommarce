@@ -1,5 +1,5 @@
-using Ecommarce.Api.Data;
 using Ecommarce.Api.Models;
+using Ecommarce.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommarce.Api.Controllers;
@@ -8,11 +8,11 @@ namespace Ecommarce.Api.Controllers;
 [Route("api/customers")]
 public sealed class CustomersController : ControllerBase
 {
-    private readonly CustomerOrderStore _store;
+    private readonly ICustomerService _customerService;
 
-    public CustomersController(CustomerOrderStore store)
+    public CustomersController(ICustomerService customerService)
     {
-        _store = store;
+        _customerService = customerService;
     }
 
     [HttpGet("lookup")]
@@ -23,7 +23,7 @@ public sealed class CustomersController : ControllerBase
             return BadRequest("Phone number is required.");
         }
 
-        var profile = _store.GetProfile(phone);
+        var profile = _customerService.GetProfile(phone);
         if (profile is null)
         {
             return NotFound();
