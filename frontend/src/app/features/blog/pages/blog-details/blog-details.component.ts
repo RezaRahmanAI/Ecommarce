@@ -3,6 +3,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { of, switchMap } from 'rxjs';
 
 import { BlogContentBlock, BlogPost } from '../../blog.models';
 import { BlogService } from '../../blog.service';
@@ -83,26 +84,46 @@ export class BlogDetailsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const slug = params.get('slug');
-      if (!slug) {
-        this.notFound = true;
-        return;
-      }
+    this.route.paramMap
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap((params) => {
+          const slug = params.get('slug');
+          if (!slug) {
+            this.notFound = true;
+            return of({ post: undefined, related: [] as BlogPost[] });
+          }
 
-      const post = this.blogService.getPostBySlug(slug);
-      if (!post) {
-        this.notFound = true;
-        return;
-      }
+          return this.blogService.getPostBySlug(slug).pipe(
+            switchMap((post) => {
+              if (!post) {
+                this.notFound = true;
+                return of({ post: undefined, related: [] as BlogPost[] });
+              }
 
-      this.post = post;
-      this.contentBlocks = post.content ?? [];
-      this.relatedPosts = this.blogService.getRelatedPosts(slug, 3);
-      this.notFound = false;
-      this.shareMessage = '';
-      this.replyMessage = '';
-    });
+              return this.blogService.getRelatedPosts(slug, 3).pipe(
+                switchMap((related) => of({ post, related }))
+              );
+            })
+          );
+        })
+      )
+      .subscribe(({ post, related }) => {
+        if (!post) {
+          this.post = undefined;
+          this.relatedPosts = [];
+          this.contentBlocks = [];
+          this.notFound = true;
+          return;
+        }
+
+        this.post = post;
+        this.contentBlocks = post.content ?? [];
+        this.relatedPosts = related;
+        this.notFound = false;
+        this.shareMessage = '';
+        this.replyMessage = '';
+      });
   }
 
   get shareUrl(): string {

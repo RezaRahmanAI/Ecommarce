@@ -48,7 +48,12 @@ export class BlogListComponent implements OnInit {
   newsletterMessage = '';
 
   ngOnInit(): void {
-    this.featuredPost = this.blogService.getFeaturedPost();
+    this.blogService
+      .getFeaturedPost()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((post) => {
+        this.featuredPost = post;
+      });
 
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const tag = params.get('tag');
@@ -107,15 +112,18 @@ export class BlogListComponent implements OnInit {
   }
 
   private loadPosts(reset: boolean): void {
-    const result = this.blogService.getPosts({
-      category: this.selectedCategory,
-      search: this.searchControl.value,
-      page: this.page,
-      pageSize: this.pageSize,
-    });
-
-    this.posts = reset ? result.posts : [...this.posts, ...result.posts];
-    this.totalPosts = result.total;
-    this.hasMore = this.posts.length < this.totalPosts;
+    this.blogService
+      .getPosts({
+        category: this.selectedCategory,
+        search: this.searchControl.value,
+        page: this.page,
+        pageSize: this.pageSize,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        this.posts = reset ? result.posts : [...this.posts, ...result.posts];
+        this.totalPosts = result.total;
+        this.hasMore = this.posts.length < this.totalPosts;
+      });
   }
 }
