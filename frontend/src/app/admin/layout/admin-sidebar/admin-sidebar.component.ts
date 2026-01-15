@@ -21,6 +21,7 @@ export class AdminSidebarComponent {
 
   navItems: AdminNavItem[] = [
     { label: 'Orders', icon: 'inventory_2', route: '/admin/orders' },
+    { label: 'Blog', icon: 'article', route: '/admin/blog' },
     { label: 'Customers', icon: 'group', route: '/admin/customers' },
     { label: 'Analytics', icon: 'analytics', route: '/admin/analytics' },
   ];

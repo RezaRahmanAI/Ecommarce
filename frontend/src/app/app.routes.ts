@@ -27,6 +27,7 @@ import { AdminProductCreateComponent } from './admin/pages/admin-product-create/
 import { AdminProductsComponent } from './admin/pages/admin-products/admin-products.component';
 import { AdminCategoryManagementComponent } from './admin/pages/admin-category-management/admin-category-management.component';
 import { AdminSettingsComponent } from './admin/pages/admin-settings/admin-settings.component';
+import { AdminBlogPostsComponent } from './admin/pages/admin-blog-posts/admin-blog-posts.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -116,6 +117,11 @@ export const appRoutes: Routes = [
         path: 'orders',
         component: AdminOrdersComponent,
         data: { title: 'Order Management' },
+      },
+      {
+        path: 'blog',
+        component: AdminBlogPostsComponent,
+        data: { title: 'Blog Posts' },
       },
       {
         path: 'orders/:id',

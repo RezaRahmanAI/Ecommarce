@@ -176,6 +176,48 @@ app.MapPut("/api/admin/orders/{id:int}/status", (int id, OrderStatusUpdate paylo
 app.MapDelete("/api/admin/orders/{id:int}", (int id, AdminDataStore store) =>
   Results.Ok(store.DeleteOrder(id)));
 
+app.MapGet("/api/admin/blog/posts", (AdminDataStore store) => Results.Ok(store.GetBlogPosts()));
+app.MapGet("/api/admin/blog/posts/{id:int}", (int id, AdminDataStore store) =>
+{
+  var post = store.GetBlogPost(id);
+  return post is null ? Results.NotFound() : Results.Ok(post);
+});
+app.MapPost("/api/admin/blog/posts", (BlogPostPayload payload, AdminDataStore store) =>
+  Results.Ok(store.CreateBlogPost(payload)));
+app.MapPut("/api/admin/blog/posts/{id:int}", (int id, BlogPostPayload payload, AdminDataStore store) =>
+{
+  var post = store.UpdateBlogPost(id, payload);
+  return post is null ? Results.NotFound() : Results.Ok(post);
+});
+app.MapDelete("/api/admin/blog/posts/{id:int}", (int id, AdminDataStore store) =>
+  Results.Ok(store.DeleteBlogPost(id)));
+
+app.MapGet("/api/blog/posts", (HttpRequest request, AdminDataStore store) =>
+{
+  var search = request.Query["search"].ToString();
+  var category = request.Query["category"].ToString();
+  var page = int.TryParse(request.Query["page"], out var parsedPage) ? parsedPage : 1;
+  var pageSize = int.TryParse(request.Query["pageSize"], out var parsedPageSize) ? parsedPageSize : 6;
+
+  var (items, total) = store.FilterBlogPosts(search, category, page, pageSize);
+  return Results.Ok(new { posts = items, total, page, pageSize });
+});
+app.MapGet("/api/blog/posts/featured", (AdminDataStore store) =>
+{
+  var post = store.GetFeaturedBlogPost();
+  return post is null ? Results.NotFound() : Results.Ok(post);
+});
+app.MapGet("/api/blog/posts/{slug}", (string slug, AdminDataStore store) =>
+{
+  var post = store.GetBlogPostBySlug(slug);
+  return post is null ? Results.NotFound() : Results.Ok(post);
+});
+app.MapGet("/api/blog/posts/{slug}/related", (string slug, HttpRequest request, AdminDataStore store) =>
+{
+  var limit = int.TryParse(request.Query["limit"], out var parsedLimit) ? parsedLimit : 3;
+  return Results.Ok(store.GetRelatedBlogPosts(slug, limit));
+});
+
 app.MapGet("/api/admin/settings", (AdminDataStore store) => Results.Ok(store.GetSettings()));
 app.MapPut("/api/admin/settings", (AdminSettings payload, AdminDataStore store) => Results.Ok(store.SaveSettings(payload)));
 app.MapPost("/api/admin/settings/shipping-zones", (ShippingZone payload, AdminDataStore store) =>

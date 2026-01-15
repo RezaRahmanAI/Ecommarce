@@ -9,6 +9,7 @@ public class AdminDataStore
   private readonly List<Category> _categories;
   private readonly List<Product> _products;
   private readonly List<Order> _orders;
+  private readonly List<BlogPost> _blogPosts;
   private AdminSettings _settings;
 
   public AdminDataStore()
@@ -16,6 +17,7 @@ public class AdminDataStore
     _categories = SeedCategories();
     _products = SeedProducts();
     _orders = SeedOrders();
+    _blogPosts = SeedBlogPosts();
     _settings = SeedSettings();
   }
 
@@ -328,6 +330,167 @@ public class AdminDataStore
     }
   }
 
+  public List<BlogPost> GetBlogPosts()
+  {
+    lock (_sync)
+    {
+      return _blogPosts.Select(CloneBlogPost).ToList();
+    }
+  }
+
+  public BlogPost? GetBlogPost(int id)
+  {
+    lock (_sync)
+    {
+      var post = _blogPosts.FirstOrDefault(item => item.Id == id);
+      return post is null ? null : CloneBlogPost(post);
+    }
+  }
+
+  public BlogPost? GetBlogPostBySlug(string slug)
+  {
+    lock (_sync)
+    {
+      var post = _blogPosts.FirstOrDefault(item => item.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+      return post is null ? null : CloneBlogPost(post);
+    }
+  }
+
+  public BlogPost? GetFeaturedBlogPost()
+  {
+    lock (_sync)
+    {
+      var post = _blogPosts.FirstOrDefault(item => item.Featured);
+      return post is null ? null : CloneBlogPost(post);
+    }
+  }
+
+  public BlogPost CreateBlogPost(BlogPostPayload payload)
+  {
+    lock (_sync)
+    {
+      var nextId = _blogPosts.Count > 0 ? _blogPosts.Max(item => item.Id) + 1 : 1;
+      var publishedAt = payload.PublishedAt == default ? DateTime.UtcNow : payload.PublishedAt;
+      var post = new BlogPost
+      {
+        Id = nextId,
+        Slug = payload.Slug,
+        Title = payload.Title,
+        Excerpt = payload.Excerpt,
+        ContentHtml = payload.ContentHtml,
+        Content = CloneBlogContent(payload.Content),
+        CoverImage = payload.CoverImage,
+        Category = payload.Category,
+        AuthorName = payload.AuthorName,
+        AuthorAvatar = payload.AuthorAvatar,
+        AuthorBio = payload.AuthorBio,
+        PublishedAt = publishedAt,
+        ReadTime = payload.ReadTime,
+        Tags = payload.Tags,
+        Featured = payload.Featured,
+        CoverImageCaption = payload.CoverImageCaption
+      };
+
+      _blogPosts.Insert(0, post);
+      return CloneBlogPost(post);
+    }
+  }
+
+  public BlogPost? UpdateBlogPost(int id, BlogPostPayload payload)
+  {
+    lock (_sync)
+    {
+      var index = _blogPosts.FindIndex(item => item.Id == id);
+      if (index < 0)
+      {
+        return null;
+      }
+
+      var publishedAt = payload.PublishedAt == default ? _blogPosts[index].PublishedAt : payload.PublishedAt;
+      var post = new BlogPost
+      {
+        Id = id,
+        Slug = payload.Slug,
+        Title = payload.Title,
+        Excerpt = payload.Excerpt,
+        ContentHtml = payload.ContentHtml,
+        Content = CloneBlogContent(payload.Content),
+        CoverImage = payload.CoverImage,
+        Category = payload.Category,
+        AuthorName = payload.AuthorName,
+        AuthorAvatar = payload.AuthorAvatar,
+        AuthorBio = payload.AuthorBio,
+        PublishedAt = publishedAt,
+        ReadTime = payload.ReadTime,
+        Tags = payload.Tags,
+        Featured = payload.Featured,
+        CoverImageCaption = payload.CoverImageCaption
+      };
+
+      _blogPosts[index] = post;
+      return CloneBlogPost(post);
+    }
+  }
+
+  public bool DeleteBlogPost(int id)
+  {
+    lock (_sync)
+    {
+      var removed = _blogPosts.RemoveAll(item => item.Id == id);
+      return removed > 0;
+    }
+  }
+
+  public (List<BlogPost> Items, int Total) FilterBlogPosts(string? searchTerm, string category, int page, int pageSize)
+  {
+    var filtered = FilterBlogPosts(searchTerm, category);
+    var total = filtered.Count;
+    var startIndex = (page - 1) * pageSize;
+    var items = filtered.Skip(startIndex).Take(pageSize).ToList();
+    return (items, total);
+  }
+
+  public List<BlogPost> FilterBlogPosts(string? searchTerm, string category)
+  {
+    var normalizedSearch = searchTerm?.Trim().ToLowerInvariant() ?? string.Empty;
+    var posts = GetBlogPosts();
+    return posts.Where(post =>
+    {
+      var matchesCategory = string.IsNullOrWhiteSpace(category) || category == "All" || post.Category == category;
+      if (!matchesCategory)
+      {
+        return false;
+      }
+
+      if (string.IsNullOrWhiteSpace(normalizedSearch))
+      {
+        return true;
+      }
+
+      var tagMatch = post.Tags.Any(tag => tag.ToLowerInvariant().Contains(normalizedSearch));
+      return post.Title.ToLowerInvariant().Contains(normalizedSearch)
+        || post.Excerpt.ToLowerInvariant().Contains(normalizedSearch)
+        || post.Category.ToLowerInvariant().Contains(normalizedSearch)
+        || post.AuthorName.ToLowerInvariant().Contains(normalizedSearch)
+        || tagMatch;
+    }).OrderByDescending(post => post.PublishedAt).ToList();
+  }
+
+  public List<BlogPost> GetRelatedBlogPosts(string slug, int limit)
+  {
+    var current = GetBlogPostBySlug(slug);
+    if (current is null)
+    {
+      return [];
+    }
+
+    return GetBlogPosts()
+      .Where(post => post.Slug != slug && post.Category == current.Category)
+      .OrderByDescending(post => post.PublishedAt)
+      .Take(limit)
+      .ToList();
+  }
+
   public AdminSettings GetSettings()
   {
     lock (_sync)
@@ -601,6 +764,48 @@ public class AdminDataStore
       Total = order.Total,
       Status = order.Status
     };
+  }
+
+  private static BlogPost CloneBlogPost(BlogPost post)
+  {
+    return new BlogPost
+    {
+      Id = post.Id,
+      Slug = post.Slug,
+      Title = post.Title,
+      Excerpt = post.Excerpt,
+      ContentHtml = post.ContentHtml,
+      Content = CloneBlogContent(post.Content),
+      CoverImage = post.CoverImage,
+      Category = post.Category,
+      AuthorName = post.AuthorName,
+      AuthorAvatar = post.AuthorAvatar,
+      AuthorBio = post.AuthorBio,
+      PublishedAt = post.PublishedAt,
+      ReadTime = post.ReadTime,
+      Tags = [.. post.Tags],
+      Featured = post.Featured,
+      CoverImageCaption = post.CoverImageCaption
+    };
+  }
+
+  private static List<BlogContentBlock> CloneBlogContent(IEnumerable<BlogContentBlock>? blocks)
+  {
+    if (blocks is null)
+    {
+      return [];
+    }
+
+    return blocks.Select(block => new BlogContentBlock
+    {
+      Type = block.Type,
+      Text = block.Text,
+      ProductId = block.ProductId,
+      ProductName = block.ProductName,
+      ProductDescription = block.ProductDescription,
+      ProductImage = block.ProductImage,
+      ProductImageAlt = block.ProductImageAlt
+    }).ToList();
   }
 
   private static AdminSettings CloneSettings(AdminSettings settings)
@@ -898,6 +1103,286 @@ public class AdminDataStore
       new Order { Id = 19, OrderId = "#ORD-7764", CustomerName = "Ola Kareem", CustomerInitials = "OK", Date = DaysAgo(18), ItemsCount = 3, Total = 140.00m, Status = OrderStatus.Delivered },
       new Order { Id = 20, OrderId = "#ORD-7763", CustomerName = "Samiya Ali", CustomerInitials = "SA", Date = DaysAgo(19), ItemsCount = 2, Total = 105.00m, Status = OrderStatus.Processing },
       new Order { Id = 21, OrderId = "#ORD-7762", CustomerName = "Musa Ibrahim", CustomerInitials = "MI", Date = DaysAgo(20), ItemsCount = 1, Total = 70.00m, Status = OrderStatus.Cancelled }
+    ];
+  }
+
+  private static List<BlogPost> SeedBlogPosts()
+  {
+    var sharedContent = BuildSharedBlogContent();
+    var sharedAvatar =
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDOeayVSwQjnUOIlrLGb40bJACSOrgMhmcMNpmK5GLQ9_8PTCyQpj6JO-p_BFQwGzsKfydm1khc3mNBngB2EaGx13ARPVkkPtPjGSHyTp9kQhDmD9iBpOjwIMVZ0Yxi0w2WpZCoUH3mP8CrDXHo7mHA9_mCYcslil4Keoho0cJqWk9EVpuuvgJWpG8s6lHciOuuxhkH4oEauV5wUrvjfQhDCak3PoZFHwb4Kjt_i4KQ3aiHygfyjMIOm5kJoGv8krYpvhDcrain4yc";
+
+    return
+    [
+      new BlogPost
+      {
+        Id = 1,
+        Slug = "summer-modesty-stay-cool-and-covered",
+        Title = "Summer Modesty: How to Stay Cool and Covered",
+        Excerpt =
+          "Discover the best breathable fabrics and layering techniques to maintain your personal style and comfort during the warmer months without compromising on modesty.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuBNGqRI8mbwuU74Oenw72ga9HiuAdOWjoe7vF_fmh5QaLoT--WI_teRSizdCjbI63MD9uDEQOCRkLIipu2BJ886B6Zzf8EKnQi2N19QQZam5HpwQ-UeRV9cV3mfLiXFPN2KdDp8NKDIdQEFuvkSFe9f-kaK_EmZDQgYqV0C1fjeciXFAn81xmZuOEwoKmEQqRjfelAwAEwiXgEmqNHDZyKJqQQB43kQLw9HXsoj7DbLWUCnzwTyI3NjzQ45CiAJR24rmd_awm8xT4c",
+        Category = "Style Guide",
+        AuthorName = "Amina Khan",
+        AuthorAvatar = sharedAvatar,
+        AuthorBio =
+          "Fashion enthusiast and content creator at Arza. I love exploring the intersection of modesty and modern trends.",
+        PublishedAt = new DateTime(2024, 5, 15, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "5 min read",
+        Tags = ["ModestFashion", "SummerStyle", "Layering"],
+        Featured = true,
+        CoverImageCaption = "Exploring airy fabrics and breathable layers for summer days.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 2,
+        Slug = "sustainable-fabrics-changing-modest-fashion",
+        Title = "Sustainable Fabrics Changing Modest Fashion",
+        Excerpt = "From Tencel to organic linen, explore how eco-friendly materials are reshaping the industry and your wardrobe choices.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuCoSLuL6Q1Mx7SqAoQSlBSDcTTDWwWLrwMaFjb1mV-9DLVx5tTV4q01CxqcoHLYs69F9w0GBiwJy6v3Ax00hq-QsVB62THLpF85hU3EChyU_wDiMqP0e5UcZdRQK2TP4Ym9rgN4kJJT2fKOqNgg-e_oIOALjl0KATim12CqlehVN38Y54UxiG6yepBD-Za7ueaeEhdNDf4Tj0arhW4pu-oe6k_lFsoWjY0wV6wJcXMBVZFxOP-1Wen8jZ12X5H3UgNGf3ctf4LgT8k",
+        Category = "Trends",
+        AuthorName = "Sarah Ahmed",
+        AuthorAvatar = sharedAvatar,
+        AuthorBio = "Sustainability writer focused on ethical fashion and mindful shopping.",
+        PublishedAt = new DateTime(2024, 5, 12, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "6 min read",
+        Tags = ["Sustainability", "EcoFriendly", "Wardrobe"],
+        Featured = false,
+        CoverImageCaption = "A closer look at textured eco-friendly fabrics.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 3,
+        Slug = "essential-hijab-styles-modern-workplace",
+        Title = "5 Essential Hijab Styles for the Modern Workplace",
+        Excerpt = "Look professional and feel confident with these five simple, elegant, and secure hijab wraps designed for the office.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuAMnHp3XwjAOVT5m-aREBcgvLBF2CHpknEpMTI2V3Y4hX8XKGbe70HOQcUQlFeoTcep0c71lzvXPsY0DZe_A8EWvvikfLNd0W6EyfsuJPUIwwM0Y-eHuT5rG-y52_DV8UaGCZhsD4q3r7q5w2MOaKb4RfH7uKfctaviukTu0od2zDPuzQN-IrO3Q2fZcP2UhcbOSrmvXuIAmyHFP42Z2WSieCPdM0wjyPyuxC2Xthaa13BprTsesjj20U75d8GLKyRaxITNBPbE4SY",
+        Category = "Style Guide",
+        AuthorName = "Fatima Khan",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDV9doAPdmq0Mhoz9MdzLZ55dytifnuvnXIRqcYIp5muaUQ_gv1RglXDBfjIpZVnJbcqkj-OYpTPKReN_C9sDdBYtDLY9vgf8w8fNIpDBKLhxHJ99huwZgxGIZ4aY_q0BAsZUmMxAoosLwrBTWDHLjEq1-ROR47dzaGMfHrHXQj1ZCKIvnU1Ct-wULGCtLkeerhzTJzgfYPYuRR-j_Sxxbg37gI6zGtRmCuJm1gkxd5Ps9MrdJQbGVBvfk0rsWNhj0QO_I9U-woIaQ",
+        AuthorBio = "Styling lead specializing in professional modest fashion.",
+        PublishedAt = new DateTime(2024, 5, 10, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "4 min read",
+        Tags = ["Hijab", "Workwear", "Style"],
+        Featured = false,
+        CoverImageCaption = "Elegant office-ready hijab styling.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 4,
+        Slug = "morning-routines-productive-day",
+        Title = "Morning Routines for a Productive Day",
+        Excerpt =
+          "Start your day with intention. We break down a Fajr-centered morning routine that boosts productivity and spiritual mindfulness.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDqTd2i-40zbf897VfSkb0a0gX3QrmijuE7XIht3sd2QupwZ-RlDRkMNht4GfGj8LObQkANOnckcvwiUyF9SXRhTrr0fgiYlMDtcU9MKK14929IyuLEJ2J-2kRkxTSMZc_qsmPSr3Y1KWPsMAIvV0hhLyZowQ6HgSuAIzyt2WjAC8GcK1Uek7OkzazJ7HD9tq1bHj0_UaBwPeOwXwozvgqw4tr_SY2lCk-Rgai_OuS1nYF31CsHmi8ex6MQbNPUKcPGK5xGLF0wXvQ",
+        Category = "Lifestyle",
+        AuthorName = "Amina Ross",
+        AuthorAvatar = sharedAvatar,
+        AuthorBio = "Lifestyle editor sharing mindful routines and wellness tips.",
+        PublishedAt = new DateTime(2024, 5, 8, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "5 min read",
+        Tags = ["Lifestyle", "Wellness", "Productivity"],
+        Featured = false,
+        CoverImageCaption = "A peaceful morning ritual with coffee and a good book.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 5,
+        Slug = "sneak-peek-upcoming-eid-collection",
+        Title = "Sneak Peek: The Upcoming Eid Collection",
+        Excerpt =
+          "Get an exclusive first look at our upcoming festive range, featuring rich jewel tones and intricate embroidery.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuBp-E33MKU2ZtFYpexHyaFdAggRbYS3AEKiLrFwcKjnydqsFjgtGHONxq5em9I69mdginhZZYSjViKgALOgMTG7M7_598nNyjg9zhOXjfON-Esvr6WmxRxvFCLW6fg7R6XOSJqt9YV2DMqUo5do6Ifo_KJPUbx7WBZX5Dh4KO3KtSG68K_1pwqbBNvnsfh2p8y4FwUwtJBj9vOSI9U5N3V76hUBDbXW2cqHVDMSTLAOJo_6Cmj0iXzKViIiypwB7SHVHO9k9vd60A4",
+        Category = "Collections",
+        AuthorName = "Team Arza",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDf_ijS-eALQK3gCysFjznX9Vn5re-Qo_sD3kJlBjrJme0eaSAyV17RE_qiGJ5H--vSYfhgf0AIJvTlbYbnDYNy3Nx1QLw56LQbszSR8ZzDlDxF0e1dcz9E4GOJwLX_YjUT-2UA7eTeXBs5PqBEFKE8X_3qhno6R41sDToZIJMwL7QLjwIJMNnQcVEzeDYXUcuJCY1l_YbvMk32st3H-EVwe4NcBhLQqCQcmlhDvfzkic1MMpKodYx1aPQgn0pBglSjEtJoORroWr4",
+        AuthorBio = "Our in-house team highlights seasonal collections and launches.",
+        PublishedAt = new DateTime(2024, 5, 5, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "3 min read",
+        Tags = ["Collections", "Eid", "NewArrivals"],
+        Featured = false,
+        CoverImageCaption = "A preview of our jewel-toned Eid collection.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 6,
+        Slug = "finding-stillness-in-a-busy-world",
+        Title = "Finding Stillness in a Busy World",
+        Excerpt = "Reflections on maintaining a spiritual connection amidst the chaos of modern life, work, and social media.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuAieMKud1SR0wT4bOSc-rWnTUBrYj14weDG88yKBHtM8Icnr-ApTnJAgv0wiQ9QQroBBgnb90l3hr8alalKQWbeTU3_pIfOvJbL95or-OrD9MSmnvU_RW7oGszgiFlzRGfyt3UmUeotsQdnl_r8IN4Ux_n0m7SAUnTVZ1OWm611Z4avTpTt5TcIk1KkxRZirj4CBPE2JmBp4XoWRCiTk9mPHEs5b-W_rYcZOcO-SLnfYHfsO_mwY9zkJ1yKFantci6N3-WzqXpCaw8",
+        Category = "Faith",
+        AuthorName = "Zainab Ali",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDf_ijS-eALQK3gCysFjznX9Vn5re-Qo_sD3kJlBjrJme0eaSAyV17RE_qiGJ5H--vSYfhgf0AIJvTlbYbnDYNy3Nx1QLw56LQbszSR8ZzDlDxF0e1dcz9E4GOJwLX_YjUT-2UA7eTeXBs5PqBEFKE8X_3qhno6R41sDToZIJMwL7QLjwIJMNnQcVEzeDYXUcuJCY1l_YbvMk32st3H-EVwe4NcBhLQqCQcmlhDvfzkic1MMpKodYx1aPQgn0pBglSjEtJoORroWr4",
+        AuthorBio = "Faith writer focusing on mindful living and spiritual balance.",
+        PublishedAt = new DateTime(2024, 5, 2, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "4 min read",
+        Tags = ["Faith", "Mindfulness", "Spirituality"],
+        Featured = false,
+        CoverImageCaption = "A quiet moment of reflection and prayer.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 7,
+        Slug = "halal-beauty-brands-to-know",
+        Title = "Halal Beauty Brands You Need to Know",
+        Excerpt = "A curated list of certified Halal makeup and skincare brands that deliver both quality and peace of mind.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuCX8A9R99qs3i_ijEz6NF9o7enZIUL582O6Y2RhcESir7-RTHavkEnQBzoE6RWH5z4iCNaDXfSlJcKl2wEaTPSn5Gwzrja8cs6rMjNy0d1x2Ouy7dJVVyXUhh-R5YkPPR1XctpufUo3T45Z7iWvk_6KNjKINvWaipdId6-ErrSwKcYxqXtLH3T_CoReob0f7eBtvKrpm78uttj6s2TWPr8u3kj5hU-Ob3Y2_QNZDkX6p78L2HQ3_z7DiuEOwgGQwjpFuixenjwv7mc",
+        Category = "Beauty",
+        AuthorName = "Layla Omar",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDV9doAPdmq0Mhoz9MdzLZ55dytifnuvnXIRqcYIp5muaUQ_gv1RglXDBfjIpZVnJbcqkj-OYpTPKReN_C9sDdBYtDLY9vgf8w8fNIpDBKLhxHJ99huwZgxGIZ4aY_q0BAsZUmMxAoosLwrBTWDHLjEq1-ROR47dzaGMfHrHXQj1ZCKIvnU1Ct-wULGCtLkeerhzTJzgfYPYuRR-j_Sxxbg37gI6zGtRmCuJm1gkxd5Ps9MrdJQbGVBvfk0rsWNhj0QO_I9U-woIaQ",
+        AuthorBio = "Beauty editor spotlighting halal-certified favorites.",
+        PublishedAt = new DateTime(2024, 4, 29, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "3 min read",
+        Tags = ["Beauty", "Halal", "Skincare"],
+        Featured = false,
+        CoverImageCaption = "Minimal makeup essentials for everyday wear.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 8,
+        Slug = "mastering-minimalist-hijab-drape",
+        Title = "Mastering the Minimalist Hijab Drape",
+        Excerpt = "A step-by-step guide to a clean, elegant hijab style that works for any occasion.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuAFWjxTIrN9gZyjoaeIdoRsDSvq5PdxE4d-PB16QylnZ4AEq1p2APgbTWRyC-cnmUPX8ssmIoC-U45w5dMmRF9op6peWoEOf5mgwES1WaKLpm3oINF6oyma918cRQd4E3tsbdFWW-0pP2u1LClSxiafwTtEGBv8bE08GpCQAWn29tCcUxsQkX4mWiygcZ2Pghvu_5D8_b_brJVd0_JgroLphsPgVG_bcTGpIrVzjUQyy-5Kwqi4F_d8mSSdRo4odEjFLaMYpNvqmHM",
+        Category = "Tutorial",
+        AuthorName = "Rania Noor",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDf_ijS-eALQK3gCysFjznX9Vn5re-Qo_sD3kJlBjrJme0eaSAyV17RE_qiGJ5H--vSYfhgf0AIJvTlbYbnDYNy3Nx1QLw56LQbszSR8ZzDlDxF0e1dcz9E4GOJwLX_YjUT-2UA7eTeXBs5PqBEFKE8X_3qhno6R41sDToZIJMwL7QLjwIJMNnQcVEzeDYXUcuJCY1l_YbvMk32st3H-EVwe4NcBhLQqCQcmlhDvfzkic1MMpKodYx1aPQgn0pBglSjEtJoORroWr4",
+        AuthorBio = "Tutorial creator specializing in easy, elegant hijab styles.",
+        PublishedAt = new DateTime(2024, 4, 20, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "4 min read",
+        Tags = ["Tutorial", "Hijab", "Styling"],
+        Featured = false,
+        CoverImageCaption = "A minimalist hijab drape for everyday wear.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 9,
+        Slug = "neutral-tones-timeless-wardrobe-staple",
+        Title = "Neutral Tones: A Timeless Wardrobe Staple",
+        Excerpt = "Why soft neutrals remain the foundation of modest fashion and how to style them year-round.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDJtFfMuJ1xEJhCgT7DYHFctXiZhcWYPrfzgRK6rEOCXkayrMzNClGCgaFq7QPOJBkvKUv3r8ok38In7OAzn8V7M0roHoT1v5cSn20_WSJUa6dMZfPkDp0Df-ZvrcrdQGe0_XMQklJONeobBtR9mUkmFXNyxvSqbzZoGdb2BGquHhJ-yHI8cLj_A0Z0eqSN0DRwLE9M5-6QaIB7Eg1whmi-Qdx0kB4lrU0YCsW_LpqmWACVrJ_ZhnXf1A5IFLqxDSyI9cYeZ29cnT0",
+        Category = "Trends",
+        AuthorName = "Nadia Yusuf",
+        AuthorAvatar = sharedAvatar,
+        AuthorBio = "Trend analyst highlighting timeless wardrobe essentials.",
+        PublishedAt = new DateTime(2024, 4, 12, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "5 min read",
+        Tags = ["Trends", "Neutrals", "Wardrobe"],
+        Featured = false,
+        CoverImageCaption = "Neutral tone layering for modern modest outfits.",
+        Content = CloneBlogContent(sharedContent)
+      },
+      new BlogPost
+      {
+        Id = 10,
+        Slug = "why-we-choose-ethical-fabrics",
+        Title = "Why We Choose Ethical Fabrics",
+        Excerpt = "Behind the scenes of our sourcing process and what ethical fashion means to us.",
+        CoverImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuCYDCPfHt0sXGJYq8fv99Y3oTwy4NhNw3zx5yZi9JET2AqXpUj0qdM0BjfD2DvDe42o11UqV5nhvmdjFK9asKLeMntY2Ipj73xV9PVo06SfawgydLxhtFmbUGJihuHN14j1tx8HEYYkdkAirzmVqQP6RvCm4hHbplylE_jh307RPN_1CpWhBXqLCiqU5mI31oGxszTTaAoTEF9_ePQ-bqdOOH7FStNPNky863QJpeCs4ClVFHbnSErnf1mkwOfymHxzhDkyDbuCJgw",
+        Category = "Sustainability",
+        AuthorName = "Huda Rahman",
+        AuthorAvatar =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDV9doAPdmq0Mhoz9MdzLZ55dytifnuvnXIRqcYIp5muaUQ_gv1RglXDBfjIpZVnJbcqkj-OYpTPKReN_C9sDdBYtDLY9vgf8w8fNIpDBKLhxHJ99huwZgxGIZ4aY_q0BAsZUmMxAoosLwrBTWDHLjEq1-ROR47dzaGMfHrHXQj1ZCKIvnU1Ct-wULGCtLkeerhzTJzgfYPYuRR-j_Sxxbg37gI6zGtRmCuJm1gkxd5Ps9MrdJQbGVBvfk0rsWNhj0QO_I9U-woIaQ",
+        AuthorBio = "Ethical sourcing manager and sustainability advocate.",
+        PublishedAt = new DateTime(2024, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+        ReadTime = "6 min read",
+        Tags = ["Sustainability", "Ethical", "Fabrics"],
+        Featured = false,
+        CoverImageCaption = "Sustainable fabrics chosen for mindful wardrobes.",
+        Content = CloneBlogContent(sharedContent)
+      }
+    ];
+  }
+
+  private static List<BlogContentBlock> BuildSharedBlogContent()
+  {
+    return
+    [
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "Modest fashion is not just about covering up; it is about expressing your personal style with elegance and grace. In this season's collection, we focus on earthy tones and breathable fabrics that provide both comfort and sophistication. Layering is key, allowing you to transition seamlessly from the cool breeze of autumn mornings to the warmer afternoon sun."
+      },
+      new BlogContentBlock
+      {
+        Type = "heading",
+        Text = "Why Earthy Tones?"
+      },
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "Nature has always been the ultimate inspiration for designers. This year, we're seeing a resurgence of terracotta, olive green, and deep browns. These colors are versatile and can be mixed and matched effortlessly."
+      },
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "When styling these tones, consider texture. A silk scarf in a rich copper hue adds a touch of luxury to a simple linen dress. The contrast between matte and shiny fabrics creates visual interest without overwhelming the outfit."
+      },
+      new BlogContentBlock
+      {
+        Type = "product",
+        ProductId = 14,
+        ProductName = "The Golden Hour Scarf",
+        ProductDescription =
+          "Crafted from 100% organic silk, perfect for adding a pop of warmth to any ensemble.",
+        ProductImage =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDAl2zpnIGb9p96VWD1bzsbyYDCKk2RdD-7TiOd0VR41dpaJDFdt4Hx4NoQR0ikKAWotz7zh9vARE_3iZ_Dt88hEA81iS5dZ_v_ZhYmVRNcmA6KvVQxpAy4NwXHyNE9JKAdPDru13UwSdIKycmxm9cSEyvn9s3y--uxJ7HKwQv40QE9suFhq8OlitAGp8bLPvl1TmIh26oWJ2HMTMBwq8bMT64NVrxNKe4svmaj1vVfWHkorOcbKV4_OVhwei5Gotb_zDO6Yv-XE0Q",
+        ProductImageAlt = "Close up of a mustard yellow hijab"
+      },
+      new BlogContentBlock
+      {
+        Type = "heading",
+        Text = "The Art of Layering"
+      },
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "Layering isn't just practical; it's an art form. Start with a lightweight base, like our classic cotton abaya, and add structure with a long-line cardigan or a structured blazer."
+      },
+      new BlogContentBlock
+      {
+        Type = "blockquote",
+        Text = "\"Fashion is the armor to survive the reality of everyday life. Modesty is the shield that protects your peace.\""
+      },
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "Accessories play a crucial role as well. A thin belt can define the waist without compromising modesty, while statement jewelry can elevate a simple look for an evening event. Remember, the goal is harmony. Each piece should complement the others, creating a cohesive silhouette."
+      },
+      new BlogContentBlock
+      {
+        Type = "paragraph",
+        Text =
+          "As we move forward into the colder months, don't be afraid to experiment. Fashion is personal. Use these trends as a guide, but always stay true to what makes you feel confident and beautiful."
+      }
     ];
   }
 
