@@ -1,60 +1,28 @@
 <header
-  class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#0e3b4a] bg-primary px-4 py-3 shadow-md md:px-10"
+  class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#0e3b4a] bg-gradient-to-r from-primary via-[#0c3a4a] to-[#0a2f3b] px-4 py-3 shadow-lg md:px-10"
 >
   <div class="flex items-center gap-8">
     <div class="flex items-center gap-4 text-white">
-      <div class="size-8 flex items-center justify-center rounded-full bg-accent text-primary">
+      <div class="size-8 flex items-center justify-center rounded-full bg-accent text-primary shadow-sm">
         <span class="material-symbols-outlined text-xl">all_inclusive</span>
       </div>
       <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Arza</h2>
     </div>
     <div class="hidden lg:flex items-center gap-6">
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/">Home</a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/men">Men's</a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/women">Women's</a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/children">
+      <a class="text-gray-100 hover:text-accent text-sm font-semibold leading-normal transition-colors" routerLink="/">Home</a>
+      <a class="text-gray-100 hover:text-accent text-sm font-semibold leading-normal transition-colors" routerLink="/men">Men's</a>
+      <a class="text-gray-100 hover:text-accent text-sm font-semibold leading-normal transition-colors" routerLink="/women">Women's</a>
+      <a class="text-gray-100 hover:text-accent text-sm font-semibold leading-normal transition-colors" routerLink="/children">
         Children's
       </a>
-      <a class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors" routerLink="/accessories">
+      <a class="text-gray-100 hover:text-accent text-sm font-semibold leading-normal transition-colors" routerLink="/accessories">
         Accessories
-      </a>
-      <a
-        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
-        routerLink="/about"
-        routerLinkActive="text-accent"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        About
-      </a>
-      <a
-        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
-        routerLink="/contact"
-        routerLinkActive="text-accent"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        Contact
-      </a>
-      <a
-        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
-        routerLink="/blog"
-        routerLinkActive="text-accent"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        Blog
-      </a>
-      <a
-        class="text-gray-200 hover:text-accent text-sm font-medium leading-normal transition-colors"
-        routerLink="/admin"
-        routerLinkActive="text-accent"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        Admin
       </a>
     </div>
   </div>
-  <div class="flex flex-1 justify-end gap-4 md:gap-8">
+  <div class="flex flex-1 justify-end gap-4 md:gap-6">
     <label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
-      <div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#084255]">
+      <div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#084255] shadow-inner">
         <div class="text-gray-400 flex border-none bg-transparent items-center justify-center pl-4 rounded-l-lg border-r-0">
           <span class="material-symbols-outlined text-xl">search</span>
         </div>
@@ -65,33 +33,7 @@
         />
       </div>
     </label>
-    <div class="flex gap-2" *ngIf="vm$ | async as vm">
-      <ng-container *ngIf="vm.user; else guestActions">
-        <a
-          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
-          routerLink="/account"
-          aria-label="Account"
-        >
-          <span class="material-symbols-outlined">person</span>
-        </a>
-        <button
-          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
-          type="button"
-          (click)="logout()"
-          aria-label="Logout"
-        >
-          <span class="material-symbols-outlined">logout</span>
-        </button>
-      </ng-container>
-      <ng-template #guestActions>
-        <a
-          class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors"
-          routerLink="/login"
-          aria-label="Login"
-        >
-          <span class="material-symbols-outlined">person</span>
-        </a>
-      </ng-template>
+    <div class="flex gap-2 items-center" *ngIf="vm$ | async as vm">
       <a
         class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors relative"
         routerLink="/cart"
@@ -105,9 +47,78 @@
           {{ vm.cartCount }}
         </span>
       </a>
-      <button class="flex lg:hidden items-center justify-center overflow-hidden rounded-lg h-10 w-10 text-white hover:bg-[#084255] transition-colors">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
+      <div class="relative">
+        <button
+          class="flex items-center gap-2 rounded-lg h-10 px-3 text-white hover:bg-[#084255] transition-colors"
+          type="button"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="isMenuOpen"
+          aria-haspopup="true"
+          aria-label="Open navigation menu"
+        >
+          <span class="material-symbols-outlined">menu</span>
+          <span class="hidden md:inline text-sm font-semibold">More</span>
+        </button>
+        <div
+          *ngIf="isMenuOpen"
+          class="absolute right-0 mt-2 w-56 rounded-xl border border-[#0e3b4a] bg-[#0b3442] shadow-xl p-2 text-sm text-gray-100"
+          (mouseleave)="closeMenu()"
+        >
+          <a
+            class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[#084255] transition-colors"
+            routerLink="/about"
+            routerLinkActive="text-accent"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()"
+          >
+            About
+          </a>
+          <a
+            class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[#084255] transition-colors"
+            routerLink="/contact"
+            routerLinkActive="text-accent"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()"
+          >
+            Contact
+          </a>
+          <a
+            class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[#084255] transition-colors"
+            routerLink="/blog"
+            routerLinkActive="text-accent"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()"
+          >
+            Blog
+          </a>
+          <div class="my-2 border-t border-[#0e3b4a]"></div>
+          <ng-container *ngIf="vm.user?.role === 'admin'; else adminLogin">
+            <a
+              class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[#084255] transition-colors"
+              routerLink="/admin/dashboard"
+              (click)="closeMenu()"
+            >
+              Admin Dashboard
+            </a>
+            <button
+              class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-[#084255] transition-colors"
+              type="button"
+              (click)="logout(); closeMenu()"
+            >
+              Log out
+            </button>
+          </ng-container>
+          <ng-template #adminLogin>
+            <a
+              class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-[#084255] transition-colors"
+              routerLink="/login"
+              (click)="closeMenu()"
+            >
+              Admin Login
+            </a>
+          </ng-template>
+        </div>
+      </div>
     </div>
   </div>
 </header>
