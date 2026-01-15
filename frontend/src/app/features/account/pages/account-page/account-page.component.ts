@@ -58,10 +58,7 @@ export class AccountPageComponent {
   readonly vm$ = combineLatest([this.authState.user$, this.userService.profiles$, this.orderService.orders$]).pipe(
     map(([user, profiles, orders]) => {
       const profile = user ? profiles.find((item) => item.id === user.id) ?? null : null;
-      const filteredOrders = user
-        ? orders.filter((order) => order.userId === user.id || order.email === user.email)
-        : [];
-      return { user, profile, orders: filteredOrders };
+      return { user, profile, orders: user ? orders : [] };
     }),
   );
 

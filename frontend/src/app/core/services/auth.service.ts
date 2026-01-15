@@ -40,10 +40,10 @@ export class AuthService {
   private readonly api = inject(ApiHttpClient);
   private readonly sessionStorage = inject(AuthSessionService);
 
-  login(emailOrUsername: string, password: string): Observable<AuthSession> {
+  login(email: string, password: string): Observable<AuthSession> {
     return this.api
       .post<AuthResponseDto>('/auth/login', {
-        emailOrUsername: emailOrUsername.trim(),
+        email: email.trim(),
         password,
       })
       .pipe(

@@ -1,5 +1,3 @@
-import { ShippingAddress, ShippingMethod } from './checkout';
-
 export enum OrderStatus {
   Confirmed = 'Confirmed',
   Processing = 'Processing',
@@ -19,11 +17,11 @@ export interface OrderItem {
   sku: string;
 }
 
-export interface PaymentInfo {
-  brand: string;
-  last4: string;
-  expMonth: string;
-  expYear: string;
+export interface CustomerDetails {
+  name: string;
+  phone: string;
+  address: string;
+  deliveryDetails: string;
 }
 
 export interface OrderTotals {
@@ -42,13 +40,9 @@ export interface OrderTimeline {
 
 export interface Order {
   id: string;
-  userId?: string;
-  email: string;
   status: OrderStatus;
   items: OrderItem[];
-  shippingAddress: ShippingAddress;
-  shippingMethod: ShippingMethod;
-  payment: PaymentInfo;
+  customer: CustomerDetails;
   totals: OrderTotals;
   timeline: OrderTimeline;
 }

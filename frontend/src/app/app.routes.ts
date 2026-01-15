@@ -47,7 +47,7 @@ export const appRoutes: Routes = [
     component: ProductDetailsPageComponent,
   },
   { path: 'cart', component: CartPageComponent },
-  { path: 'checkout', component: CheckoutPageComponent, canActivate: [authGuard] },
+  { path: 'checkout', component: CheckoutPageComponent },
   { path: 'order-confirmation/:orderId', component: OrderConfirmationPageComponent },
   {
     path: 'track/:orderId',

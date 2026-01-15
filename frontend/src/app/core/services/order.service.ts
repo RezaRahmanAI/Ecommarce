@@ -1,23 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 
 import { MOCK_ORDERS } from '../data/mock-orders';
-import { SHIPPING_METHODS } from '../data/mock-shipping-methods';
 import { CartItem, CartSummary } from '../models/cart';
 import { CheckoutState } from '../models/checkout';
 import { Order, OrderItem, OrderStatus } from '../models/order';
+import { CustomerOrderApiService, CustomerOrderResponse } from './customer-order-api.service';
 
 interface PlaceOrderPayload {
   state: CheckoutState;
   cartItems: CartItem[];
   summary: CartSummary;
-  userId?: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService {
+  private readonly customerOrderApi = inject(CustomerOrderApiService);
   private readonly storageKey = 'orders';
   private readonly ordersSubject = new BehaviorSubject<Order[]>(this.loadOrders());
   readonly orders$ = this.ordersSubject.asObservable();
@@ -30,14 +30,7 @@ export class OrderService {
     return this.ordersSubject.getValue()[0];
   }
 
-  placeOrder(payload: PlaceOrderPayload): Order {
-    const orderId = `MSLM-${Math.floor(100000 + Math.random() * 900000)}`;
-    const shippingMethod = SHIPPING_METHODS.find((method) => method.id === payload.state.shippingMethodId) ??
-      SHIPPING_METHODS[0];
-    const paymentDetails = payload.state.payment;
-    const last4 = paymentDetails.cardNumber.slice(-4) || '4242';
-    const brand = this.resolveCardBrand(paymentDetails.cardNumber);
-
+  placeOrder(payload: PlaceOrderPayload): Observable<Order> {
     const items: OrderItem[] = payload.cartItems.map((item) => ({
       productId: item.productId,
       name: item.name,
@@ -50,37 +43,23 @@ export class OrderService {
       sku: `SKU-${item.productId}`,
     }));
 
-    const order: Order = {
-      id: orderId,
-      userId: payload.userId,
-      email: payload.state.email,
-      status: OrderStatus.Confirmed,
-      items,
-      shippingAddress: payload.state.shippingAddress,
-      shippingMethod,
-      payment: {
-        brand,
-        last4,
-        expMonth: paymentDetails.expMonth || '12',
-        expYear: paymentDetails.expYear || '25',
-      },
-      totals: {
-        subtotal: payload.summary.subtotal,
-        shipping: shippingMethod.price,
-        tax: payload.summary.tax,
-        total: payload.summary.subtotal + payload.summary.tax + shippingMethod.price,
-      },
-      timeline: {
-        confirmedDate: 'Today',
-        processingLabel: 'Pending',
-        shippedEta: 'Est. in 2-3 days',
-        deliveredEta: 'Est. in 4-6 days',
-      },
-    };
-
-    this.ordersSubject.next([order, ...this.ordersSubject.getValue()]);
-    this.persistOrders();
-    return order;
+    return this.customerOrderApi
+      .placeOrder({
+        name: payload.state.fullName,
+        phone: payload.state.phone,
+        address: payload.state.address,
+        deliveryDetails: payload.state.deliveryDetails,
+        itemsCount: payload.summary.itemsCount,
+        total: payload.summary.total,
+      })
+      .pipe(
+        map((response) => this.buildOrder(response, items, payload.summary)),
+        map((order) => {
+          this.ordersSubject.next([order, ...this.ordersSubject.getValue()]);
+          this.persistOrders();
+          return order;
+        }),
+      );
   }
 
   private loadOrders(): Order[] {
@@ -100,16 +79,29 @@ export class OrderService {
     localStorage.setItem(this.storageKey, JSON.stringify(this.ordersSubject.getValue()));
   }
 
-  private resolveCardBrand(cardNumber: string): string {
-    if (cardNumber.startsWith('4')) {
-      return 'Visa';
-    }
-    if (cardNumber.startsWith('5')) {
-      return 'Mastercard';
-    }
-    if (cardNumber.startsWith('3')) {
-      return 'Amex';
-    }
-    return 'Card';
+  private buildOrder(response: CustomerOrderResponse, items: OrderItem[], summary: CartSummary): Order {
+    return {
+      id: response.orderId,
+      status: OrderStatus.Confirmed,
+      items,
+      customer: {
+        name: response.name,
+        phone: response.phone,
+        address: response.address,
+        deliveryDetails: response.deliveryDetails,
+      },
+      totals: {
+        subtotal: summary.subtotal,
+        shipping: summary.shipping,
+        tax: summary.tax,
+        total: summary.total,
+      },
+      timeline: {
+        confirmedDate: 'Today',
+        processingLabel: 'Pending',
+        shippedEta: 'Est. in 2-3 days',
+        deliveredEta: 'Est. in 4-6 days',
+      },
+    };
   }
 }

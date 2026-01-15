@@ -2,393 +2,100 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
     <div class="lg:grid lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
       <div class="lg:col-span-7">
-        <nav aria-label="Progress">
-          <ol class="flex items-center space-x-4 mb-8" role="list">
-            <li class="flex items-center">
-              <span
-                class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold"
-                [ngClass]="stepClasses(1)"
-              >
-                1
-              </span>
-              <span class="ml-3 text-sm font-medium" [ngClass]="stepLabelClasses(1)">Shipping</span>
-              <span class="material-icons ml-4 text-slate-300 text-sm">arrow_forward_ios</span>
-            </li>
-            <li class="flex items-center">
-              <span
-                class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold"
-                [ngClass]="stepClasses(2)"
-              >
-                2
-              </span>
-              <span class="ml-3 text-sm font-medium" [ngClass]="stepLabelClasses(2)">Payment</span>
-              <span class="material-icons ml-4 text-slate-300 text-sm">arrow_forward_ios</span>
-            </li>
-            <li class="flex items-center">
-              <span
-                class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold"
-                [ngClass]="stepClasses(3)"
-              >
-                3
-              </span>
-              <span class="ml-3 text-sm font-medium" [ngClass]="stepLabelClasses(3)">Review</span>
-            </li>
-          </ol>
-        </nav>
-        <form [formGroup]="checkoutForm">
-          <ng-container *ngIf="currentStep === 1">
-            <section aria-labelledby="contact-heading" class="mb-10">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white" id="contact-heading">Contact Information</h2>
-              <span class="text-sm text-slate-500 dark:text-slate-400">
-                Already have an account?
-                <a class="text-primary hover:underline font-medium dark:text-accent" href="#">Log in</a>
-              </span>
-            </div>
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="email-address">Email address</label>
-              <div class="mt-1">
-                <input
-                  autocomplete="email"
-                  class="block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                  id="email-address"
-                  name="email-address"
-                  placeholder="you@example.com"
-                  type="email"
-                  formControlName="email"
-                />
-              </div>
-              <div class="mt-4 flex items-center">
-                <input
-                  class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                  id="newsletter"
-                  name="newsletter"
-                  type="checkbox"
-                  formControlName="newsletter"
-                />
-                <label class="ml-2 block text-sm text-slate-500 dark:text-slate-400" for="newsletter">
-                  Email me with news and offers
-                </label>
-              </div>
-            </div>
-            </section>
-            <section aria-labelledby="shipping-heading" class="mb-10" formGroupName="shippingAddress">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="shipping-heading">Shipping Address</h2>
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="first-name">First name</label>
-                  <input
-                    autocomplete="given-name"
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="first-name"
-                    name="first-name"
-                    type="text"
-                    formControlName="firstName"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="last-name">Last name</label>
-                  <input
-                    autocomplete="family-name"
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="last-name"
-                    name="last-name"
-                    type="text"
-                    formControlName="lastName"
-                  />
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="address">Address</label>
-                <input
-                  autocomplete="street-address"
-                  class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                  id="address"
-                  name="address"
-                  type="text"
-                  formControlName="address"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="apartment">
-                  Apartment, suite, etc. (optional)
-                </label>
-                <input
-                  class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                  id="apartment"
-                  name="apartment"
-                  type="text"
-                  formControlName="apartment"
-                />
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="city">City</label>
-                  <input
-                    autocomplete="address-level2"
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="city"
-                    name="city"
-                    type="text"
-                    formControlName="city"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="region">State / Province</label>
-                  <input
-                    autocomplete="address-level1"
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="region"
-                    name="region"
-                    type="text"
-                    formControlName="region"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="postal-code">Postal code</label>
-                  <input
-                    autocomplete="postal-code"
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="postal-code"
-                    name="postal-code"
-                    type="text"
-                    formControlName="postalCode"
-                  />
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="country">Country/Region</label>
-                <select
-                  autocomplete="country-name"
-                  class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                  id="country"
-                  name="country"
-                  formControlName="country"
-                >
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>United Kingdom</option>
-                  <option>United Arab Emirates</option>
-                  <option>Saudi Arabia</option>
-                </select>
-              </div>
-            </div>
-            </section>
-            <section aria-labelledby="method-heading" class="mb-10">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="method-heading">Shipping Method</h2>
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <label
-                class="relative flex cursor-pointer p-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                <div class="flex items-center h-5">
-                  <input
-                    class="h-4 w-4 border-slate-300 text-primary focus:ring-primary"
-                    id="standard-shipping"
-                    name="shipping-method"
-                    type="radio"
-                    formControlName="shippingMethod"
-                    [value]="shippingMethods[0].id"
-                  />
-                </div>
-                <div class="ml-3 flex flex-col">
-                  <span class="block text-sm font-medium text-slate-900 dark:text-white">{{ shippingMethods[0].label }}</span>
-                  <span class="block text-sm text-slate-500 dark:text-slate-400">{{ shippingMethods[0].description }}</span>
-                </div>
-                <div class="ml-auto">
-                  <span class="text-sm font-medium text-slate-900 dark:text-white">
-                    <ng-container *ngIf="shippingMethods[0].price === 0; else standardShipping">
-                      Free
-                    </ng-container>
-                    <ng-template #standardShipping>
-                      <app-price-display [amount]="shippingMethods[0].price" size="sm"></app-price-display>
-                    </ng-template>
-                  </span>
-                </div>
-              </label>
-              <label class="relative flex cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                <div class="flex items-center h-5">
-                  <input
-                    class="h-4 w-4 border-slate-300 text-primary focus:ring-primary"
-                    id="express-shipping"
-                    name="shipping-method"
-                    type="radio"
-                    formControlName="shippingMethod"
-                    [value]="shippingMethods[1].id"
-                  />
-                </div>
-                <div class="ml-3 flex flex-col">
-                  <span class="block text-sm font-medium text-slate-900 dark:text-white">{{ shippingMethods[1].label }}</span>
-                  <span class="block text-sm text-slate-500 dark:text-slate-400">{{ shippingMethods[1].description }}</span>
-                </div>
-                <div class="ml-auto">
-                  <span class="text-sm font-medium text-slate-900 dark:text-white">
-                    <ng-container *ngIf="shippingMethods[1].price === 0; else expressShipping">
-                      Free
-                    </ng-container>
-                    <ng-template #expressShipping>
-                      <app-price-display [amount]="shippingMethods[1].price" size="sm"></app-price-display>
-                    </ng-template>
-                  </span>
-                </div>
-              </label>
-            </div>
-            </section>
-            <div
-              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
-            >
-              <a
-                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
-                routerLink="/cart"
-              >
-                <span class="material-icons text-base mr-1">arrow_back</span> Return to cart
-              </a>
-              <button
-                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                type="button"
-                (click)="continueToPayment()"
-              >
-                Continue to Payment
-              </button>
-            </div>
-          </ng-container>
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Place your order</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Enter your delivery details to place the order. Returning customers can provide their phone number to
+            autofill saved information.
+          </p>
+        </div>
 
-          <ng-container *ngIf="currentStep === 2">
-            <section aria-labelledby="payment-heading" class="mb-10" formGroupName="payment">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="payment-heading">Payment</h2>
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="cardholder">
-                    Cardholder name
-                  </label>
-                  <input
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="cardholder"
-                    type="text"
-                    formControlName="cardholderName"
-                    placeholder="Amina Noor"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="card-number">Card number</label>
-                  <input
-                    class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                    id="card-number"
-                    type="text"
-                    formControlName="cardNumber"
-                    placeholder="4242 4242 4242 4242"
-                  />
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="exp-month">Exp. Month</label>
-                    <input
-                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                      id="exp-month"
-                      type="text"
-                      formControlName="expMonth"
-                      placeholder="MM"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="exp-year">Exp. Year</label>
-                    <input
-                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                      id="exp-year"
-                      type="text"
-                      formControlName="expYear"
-                      placeholder="YY"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="cvc">CVC</label>
-                    <input
-                      class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
-                      id="cvc"
-                      type="text"
-                      formControlName="cvc"
-                      placeholder="123"
-                    />
-                  </div>
-                </div>
-                <div class="flex items-center">
-                  <input
-                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                    id="save-card"
-                    type="checkbox"
-                    formControlName="saveCard"
-                  />
-                  <label class="ml-2 block text-sm text-slate-500 dark:text-slate-400" for="save-card">
-                    Save card for next time
-                  </label>
-                </div>
-              </div>
-            </section>
-            <div
-              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
-            >
-              <button
-                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
-                type="button"
-                (click)="backToShipping()"
-              >
-                <span class="material-icons text-base mr-1">arrow_back</span> Back to shipping
-              </button>
-              <button
-                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                type="button"
-                (click)="continueToReview()"
-              >
-                Continue to Review
-              </button>
+        <form [formGroup]="checkoutForm" class="space-y-6">
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="full-name">Full name</label>
+              <input
+                class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                id="full-name"
+                type="text"
+                formControlName="fullName"
+                placeholder="Amina Noor"
+              />
+              <p class="text-xs text-red-500 mt-1" *ngIf="checkoutForm.controls.fullName.touched && checkoutForm.controls.fullName.invalid">
+                Your name is required.
+              </p>
             </div>
-          </ng-container>
 
-          <ng-container *ngIf="currentStep === 3">
-            <section aria-labelledby="review-heading" class="mb-10">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4" id="review-heading">Review</h2>
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                <div>
-                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Shipping</h3>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ checkoutForm.controls.shippingAddress.controls.firstName.value }}
-                    {{ checkoutForm.controls.shippingAddress.controls.lastName.value }} ·
-                    {{ checkoutForm.controls.shippingAddress.controls.address.value }},
-                    {{ checkoutForm.controls.shippingAddress.controls.city.value }}
-                  </p>
-                </div>
-                <div>
-                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Payment</h3>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">
-                    Card ending in {{ checkoutForm.controls.payment.controls.cardNumber.value | slice:-4 }}
-                  </p>
-                </div>
-                <div *ngIf="checkoutForm.controls.promoCode.value" class="text-sm text-slate-500 dark:text-slate-400">
-                  Promo code: <span class="font-semibold">{{ checkoutForm.controls.promoCode.value }}</span>
-                </div>
-              </div>
-            </section>
-            <div
-              class="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4"
-            >
-              <button
-                class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
-                type="button"
-                (click)="backToPayment()"
-              >
-                <span class="material-icons text-base mr-1">arrow_back</span> Back to payment
-              </button>
-              <button
-                class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                type="button"
-                (click)="placeOrder()"
-              >
-                Place Order
-              </button>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="phone">Phone number</label>
+              <input
+                class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                placeholder="+1 (555) 123-4567"
+              />
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" *ngIf="didAutofill">
+                Saved details found and autofilled.
+              </p>
+              <p class="text-xs text-red-500 mt-1" *ngIf="checkoutForm.controls.phone.touched && checkoutForm.controls.phone.invalid">
+                A valid phone number is required.
+              </p>
             </div>
-          </ng-container>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="address">Delivery address</label>
+              <textarea
+                class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                id="address"
+                rows="3"
+                formControlName="address"
+                placeholder="Street, city, and any landmarks"
+              ></textarea>
+              <p class="text-xs text-red-500 mt-1" *ngIf="checkoutForm.controls.address.touched && checkoutForm.controls.address.invalid">
+                Your delivery address is required.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="delivery-details">Product delivery details</label>
+              <textarea
+                class="mt-1 block w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-3"
+                id="delivery-details"
+                rows="4"
+                formControlName="deliveryDetails"
+                placeholder="Preferred delivery time, drop-off notes, or other instructions"
+              ></textarea>
+              <p
+                class="text-xs text-red-500 mt-1"
+                *ngIf="checkoutForm.controls.deliveryDetails.touched && checkoutForm.controls.deliveryDetails.invalid"
+              >
+                Please add delivery instructions.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4">
+            <a
+              class="flex items-center text-sm font-medium text-primary hover:text-primary/80 dark:text-accent dark:hover:text-accent/80 transition-colors"
+              routerLink="/cart"
+            >
+              <span class="material-icons text-base mr-1">arrow_back</span> Return to cart
+            </a>
+            <button
+              class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-4 text-base font-semibold shadow-md transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              type="button"
+              (click)="placeOrder()"
+              [disabled]="isLoading"
+            >
+              {{ isLoading ? 'Placing order...' : 'Place Order' }}
+            </button>
+          </div>
+
+          <p class="text-sm text-red-500" *ngIf="errorMessage">{{ errorMessage }}</p>
         </form>
       </div>
+
       <div class="mt-10 lg:mt-0 lg:col-span-5" *ngIf="vm$ | async as vm">
         <div class="sticky top-24">
           <h2 class="sr-only">Order Summary</h2>
@@ -422,28 +129,6 @@
                   </div>
                 </li>
               </ul>
-            </div>
-            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800">
-              <div class="flex space-x-2" [formGroup]="checkoutForm">
-                <div class="flex-grow">
-                  <label class="sr-only" for="discount-code">Discount code</label>
-                  <input
-                    class="block w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-2.5 placeholder-slate-400"
-                    id="discount-code"
-                    name="discount-code"
-                    placeholder="Discount code"
-                    type="text"
-                    formControlName="promoCode"
-                  />
-                </div>
-                <button
-                  class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 px-4 rounded-lg font-medium text-sm transition-colors"
-                  type="button"
-                  (click)="applyPromoCode()"
-                >
-                  Apply
-                </button>
-              </div>
             </div>
             <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 space-y-4">
               <div class="flex items-center justify-between">
@@ -483,23 +168,6 @@
                   ></app-price-display>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="mt-6 flex justify-center gap-4 text-slate-300 dark:text-slate-600">
-            <div aria-label="Visa" class="h-8 w-12 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center">
-              <span class="font-bold text-[10px] text-slate-500">VISA</span>
-            </div>
-            <div aria-label="Mastercard" class="h-8 w-12 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center">
-              <div class="flex -space-x-1">
-                <div class="w-3 h-3 rounded-full bg-slate-400 opacity-80"></div>
-                <div class="w-3 h-3 rounded-full bg-slate-500 opacity-80"></div>
-              </div>
-            </div>
-            <div aria-label="Amex" class="h-8 w-12 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center">
-              <span class="font-bold text-[8px] tracking-tighter text-slate-500">AMEX</span>
-            </div>
-            <div aria-label="PayPal" class="h-8 w-12 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center">
-              <span class="font-serif italic font-bold text-[10px] text-slate-500">P</span>
             </div>
           </div>
         </div>

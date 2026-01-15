@@ -1,10 +1,8 @@
 import { Order, OrderStatus } from '../models/order';
-import { SHIPPING_METHODS } from './mock-shipping-methods';
 
 export const MOCK_ORDERS: Order[] = [
   {
     id: 'MSLM-890234',
-    email: 'sarah@example.com',
     status: OrderStatus.Processing,
     items: [
       {
@@ -32,22 +30,11 @@ export const MOCK_ORDERS: Order[] = [
         sku: 'MS-HJ-042',
       },
     ],
-    shippingAddress: {
-      firstName: 'Sarah',
-      lastName: 'Ahmed',
-      address: '123 Olive Grove Avenue',
-      apartment: 'Apt 4B',
-      city: 'New York',
-      region: 'NY',
-      postalCode: '10012',
-      country: 'United States',
-    },
-    shippingMethod: SHIPPING_METHODS[0],
-    payment: {
-      brand: 'Mastercard',
-      last4: '4242',
-      expMonth: '12',
-      expYear: '25',
+    customer: {
+      name: 'Sarah Ahmed',
+      phone: '+1 (555) 201-8890',
+      address: '123 Olive Grove Avenue, Apt 4B, New York, NY 10012',
+      deliveryDetails: 'Leave at the front desk, call on arrival.',
     },
     totals: {
       subtotal: 170,
