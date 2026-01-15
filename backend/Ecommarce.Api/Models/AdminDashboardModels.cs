@@ -2,13 +2,11 @@ namespace Ecommarce.Api.Models;
 
 public record DashboardStats(
   decimal TotalRevenue,
-  string RevenueTrend,
-  string NewOrders,
-  string OrdersTrend,
-  string ActiveCustomers,
-  string CustomersTrend,
-  string LowStock,
-  string LowStockTrend
+  string TotalOrders,
+  string DeliveredOrders,
+  string OrdersLeft,
+  string ReturnedOrders,
+  string CustomerQueries
 );
 
 public record OrderItem(

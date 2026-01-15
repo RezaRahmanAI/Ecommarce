@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import {
   DashboardStats,
@@ -32,12 +32,16 @@ export class DashboardOverviewComponent {
     this.selectedRange = value;
   }
 
-  exportRevenueReport(): void {
+  async exportRevenueReport(): Promise<void> {
+    const stats = await firstValueFrom(this.stats$);
     const csvRows = [
       ['Range', 'Metric', 'Value'],
-      [this.selectedRange, 'Total Revenue', 'BDT 45,231'],
-      [this.selectedRange, 'New Orders', '1,204'],
-      [this.selectedRange, 'Active Customers', '892'],
+      [this.selectedRange, 'Total Order Value', stats.totalRevenue.toFixed(2)],
+      [this.selectedRange, 'Total Orders', stats.totalOrders],
+      [this.selectedRange, 'Delivered Orders', stats.deliveredOrders],
+      [this.selectedRange, 'Orders Left', stats.ordersLeft],
+      [this.selectedRange, 'Returned Orders', stats.returnedOrders],
+      [this.selectedRange, 'Customer Queries', stats.customerQueries],
     ];
 
     const csvContent = csvRows.map((row) => row.join(',')).join('\n');

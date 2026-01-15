@@ -447,19 +447,19 @@ public class AdminDataStore
   {
     var orders = GetOrders();
     var totalRevenue = orders.Sum(order => order.Total);
-    var newOrders = orders.Count(order => DateTime.ParseExact(order.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture) >= DateTime.UtcNow.AddDays(-30));
-    var activeCustomers = orders.Select(order => order.CustomerName).Distinct().Count();
-    var lowStock = GetProducts().Count(product => product.Stock <= 5);
+    var totalOrders = orders.Count;
+    var deliveredOrders = orders.Count(order => order.Status == OrderStatus.Delivered);
+    var ordersLeft = orders.Count(order => order.Status is OrderStatus.Processing or OrderStatus.Shipped);
+    var returnedOrders = orders.Count(order => order.Status == OrderStatus.Refund);
+    var customerQueries = Math.Max(3, orders.Select(order => order.CustomerName).Distinct().Count() / 2);
 
     return new DashboardStats(
       TotalRevenue: totalRevenue,
-      RevenueTrend: "+12.4%",
-      NewOrders: newOrders.ToString(CultureInfo.InvariantCulture),
-      OrdersTrend: "+6.2%",
-      ActiveCustomers: activeCustomers.ToString(CultureInfo.InvariantCulture),
-      CustomersTrend: "+3.1%",
-      LowStock: lowStock.ToString(CultureInfo.InvariantCulture),
-      LowStockTrend: "-1.4%"
+      TotalOrders: totalOrders.ToString(CultureInfo.InvariantCulture),
+      DeliveredOrders: deliveredOrders.ToString(CultureInfo.InvariantCulture),
+      OrdersLeft: ordersLeft.ToString(CultureInfo.InvariantCulture),
+      ReturnedOrders: returnedOrders.ToString(CultureInfo.InvariantCulture),
+      CustomerQueries: customerQueries.ToString(CultureInfo.InvariantCulture)
     );
   }
 

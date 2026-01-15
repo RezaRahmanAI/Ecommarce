@@ -1,12 +1,10 @@
 export interface DashboardStats {
   totalRevenue: number;
-  revenueTrend: string;
-  newOrders: string;
-  ordersTrend: string;
-  activeCustomers: string;
-  customersTrend: string;
-  lowStock: string;
-  lowStockTrend: string;
+  totalOrders: string;
+  deliveredOrders: string;
+  ordersLeft: string;
+  returnedOrders: string;
+  customerQueries: string;
 }
 
 export interface OrderItem {
