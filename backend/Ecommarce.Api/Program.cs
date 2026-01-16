@@ -78,7 +78,6 @@ if (app.Environment.IsDevelopment())
 }
 
 await ApplyDatabaseMigrationsAsync(app.Services);
-await SeedAdminUserAsync(app.Services);
 
 app.MapControllers();
 
@@ -89,34 +88,44 @@ static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services)
   await using var scope = services.CreateAsyncScope();
   var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
   await dbContext.Database.MigrateAsync();
+  await SeedAdminUserAsync(scope.ServiceProvider);
 }
 
 static async Task SeedAdminUserAsync(IServiceProvider services)
 {
-  await using var scope = services.CreateAsyncScope();
-  var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-  var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-  var settings = scope.ServiceProvider.GetRequiredService<IOptions<AdminUserSettings>>().Value;
+  var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+  var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+  var settings = services.GetRequiredService<IOptions<AdminUserSettings>>().Value;
 
   if (string.IsNullOrWhiteSpace(settings.Email) || string.IsNullOrWhiteSpace(settings.Password))
   {
     return;
   }
 
-  if (!await roleManager.RoleExistsAsync("admin"))
+  var adminRole = "admin";
+  if (!await roleManager.RoleExistsAsync(adminRole))
   {
-    await roleManager.CreateAsync(new IdentityRole("admin"));
+    await roleManager.CreateAsync(new IdentityRole(adminRole));
   }
 
+  var desiredUsername = string.IsNullOrWhiteSpace(settings.Username)
+    ? settings.Email
+    : settings.Username;
   var user = await userManager.FindByEmailAsync(settings.Email);
+  if (user is null && !string.IsNullOrWhiteSpace(settings.Username))
+  {
+    user = await userManager.FindByNameAsync(settings.Username);
+  }
+
   if (user is null)
   {
     user = new ApplicationUser
     {
-      UserName = settings.Email,
+      UserName = desiredUsername,
       Email = settings.Email,
       FirstName = settings.FirstName,
-      LastName = settings.LastName
+      LastName = settings.LastName,
+      EmailConfirmed = true
     };
 
     var result = await userManager.CreateAsync(user, settings.Password);
@@ -125,9 +134,61 @@ static async Task SeedAdminUserAsync(IServiceProvider services)
       return;
     }
   }
-
-  if (!await userManager.IsInRoleAsync(user, "admin"))
+  else
   {
-    await userManager.AddToRoleAsync(user, "admin");
+    var shouldUpdate = false;
+    if (!string.Equals(user.UserName, desiredUsername, StringComparison.Ordinal))
+    {
+      user.UserName = desiredUsername;
+      shouldUpdate = true;
+    }
+
+    if (!string.Equals(user.Email, settings.Email, StringComparison.OrdinalIgnoreCase))
+    {
+      user.Email = settings.Email;
+      shouldUpdate = true;
+    }
+
+    if (!string.Equals(user.FirstName, settings.FirstName, StringComparison.Ordinal))
+    {
+      user.FirstName = settings.FirstName;
+      shouldUpdate = true;
+    }
+
+    if (!string.Equals(user.LastName, settings.LastName, StringComparison.Ordinal))
+    {
+      user.LastName = settings.LastName;
+      shouldUpdate = true;
+    }
+
+    if (!user.EmailConfirmed)
+    {
+      user.EmailConfirmed = true;
+      shouldUpdate = true;
+    }
+
+    if (shouldUpdate)
+    {
+      var updateResult = await userManager.UpdateAsync(user);
+      if (!updateResult.Succeeded)
+      {
+        return;
+      }
+    }
+
+    if (!await userManager.CheckPasswordAsync(user, settings.Password))
+    {
+      var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+      var resetResult = await userManager.ResetPasswordAsync(user, resetToken, settings.Password);
+      if (!resetResult.Succeeded)
+      {
+        return;
+      }
+    }
+  }
+
+  if (!await userManager.IsInRoleAsync(user, adminRole))
+  {
+    await userManager.AddToRoleAsync(user, adminRole);
   }
 }
