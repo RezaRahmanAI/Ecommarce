@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 
 import { AuthStateService } from '../../../../core/services/auth-state.service';
@@ -12,11 +12,10 @@ import { AuthStateService } from '../../../../core/services/auth-state.service';
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.page.html',
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -27,6 +26,12 @@ export class LoginPageComponent {
   isPasswordVisible = false;
   isLoading = false;
   errorMessage = '';
+
+  ngOnInit(): void {
+    if (this.authState.getSessionSnapshot()) {
+      void this.router.navigateByUrl('/admin/dashboard');
+    }
+  }
 
   get email() {
     return this.loginForm.controls.email;
@@ -61,8 +66,7 @@ export class LoginPageComponent {
       )
       .subscribe({
         next: (session) => {
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/account';
-          void this.router.navigateByUrl(returnUrl);
+          void this.router.navigateByUrl('/admin/dashboard');
         },
         error: (error: Error) => {
           this.errorMessage = error.message || 'Invalid credentials';
