@@ -7,6 +7,7 @@ import { AppComponent } from './app/app.component';
 import { appRoutes } from './app/app.routes';
 import { API_CONFIG } from './app/core/config/api.config';
 import { authTokenInterceptor } from './app/core/http/auth-token.interceptor';
+import { environment } from './environments/environment';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -22,7 +23,7 @@ bootstrapApplication(AppComponent, {
     {
       provide: API_CONFIG,
       useValue: {
-        baseUrl: '/api',
+        baseUrl: environment.apiBaseUrl,
       },
     },
   ],

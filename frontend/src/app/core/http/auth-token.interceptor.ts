@@ -4,12 +4,23 @@ import { inject } from '@angular/core';
 import { API_CONFIG, ApiConfig } from '../config/api.config';
 import { AuthSessionService } from '../services/auth-session.service';
 
+const getBasePath = (baseUrl: string): string => {
+  try {
+    return new URL(baseUrl).pathname.replace(/\/$/, '');
+  } catch {
+    return baseUrl.replace(/\/$/, '');
+  }
+};
+
 const isApiRequest = (url: string, baseUrl: string): boolean => {
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
+  const basePath = getBasePath(normalizedBaseUrl);
+
   if (url.startsWith('/')) {
-    return url.startsWith(baseUrl) || url.startsWith('/api');
+    return url.startsWith(basePath);
   }
 
-  return url.startsWith(baseUrl);
+  return url.startsWith(normalizedBaseUrl);
 };
 
 export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
