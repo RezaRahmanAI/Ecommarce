@@ -57,7 +57,12 @@ builder.Services.AddCors(options =>
       return;
     }
 
-    policy.WithOrigins("https://your-domain.example")
+    policy.WithOrigins(
+        "http://localhost:4200",
+            "https://cecom.octimsbd.com",
+            "http://cecom.octimsbd.com",
+            "http://cecom.octimsbd.com",
+            "https://cecom.octimsbd.com")
       .AllowAnyHeader()
       .AllowAnyMethod();
   });
