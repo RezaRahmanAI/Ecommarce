@@ -946,76 +946,171 @@ public sealed class AdminRepository : IAdminRepository
     ];
   }
 
-  private static List<Product> SeedProducts()
-  {
-    var ratings = BuildDefaultRatings();
+    private static List<Product> SeedProducts()
+    {
+        var ratings = BuildDefaultRatings();
 
-    return
-    [
-      BuildProduct(
-        id: 1,
-        name: "Luxe Embroidered Abaya",
-        description: "Flowing chiffon abaya with embroidered cuffs.",
-        category: "Women",
-        subCategory: "Occasion Wear",
-        price: 199.00m,
-        salePrice: 149.00m,
-        purchaseRate: 110.00m,
-        gender: "women",
-        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80",
-        featured: true,
-        newArrival: true,
-        ratings: ratings
-      ),
-      BuildProduct(
-        id: 2,
-        name: "Classic Linen Abaya",
-        description: "Breathable linen blend for daily wear.",
-        category: "Women",
-        subCategory: "Everyday",
-        price: 129.00m,
-        salePrice: null,
-        purchaseRate: 78.00m,
-        gender: "women",
-        imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
-        featured: false,
-        newArrival: true,
-        ratings: ratings
-      ),
-      BuildProduct(
-        id: 3,
-        name: "Essential Jersey Hijab",
-        description: "Soft stretch jersey hijab in neutral tones.",
-        category: "Accessories",
-        subCategory: "Hijabs",
-        price: 29.00m,
-        salePrice: null,
-        purchaseRate: 12.00m,
-        gender: "accessories",
-        imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
-        featured: true,
-        newArrival: false,
-        ratings: ratings
-      ),
-      BuildProduct(
-        id: 4,
-        name: "Structured Prayer Set",
-        description: "Two-piece prayer set with matching pouch.",
-        category: "Women",
-        subCategory: "Prayer Sets",
-        price: 89.00m,
-        salePrice: null,
-        purchaseRate: 52.00m,
-        gender: "women",
-        imageUrl: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=600&q=80",
-        featured: false,
-        newArrival: false,
-        ratings: ratings
-      )
-    ];
-  }
+        return
+        [
+          // ===== WOMEN =====
+          BuildProduct(
+      id: 1,
+      name: "Luxe Embroidered Abaya",
+      description: "Flowing chiffon abaya with embroidered cuffs.",
+      category: "Women",
+      subCategory: "Occasion Wear",
+      price: 199.00m,
+      salePrice: 149.00m,
+      purchaseRate: 110.00m,
+      gender: "women",
+      imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80",
+      featured: true,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 2,
+      name: "Classic Linen Abaya",
+      description: "Breathable linen blend for daily wear.",
+      category: "Women",
+      subCategory: "Everyday",
+      price: 129.00m,
+      salePrice: null,
+      purchaseRate: 78.00m,
+      gender: "women",
+      imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 3,
+      name: "Essential Jersey Hijab",
+      description: "Soft stretch jersey hijab in neutral tones.",
+      category: "Accessories",
+      subCategory: "Hijabs",
+      price: 29.00m,
+      salePrice: null,
+      purchaseRate: 12.00m,
+      gender: "accessories",
+      imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+      featured: true,
+      newArrival: false,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 4,
+      name: "Structured Prayer Set",
+      description: "Two-piece prayer set with matching pouch.",
+      category: "Women",
+      subCategory: "Prayer Sets",
+      price: 89.00m,
+      salePrice: null,
+      purchaseRate: 52.00m,
+      gender: "women",
+      imageUrl: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: false,
+      ratings: ratings
+    ),
 
-  private static Product BuildProduct(
+    // ===== MEN =====
+    BuildProduct(
+      id: 5,
+      name: "Classic White Thobe",
+      description: "Premium cotton thobe for daily and prayer wear.",
+      category: "Men",
+      subCategory: "Thobes",
+      price: 119.00m,
+      salePrice: 99.00m,
+      purchaseRate: 70.00m,
+      gender: "men",
+      imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80",
+      featured: true,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 6,
+      name: "Modern Fit Kurta",
+      description: "Tailored kurta with breathable fabric.",
+      category: "Men",
+      subCategory: "Kurtas",
+      price: 89.00m,
+      salePrice: null,
+      purchaseRate: 55.00m,
+      gender: "men",
+      imageUrl: "https://images.unsplash.com/photo-1622445275463-afa2e64f2fca?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 7,
+      name: "Casual Linen Shirt",
+      description: "Lightweight shirt perfect for warm climates.",
+      category: "Men",
+      subCategory: "Casual Wear",
+      price: 69.00m,
+      salePrice: null,
+      purchaseRate: 40.00m,
+      gender: "men",
+      imageUrl: "https://images.unsplash.com/photo-1520974735194-6c7a44a3c52f?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: false,
+      ratings: ratings
+    ),
+
+    // ===== CHILDREN =====
+    BuildProduct(
+      id: 8,
+      name: "Girls Floral Abaya",
+      description: "Lightweight abaya with soft floral patterns.",
+      category: "Children",
+      subCategory: "Girls Wear",
+      price: 59.00m,
+      salePrice: 49.00m,
+      purchaseRate: 32.00m,
+      gender: "children",
+      imageUrl: "https://images.unsplash.com/photo-1542060748-10c28b62716c?auto=format&fit=crop&w=600&q=80",
+      featured: true,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 9,
+      name: "Boys Cotton Thobe",
+      description: "Comfortable thobe designed for kids.",
+      category: "Children",
+      subCategory: "Boys Wear",
+      price: 55.00m,
+      salePrice: null,
+      purchaseRate: 30.00m,
+      gender: "children",
+      imageUrl: "https://images.unsplash.com/photo-1602810318009-08d64d4d0e7f?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: true,
+      ratings: ratings
+    ),
+    BuildProduct(
+      id: 10,
+      name: "Kids Prayer Outfit",
+      description: "Soft two-piece prayer outfit for children.",
+      category: "Children",
+      subCategory: "Prayer Wear",
+      price: 49.00m,
+      salePrice: null,
+      purchaseRate: 28.00m,
+      gender: "children",
+      imageUrl: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=600&q=80",
+      featured: false,
+      newArrival: false,
+      ratings: ratings
+    )
+        ];
+    }
+
+    private static Product BuildProduct(
     int id,
     string name,
     string description,
