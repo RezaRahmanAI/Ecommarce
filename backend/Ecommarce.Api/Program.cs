@@ -51,20 +51,9 @@ builder.Services.AddCors(options =>
 {
   options.AddPolicy("AppCors", policy =>
   {
-    if (builder.Environment.IsDevelopment())
-    {
-      policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-      return;
-    }
-
-    policy.WithOrigins(
-        "http://localhost:4200",
-            "https://cecom.octimsbd.com",
-            "http://cecom.octimsbd.com",
-            "http://cecom.octimsbd.com",
-            "https://cecom.octimsbd.com")
-      .AllowAnyHeader()
-      .AllowAnyMethod();
+    policy.AllowAnyOrigin()
+          .AllowAnyHeader()
+          .AllowAnyMethod();
   });
 });
 
