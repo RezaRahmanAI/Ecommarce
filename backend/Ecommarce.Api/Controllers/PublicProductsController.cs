@@ -73,6 +73,7 @@ public class PublicProductsController : ControllerBase
     /// </summary>
     [HttpGet("new-arrivals")]
     public async Task<IActionResult> GetNewArrivals([FromQuery] int? limit = 10)
+    
     {
         var query = new GetProductsQuery
         {

@@ -14,6 +14,23 @@ public class ProductConfiguration : IEntityTypeConfiguration<ProductEntity>
     private const int RatingPrecision = 4;
     private const int RatingScale = 2;
 
+    private static List<string> DeserializeListSafe(string v)
+    {
+        if (string.IsNullOrEmpty(v))
+        {
+            return new List<string>();
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>();
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
     public void Configure(EntityTypeBuilder<ProductEntity> builder)
     {
         builder.ToTable("Products");
@@ -57,9 +74,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<ProductEntity>
         // JSON columns for lists
         var stringListConverter = new ValueConverter<List<string>, string>(
             v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-            v => string.IsNullOrEmpty(v) 
-                ? new List<string>() 
-                : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
+            v => DeserializeListSafe(v));
 
         var stringListComparer = new ValueComparer<List<string>>(
             (c1, c2) => c1!.SequenceEqual(c2!),
