@@ -104,11 +104,65 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             ImageUrl = p.ImageUrl,
             StatusActive = p.StatusActive,
             MediaUrls = p.MediaUrls,
-            Ratings = p.Ratings,
-            Images = p.Images,
-            Variants = p.Variants,
-            Meta = p.Meta,
-            RelatedProducts = p.RelatedProducts
+            
+            Ratings = p.Ratings == null ? null : new ProductRatingsDto
+            {
+                AvgRating = p.Ratings.AvgRating,
+                ReviewCount = p.Ratings.ReviewCount,
+                RatingBreakdown = p.Ratings.RatingBreakdown?.Select(r => new RatingBreakdownItemDto
+                {
+                    Rating = r.Rating,
+                    Percentage = r.Percentage
+                }).ToList() ?? new()
+            },
+            
+            Images = p.Images == null ? null : new ProductImagesDto
+            {
+                MainImage = new ProductImageDto
+                {
+                    Type = p.Images.MainImage.Type,
+                    Label = p.Images.MainImage.Label,
+                    Url = p.Images.MainImage.Url,
+                    Alt = p.Images.MainImage.Alt
+                },
+                Thumbnails = p.Images.Thumbnails?.Select(i => new ProductImageDto
+                {
+                    Type = i.Type,
+                    Label = i.Label,
+                    Url = i.Url,
+                    Alt = i.Alt
+                }).ToList() ?? new()
+            },
+            
+            Variants = p.Variants == null ? null : new ProductVariantsDto
+            {
+                Colors = p.Variants.Colors?.Select(c => new VariantColorDto
+                {
+                    Name = c.Name,
+                    Hex = c.Hex,
+                    Selected = c.Selected
+                }).ToList() ?? new(),
+                Sizes = p.Variants.Sizes?.Select(s => new VariantSizeDto
+                {
+                    Label = s.Label,
+                    Stock = s.Stock,
+                    Selected = s.Selected
+                }).ToList() ?? new()
+            },
+            
+            Meta = p.Meta == null ? null : new ProductMetaDto
+            {
+                FabricAndCare = p.Meta.FabricAndCare,
+                ShippingAndReturns = p.Meta.ShippingAndReturns
+            },
+            
+            RelatedProducts = p.RelatedProducts?.Select(r => new RelatedProductInfoDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Price = r.Price,
+                ImageUrl = r.ImageUrl
+            }).ToList()
         }).ToList();
     }
 }

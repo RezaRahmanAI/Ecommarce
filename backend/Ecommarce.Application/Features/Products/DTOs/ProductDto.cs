@@ -1,5 +1,4 @@
 namespace Ecommarce.Application.Features.Products.DTOs;
-using Ecommarce.Domain.Entities;
 
 public class ProductDto
 {
@@ -24,10 +23,10 @@ public class ProductDto
     public bool StatusActive { get; set; }
     public List<string> MediaUrls { get; set; } = new();
     
-    // Complex types
-    public ProductRatings? Ratings { get; set; }
-    public ProductImages? Images { get; set; }
-    public ProductVariants? Variants { get; set; }
-    public ProductMeta? Meta { get; set; }
-    public List<RelatedProductInfo>? RelatedProducts { get; set; }
+    // Complex types (using DTOs)
+    public ProductRatingsDto? Ratings { get; set; }
+    public ProductImagesDto? Images { get; set; }
+    public ProductVariantsDto? Variants { get; set; }
+    public ProductMetaDto? Meta { get; set; }
+    public List<RelatedProductInfoDto>? RelatedProducts { get; set; }
 }
