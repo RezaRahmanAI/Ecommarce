@@ -8,18 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/admin/[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Application.Services.Interfaces.ICategoryService _categoryService;
 
-    public CategoriesController(IMediator mediator)
+    public CategoriesController(Application.Services.Interfaces.ICategoryService categoryService)
     {
-        _mediator = mediator;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
-        var query = new GetCategoriesQuery();
-        var result = await _mediator.Send(query);
+        var result = await _categoryService.GetCategoriesAsync();
         return Ok(result);
     }
 }

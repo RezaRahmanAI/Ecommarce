@@ -13,11 +13,11 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(Roles = "Admin")]
 public class ProductsController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Application.Services.Interfaces.IProductService _productService;
 
-    public ProductsController(IMediator mediator)
+    public ProductsController(Application.Services.Interfaces.IProductService productService)
     {
-        _mediator = mediator;
+        _productService = productService;
     }
 
     [HttpGet]
@@ -37,30 +37,28 @@ public class ProductsController : ControllerBase
             PageSize = pageSize
         };
 
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductsAsync(query);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProduct(int id)
     {
-        var query = new GetProductByIdQuery(id);
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductByIdAsync(id);
         return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
     {
-        var result = await _mediator.Send(command);
+        var result = await _productService.CreateProductAsync(command);
         return CreatedAtAction(nameof(GetProduct), new { id = result.Id }, result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
-        var command = new DeleteProductCommand(id);
-        var result = await _mediator.Send(command);
+        var result = await _productService.DeleteProductAsync(id);
         return Ok(new { success = result, message = "Product deleted successfully" });
     }
 }

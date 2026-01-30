@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/products")]
 public class PublicProductsController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Application.Services.Interfaces.IProductService _productService;
 
-    public PublicProductsController(IMediator mediator)
+    public PublicProductsController(Application.Services.Interfaces.IProductService productService)
     {
-        _mediator = mediator;
+        _productService = productService;
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public class PublicProductsController : ControllerBase
             PageSize = pageSize
         };
 
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductsAsync(query);
         return Ok(result);
     }
 
@@ -45,8 +45,7 @@ public class PublicProductsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProduct(int id)
     {
-        var query = new GetProductByIdQuery(id);
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductByIdAsync(id);
         return Ok(result);
     }
 
@@ -64,7 +63,7 @@ public class PublicProductsController : ControllerBase
             IsFeatured = true
         };
 
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductsAsync(query);
         return Ok(result);
     }
 
@@ -83,7 +82,7 @@ public class PublicProductsController : ControllerBase
             IsNewArrival = true
         };
 
-        var result = await _mediator.Send(query);
+        var result = await _productService.GetProductsAsync(query);
         return Ok(result);
     }
 }

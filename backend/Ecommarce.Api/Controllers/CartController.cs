@@ -12,11 +12,11 @@ using System.Security.Claims;
 [Authorize(Roles = "Customer")]
 public class CartController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Application.Services.Interfaces.ICartService _cartService;
 
-    public CartController(IMediator mediator)
+    public CartController(Application.Services.Interfaces.ICartService cartService)
     {
-        _mediator = mediator;
+        _cartService = cartService;
     }
 
     /// <summary>
@@ -26,8 +26,7 @@ public class CartController : ControllerBase
     public async Task<IActionResult> GetCart()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-        var query = new GetCartQuery(userId);
-        var result = await _mediator.Send(query);
+        var result = await _cartService.GetCartAsync(userId);
         
         if (result == null)
         {
@@ -52,7 +51,7 @@ public class CartController : ControllerBase
             Quantity = request.Quantity
         };
 
-        var result = await _mediator.Send(command);
+        var result = await _cartService.AddToCartAsync(command);
         return Ok(result);
     }
 }

@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Application.Services.Interfaces.IAuthService _authService;
 
-    public AuthController(IMediator mediator)
+    public AuthController(Application.Services.Interfaces.IAuthService authService)
     {
-        _mediator = mediator;
+        _authService = authService;
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        var result = await _mediator.Send(command);
+        var result = await _authService.RegisterAsync(command);
         return Ok(result);
     }
 
@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
-        var result = await _mediator.Send(command);
+        var result = await _authService.LoginAsync(command);
         return Ok(result);
     }
 
