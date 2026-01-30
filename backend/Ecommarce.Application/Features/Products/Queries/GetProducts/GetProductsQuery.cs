@@ -118,19 +118,19 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             
             Images = p.Images == null ? null : new ProductImagesDto
             {
-                MainImage = p.Images.MainImage == null ? new ProductImageDto() : new ProductImageDto
+                MainImage = new ProductImageDto
                 {
-                    Type = p.Images.MainImage.Type ?? "image",
-                    Label = p.Images.MainImage.Label ?? string.Empty,
-                    Url = p.Images.MainImage.Url ?? string.Empty,
-                    Alt = p.Images.MainImage.Alt ?? string.Empty
+                    Type = p.Images.MainImage.Type,
+                    Label = p.Images.MainImage.Label,
+                    Url = p.Images.MainImage.Url,
+                    Alt = p.Images.MainImage.Alt
                 },
                 Thumbnails = p.Images.Thumbnails?.Select(i => new ProductImageDto
                 {
-                    Type = i.Type ?? "image",
-                    Label = i.Label ?? string.Empty,
-                    Url = i.Url ?? string.Empty,
-                    Alt = i.Alt ?? string.Empty
+                    Type = i.Type,
+                    Label = i.Label,
+                    Url = i.Url,
+                    Alt = i.Alt
                 }).ToList() ?? new()
             },
             
@@ -138,13 +138,13 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             {
                 Colors = p.Variants.Colors?.Select(c => new VariantColorDto
                 {
-                    Name = c.Name ?? string.Empty,
-                    Hex = c.Hex ?? string.Empty,
+                    Name = c.Name,
+                    Hex = c.Hex,
                     Selected = c.Selected
                 }).ToList() ?? new(),
                 Sizes = p.Variants.Sizes?.Select(s => new VariantSizeDto
                 {
-                    Label = s.Label ?? string.Empty,
+                    Label = s.Label,
                     Stock = s.Stock,
                     Selected = s.Selected
                 }).ToList() ?? new()
@@ -152,16 +152,16 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             
             Meta = p.Meta == null ? null : new ProductMetaDto
             {
-                FabricAndCare = p.Meta.FabricAndCare ?? string.Empty,
-                ShippingAndReturns = p.Meta.ShippingAndReturns ?? string.Empty
+                FabricAndCare = p.Meta.FabricAndCare,
+                ShippingAndReturns = p.Meta.ShippingAndReturns
             },
             
             RelatedProducts = p.RelatedProducts?.Select(r => new RelatedProductInfoDto
             {
                 Id = r.Id,
-                Name = r.Name ?? string.Empty,
+                Name = r.Name,
                 Price = r.Price,
-                ImageUrl = r.ImageUrl ?? string.Empty
+                ImageUrl = r.ImageUrl
             }).ToList()
         }).ToList();
     }
