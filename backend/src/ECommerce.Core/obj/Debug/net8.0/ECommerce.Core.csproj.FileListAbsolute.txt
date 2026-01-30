@@ -1,0 +1,13 @@
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\bin\Debug\net8.0\ECommerce.Core.deps.json
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\bin\Debug\net8.0\ECommerce.Core.dll
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\bin\Debug\net8.0\ECommerce.Core.pdb
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.GeneratedMSBuildEditorConfig.editorconfig
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.AssemblyInfoInputs.cache
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.AssemblyInfo.cs
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.csproj.CoreCompileInputs.cache
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.sourcelink.json
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.dll
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\refint\ECommerce.Core.dll
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.pdb
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ref\ECommerce.Core.dll
+E:\Personal\Ecommarce\backend\src\ECommerce.Core\obj\Debug\net8.0\ECommerce.Core.csproj.AssemblyReference.cache

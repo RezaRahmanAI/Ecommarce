@@ -1,11 +1,14 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { Injectable, inject } from "@angular/core";
+import { BehaviorSubject, Observable, map } from "rxjs";
 
-import { MOCK_ORDERS } from '../data/mock-orders';
-import { CartItem, CartSummary } from '../models/cart';
-import { CheckoutState } from '../models/checkout';
-import { Order, OrderItem, OrderStatus } from '../models/order';
-import { CustomerOrderApiService, CustomerOrderResponse } from './customer-order-api.service';
+import { MOCK_ORDERS } from "../data/mock-orders";
+import { CartItem, CartSummary } from "../models/cart";
+import { CheckoutState } from "../models/checkout";
+import { Order, OrderItem, OrderStatus } from "../models/order";
+import {
+  CustomerOrderApiService,
+  CustomerOrderResponse,
+} from "./customer-order-api.service";
 
 interface PlaceOrderPayload {
   state: CheckoutState;
@@ -14,16 +17,20 @@ interface PlaceOrderPayload {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OrderService {
   private readonly customerOrderApi = inject(CustomerOrderApiService);
-  private readonly storageKey = 'orders';
-  private readonly ordersSubject = new BehaviorSubject<Order[]>(this.loadOrders());
+  private readonly storageKey = "orders";
+  private readonly ordersSubject = new BehaviorSubject<Order[]>(
+    this.loadOrders(),
+  );
   readonly orders$ = this.ordersSubject.asObservable();
 
   getOrderById(orderId: string): Observable<Order | undefined> {
-    return this.orders$.pipe(map((orders) => orders.find((order) => order.id === orderId)));
+    return this.orders$.pipe(
+      map((orders) => orders.find((order) => order.id === orderId)),
+    );
   }
 
   getFallbackOrder(): Order {
@@ -51,6 +58,12 @@ export class OrderService {
         deliveryDetails: payload.state.deliveryDetails,
         itemsCount: payload.summary.itemsCount,
         total: payload.summary.total,
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          color: i.color,
+          size: i.size,
+        })),
       })
       .pipe(
         map((response) => this.buildOrder(response, items, payload.summary)),
@@ -76,10 +89,17 @@ export class OrderService {
   }
 
   private persistOrders(): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.ordersSubject.getValue()));
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(this.ordersSubject.getValue()),
+    );
   }
 
-  private buildOrder(response: CustomerOrderResponse, items: OrderItem[], summary: CartSummary): Order {
+  private buildOrder(
+    response: CustomerOrderResponse,
+    items: OrderItem[],
+    summary: CartSummary,
+  ): Order {
     return {
       id: response.orderId,
       status: OrderStatus.Confirmed,
@@ -97,10 +117,10 @@ export class OrderService {
         total: summary.total,
       },
       timeline: {
-        confirmedDate: 'Today',
-        processingLabel: 'Pending',
-        shippedEta: 'Est. in 2-3 days',
-        deliveredEta: 'Est. in 4-6 days',
+        confirmedDate: "Today",
+        processingLabel: "Pending",
+        shippedEta: "Est. in 2-3 days",
+        deliveredEta: "Est. in 4-6 days",
       },
     };
   }
