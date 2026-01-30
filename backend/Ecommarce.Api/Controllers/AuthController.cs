@@ -1,83 +1,58 @@
-using Ecommarce.Api.Dtos;
-using Ecommarce.Api.Models;
-using Ecommarce.Api.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Ecommarce.Api.Controllers;
+
+using Ecommarce.Application.Features.Authentication.Commands.Login;
+using Ecommarce.Application.Features.Authentication.Commands.Register;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController : ControllerBase
+public class AuthController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITokenService _tokenService;
+    private readonly IMediator _mediator;
 
-    public AuthController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        ITokenService tokenService)
+    public AuthController(IMediator mediator)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _tokenService = tokenService;
+        _mediator = mediator;
     }
 
+    /// <summary>
+    /// Register a new customer account
+    /// </summary>
     [HttpPost("register")]
-    public ActionResult<AuthResponse> Register(RegisterRequest request)
+    [AllowAnonymous]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        return StatusCode(StatusCodes.Status403Forbidden, new { message = "Customer registration is disabled." });
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
+    /// <summary>
+    /// Login with email and password
+    /// </summary>
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user is null)
-        {
-            return Unauthorized();
-        }
-
-        var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-        if (!result.Succeeded)
-        {
-            return Unauthorized();
-        }
-
-        if (!await _userManager.IsInRoleAsync(user, "admin"))
-        {
-            return Unauthorized("Admin access required.");
-        }
-
-        var (token, expiresAt) = _tokenService.CreateToken(user);
-        var response = await BuildResponse(user, token, expiresAt);
-        return Ok(response);
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
-    private async Task<AuthResponse> BuildResponse(ApplicationUser user, string token, DateTimeOffset expiresAt)
+    /// <summary>
+    /// Get current user information (requires authentication)
+    /// </summary>
+    [HttpGet("me")]
+    [Authorize]
+    public IActionResult GetCurrentUser()
     {
-        var roles = await _userManager.GetRolesAsync(user);
-        var role = roles.FirstOrDefault() ?? "user";
-        var name = $"{user.FirstName} {user.LastName}".Trim();
-        if (string.IsNullOrWhiteSpace(name))
+        return Ok(new
         {
-            name = user.Email ?? string.Empty;
-        }
-
-        return new AuthResponse
-        {
-            AccessToken = token,
-            ExpiresAt = expiresAt,
-            User = new AuthUser
-            {
-                Id = user.Id,
-                Name = name,
-                Email = user.Email ?? string.Empty,
-                Role = role
-            }
-        };
+            UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+            Email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value,
+            FirstName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value,
+            LastName = User.FindFirst(System.Security.Claims.ClaimTypes.Surname)?.Value,
+            Roles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToList()
+        });
     }
-
 }

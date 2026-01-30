@@ -1,77 +1,93 @@
+using System.Text;
 using System.Text.Json.Serialization;
-using Ecommarce.Api.Data;
-using Ecommarce.Api.Middleware;
-using Ecommarce.Api.Models;
-using Ecommarce.Api.Repositories;
-using Ecommarce.Api.Services;
+using Ecommarce.Application;
+using Ecommarce.Infrastructure;
+using Ecommarce.Infrastructure.Identity;
+using Ecommarce.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IAdminRepository, AdminRepository>();
-builder.Services.AddSingleton<ICustomerOrderRepository, CustomerOrderRepository>();
-builder.Services.AddSingleton<IImageStorageService, ImageStorageService>();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
-  {
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-    options.User.RequireUniqueEmail = true;
-  })
-  .AddRoles<IdentityRole>()
-  .AddEntityFrameworkStores<ApplicationDbContext>()
-  .AddSignInManager();
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-builder.Services.Configure<AdminUserSettings>(builder.Configuration.GetSection(AdminUserSettings.SectionName));
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAdminCatalogService, AdminCatalogService>();
-builder.Services.AddScoped<IAdminOrderService, AdminOrderService>();
-builder.Services.AddScoped<IAdminBlogService, AdminBlogService>();
-builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
-builder.Services.AddScoped<IAdminSettingsService, AdminSettingsService>();
-builder.Services.AddScoped<IBlogPostService, BlogPostService>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddControllers();
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-builder.Services.ConfigureHttpJsonOptions(options =>
+// Add Application and Infrastructure layers
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
+builder.Services.AddAuthentication(options =>
 {
-  options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings?.Issuer,
+        ValidAudience = jwtSettings?.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings?.SigningKey ?? string.Empty)),
+        ClockSkew = TimeSpan.Zero
+    };
 });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// CORS
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy("AppCors", policy =>
-  {
-    policy.AllowAnyOrigin()
-          .AllowAnyHeader()
-          .AllowAnyMethod();
-  });
+    options.AddPolicy("AppCors", policy =>
+    {
+        policy.WithOrigins(
+                "https://test.arzamart.xyz",
+                "http://test.arzamart.xyz",
+                "http://localhost:4200",
+                "https://localhost:4200"
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
 var app = builder.Build();
 
+// Apply migrations and seed data
+await ApplyDatabaseMigrationsAsync(app.Services);
+
 app.UseCors("AppCors");
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+// app.UseMiddleware<ExceptionHandlingMiddleware>();  // TODO: Recreate this middleware
 app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-
-await ApplyDatabaseMigrationsAsync(app.Services);
 
 app.MapControllers();
 
@@ -79,110 +95,73 @@ app.Run();
 
 static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services)
 {
-  await using var scope = services.CreateAsyncScope();
-  var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-  await dbContext.Database.MigrateAsync();
-  await SeedAdminUserAsync(scope.ServiceProvider);
+    await using var scope = services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+        await SeedAdminUserAsync(scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+    }
 }
 
 static async Task SeedAdminUserAsync(IServiceProvider services)
 {
-  var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-  var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-  var settings = services.GetRequiredService<IOptions<AdminUserSettings>>().Value;
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var configuration = services.GetRequiredService<IConfiguration>();
 
-  if (string.IsNullOrWhiteSpace(settings.Email) || string.IsNullOrWhiteSpace(settings.Password))
-  {
-    return;
-  }
-
-  var adminRole = "admin";
-  if (!await roleManager.RoleExistsAsync(adminRole))
-  {
-    await roleManager.CreateAsync(new IdentityRole(adminRole));
-  }
-
-  var desiredUsername = string.IsNullOrWhiteSpace(settings.Username)
-    ? settings.Email
-    : settings.Username;
-  var user = await userManager.FindByEmailAsync(settings.Email);
-  if (user is null && !string.IsNullOrWhiteSpace(settings.Username))
-  {
-    user = await userManager.FindByNameAsync(settings.Username);
-  }
-
-  if (user is null)
-  {
-    user = new ApplicationUser
+    // Create Admin role if it doesn't exist
+    if (!await roleManager.RoleExistsAsync("Admin"))
     {
-      UserName = desiredUsername,
-      Email = settings.Email,
-      FirstName = settings.FirstName,
-      LastName = settings.LastName,
-      EmailConfirmed = true
-    };
-
-    var result = await userManager.CreateAsync(user, settings.Password);
-    if (!result.Succeeded)
-    {
-      return;
-    }
-  }
-  else
-  {
-    var shouldUpdate = false;
-    if (!string.Equals(user.UserName, desiredUsername, StringComparison.Ordinal))
-    {
-      user.UserName = desiredUsername;
-      shouldUpdate = true;
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
 
-    if (!string.Equals(user.Email, settings.Email, StringComparison.OrdinalIgnoreCase))
+    // Create Customer role if it doesn't exist
+    if (!await roleManager.RoleExistsAsync("Customer"))
     {
-      user.Email = settings.Email;
-      shouldUpdate = true;
+        await roleManager.CreateAsync(new IdentityRole("Customer"));
     }
 
-    if (!string.Equals(user.FirstName, settings.FirstName, StringComparison.Ordinal))
-    {
-      user.FirstName = settings.FirstName;
-      shouldUpdate = true;
-    }
+    // Get admin credentials from configuration
+    var adminEmail = configuration["AdminUser:Email"] ?? "admin@arzamart.com";
+    var adminUsername = configuration["AdminUser:Username"] ?? "admin";
+    var adminPassword = configuration["AdminUser:Password"] ?? "Admin123!";
+    var adminFirstName = configuration["AdminUser:FirstName"] ?? "Admin";
+    var adminLastName = configuration["AdminUser:LastName"] ?? "User";
 
-    if (!string.Equals(user.LastName, settings.LastName, StringComparison.Ordinal))
+    // Check if admin user exists
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    
+    if (adminUser == null)
     {
-      user.LastName = settings.LastName;
-      shouldUpdate = true;
-    }
+        adminUser = new ApplicationUser
+        {
+            UserName = adminUsername,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            FirstName = adminFirstName,
+            LastName = adminLastName
+        };
 
-    if (!user.EmailConfirmed)
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+    else
     {
-      user.EmailConfirmed = true;
-      shouldUpdate = true;
+        // Ensure existing admin has Admin role
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
-
-    if (shouldUpdate)
-    {
-      var updateResult = await userManager.UpdateAsync(user);
-      if (!updateResult.Succeeded)
-      {
-        return;
-      }
-    }
-
-    if (!await userManager.CheckPasswordAsync(user, settings.Password))
-    {
-      var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
-      var resetResult = await userManager.ResetPasswordAsync(user, resetToken, settings.Password);
-      if (!resetResult.Succeeded)
-      {
-        return;
-      }
-    }
-  }
-
-  if (!await userManager.IsInRoleAsync(user, adminRole))
-  {
-    await userManager.AddToRoleAsync(user, adminRole);
-  }
 }

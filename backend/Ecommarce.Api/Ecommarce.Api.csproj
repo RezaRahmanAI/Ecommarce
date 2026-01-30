@@ -20,4 +20,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommarce.Application\Ecommarce.Application.csproj" />
+    <ProjectReference Include="..\Ecommarce.Infrastructure\Ecommarce.Infrastructure.csproj" />
+  </ItemGroup>
 </Project>
