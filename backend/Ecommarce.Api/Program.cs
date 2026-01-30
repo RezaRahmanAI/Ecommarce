@@ -54,20 +54,14 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS
+// CORS - Allow requests from any origin
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AppCors", policy =>
     {
-        policy.WithOrigins(
-                "https://test.arzamart.xyz",
-                "http://test.arzamart.xyz",
-                "http://localhost:4200",
-                "https://localhost:4200"
-              )
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
