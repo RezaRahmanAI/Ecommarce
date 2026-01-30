@@ -30,3 +30,13 @@ Thumbs.db
 *.old/
 *.backup/
 *.bak
+/backend/Ecommarce.Api/bin
+/backend/Ecommarce.Api/obj
+/backend/Ecommarce.Api/publish
+/backend/Ecommarce.Application/bin/Debug/net8.0
+/backend/Ecommarce.Application/obj/Debug/net8.0
+/backend/Ecommarce.Application/obj
+/backend/Ecommarce.Domain/bin/Debug/net8.0
+/backend/Ecommarce.Domain/obj
+/backend/Ecommarce.Infrastructure/bin/Debug/net8.0
+/backend/Ecommarce.Infrastructure/obj
