@@ -10,11 +10,10 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         
-        // Services
-        services.AddScoped<Services.Interfaces.IProductService, Services.Implementations.ProductService>();
-        services.AddScoped<Services.Interfaces.ICategoryService, Services.Implementations.CategoryService>();
-        services.AddScoped<Services.Interfaces.ICartService, Services.Implementations.CartService>();
-        services.AddScoped<Services.Interfaces.IAuthService, Services.Implementations.AuthService>();
+        services.AddMediatR(cfg => {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(Common.Behaviours.ValidationBehaviour<,>));
+        });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
