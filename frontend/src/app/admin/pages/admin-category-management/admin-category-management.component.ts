@@ -1,11 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, OnInit, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ActivatedRoute, RouterModule } from "@angular/router";
+import { Subject, takeUntil } from "rxjs";
 
-import { Category, CategoryNode, ReorderPayload } from '../../models/categories.models';
-import { CategoriesService } from '../../services/categories.service';
+import {
+  Category,
+  CategoryNode,
+  ReorderPayload,
+} from "../../models/categories.models";
+import { CategoriesService } from "../../services/categories.service";
 
 interface ParentOption {
   id: string | null;
@@ -13,10 +17,10 @@ interface ParentOption {
 }
 
 @Component({
-  selector: 'app-admin-category-management',
+  selector: "app-admin-category-management",
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-category-management.component.html',
+  templateUrl: "./admin-category-management.component.html",
 })
 export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   private categoriesService = inject(CategoriesService);
@@ -29,44 +33,45 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   filteredTree: CategoryNode[] = [];
   selectedId: string | null = null;
   expandedSet = new Set<string>();
-  mode: 'create' | 'edit' = 'edit';
+  mode: "create" | "edit" = "edit";
   originalSnapshot: Category | null = null;
-  filterTerm = '';
+  filterTerm = "";
   draggingId: string | null = null;
   previousSelectedId: string | null = null;
   slugManuallyEdited = false;
   private isSlugUpdating = false;
 
-  filterControl = this.formBuilder.control('', { nonNullable: true });
+  filterControl = this.formBuilder.control("", { nonNullable: true });
 
   categoryForm = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    slug: ['', [Validators.required]],
+    name: ["", [Validators.required, Validators.minLength(2)]],
+    slug: ["", [Validators.required]],
     parentId: [null as string | null],
-    description: [''],
-    imageUrl: [''],
+    imageUrl: [""],
     isVisible: [true],
   });
 
   ngOnInit(): void {
     this.loadCategories();
 
-    this.filterControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value) => {
-      this.filterTerm = value.trim().toLowerCase();
-      this.applyFilter();
-    });
+    this.filterControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.filterTerm = value.trim().toLowerCase();
+        this.applyFilter();
+      });
 
     this.categoryForm
-      .get('name')
+      .get("name")
       ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
         if (!this.slugManuallyEdited) {
-          this.updateSlugFromName(value ?? '');
+          this.updateSlugFromName(value ?? "");
         }
       });
 
     this.categoryForm
-      .get('slug')
+      .get("slug")
       ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         if (!this.isSlugUpdating) {
@@ -74,7 +79,7 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
         }
       });
 
-    const initialId = this.route.snapshot.queryParamMap.get('category');
+    const initialId = this.route.snapshot.queryParamMap.get("category");
     if (initialId) {
       this.selectCategoryById(initialId);
     }
@@ -88,30 +93,28 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   startCreate(): void {
     this.previousSelectedId = this.selectedId;
     this.selectedId = null;
-    this.mode = 'create';
+    this.mode = "create";
     this.originalSnapshot = null;
     this.slugManuallyEdited = false;
     this.categoryForm.reset({
-      name: '',
-      slug: '',
+      name: "",
+      slug: "",
       parentId: null,
-      description: '',
-      imageUrl: '',
+      imageUrl: "",
       isVisible: true,
     });
   }
 
   selectCategory(category: Category): void {
     this.selectedId = category.id;
-    this.mode = 'edit';
+    this.mode = "edit";
     this.originalSnapshot = { ...category };
     this.slugManuallyEdited = false;
     this.categoryForm.reset({
       name: category.name,
       slug: category.slug,
       parentId: category.parentId ?? null,
-      description: category.description ?? '',
-      imageUrl: category.imageUrl ?? '',
+      imageUrl: category.imageUrl ?? "",
       isVisible: category.isVisible,
     });
   }
@@ -150,15 +153,15 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   onDragStart(categoryId: string, event: DragEvent): void {
     this.draggingId = categoryId;
     if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', categoryId);
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", categoryId);
     }
   }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.dropEffect = "move";
     }
   }
 
@@ -166,12 +169,14 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     if (!this.draggingId || this.draggingId === targetCategory.id) {
       return;
     }
-    const dragged = this.categoriesFlat.find((item) => item.id === this.draggingId);
+    const dragged = this.categoriesFlat.find(
+      (item) => item.id === this.draggingId,
+    );
     if (!dragged) {
       return;
     }
     if (this.isDescendant(dragged.id, targetCategory.id)) {
-      window.alert('You cannot move a category into one of its descendants.');
+      window.alert("You cannot move a category into one of its descendants.");
       return;
     }
 
@@ -183,8 +188,10 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     } else {
       dragged.parentId = targetCategory.id;
       dragged.sortOrder =
-        this.categoriesFlat.filter((item) => item.parentId === targetCategory.id && item.id !== dragged.id)
-          .length + 1;
+        this.categoriesFlat.filter(
+          (item) =>
+            item.parentId === targetCategory.id && item.id !== dragged.id,
+        ).length + 1;
       this.updateSortOrderForParent(targetCategory.id);
       this.updateSortOrderForParent(draggedParentId);
     }
@@ -213,20 +220,19 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
 
     const formValue = this.categoryForm.getRawValue();
     const payload: Partial<Category> = {
-      name: formValue.name ?? '',
-      slug: formValue.slug ?? '',
+      name: formValue.name ?? "",
+      slug: formValue.slug ?? "",
       parentId: formValue.parentId ?? null,
-      description: formValue.description ?? '',
-      imageUrl: formValue.imageUrl ?? '',
+      imageUrl: formValue.imageUrl ?? "",
       isVisible: formValue.isVisible ?? true,
     };
 
-    if (this.mode === 'create') {
+    if (this.mode === "create") {
       this.categoriesService.create(payload).subscribe((created) => {
         this.categoriesFlat.push(created);
         this.rebuildTree();
         this.selectCategory(created);
-        window.alert('Category created successfully.');
+        window.alert("Category created successfully.");
       });
       return;
     }
@@ -235,34 +241,37 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.categoriesService.update(this.selectedId, payload).subscribe((updated) => {
-      const index = this.categoriesFlat.findIndex((item) => item.id === updated.id);
-      if (index !== -1) {
-        const existing = this.categoriesFlat[index];
-        this.categoriesFlat[index] = {
-          ...existing,
-          ...updated,
-          productCount: existing.productCount,
-        };
-        this.rebuildTree();
-        this.selectCategory(this.categoriesFlat[index]);
-        window.alert('Category updated successfully.');
-      }
-    });
+    this.categoriesService
+      .update(this.selectedId, payload)
+      .subscribe((updated) => {
+        const index = this.categoriesFlat.findIndex(
+          (item) => item.id === updated.id,
+        );
+        if (index !== -1) {
+          const existing = this.categoriesFlat[index];
+          this.categoriesFlat[index] = {
+            ...existing,
+            ...updated,
+            productCount: existing.productCount,
+          };
+          this.rebuildTree();
+          this.selectCategory(this.categoriesFlat[index]);
+          window.alert("Category updated successfully.");
+        }
+      });
   }
 
   cancelEdit(): void {
-    if (this.mode === 'create') {
-      this.mode = 'edit';
+    if (this.mode === "create") {
+      this.mode = "edit";
       if (this.previousSelectedId) {
         this.selectCategoryById(this.previousSelectedId);
       } else {
         this.categoryForm.reset({
-          name: '',
-          slug: '',
+          name: "",
+          slug: "",
           parentId: null,
-          description: '',
-          imageUrl: '',
+          imageUrl: "",
           isVisible: true,
         });
       }
@@ -275,9 +284,13 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   }
 
   deleteCategory(category: Category): void {
-    const hasChildren = this.categoriesFlat.some((item) => item.parentId === category.id);
+    const hasChildren = this.categoriesFlat.some(
+      (item) => item.parentId === category.id,
+    );
     if (hasChildren) {
-      window.alert('This category has child categories. Remove or reassign them before deleting.');
+      window.alert(
+        "This category has child categories. Remove or reassign them before deleting.",
+      );
       return;
     }
     const confirmed = window.confirm(`Delete ${category.name}?`);
@@ -289,13 +302,15 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       if (!success) {
         return;
       }
-      this.categoriesFlat = this.categoriesFlat.filter((item) => item.id !== category.id);
+      this.categoriesFlat = this.categoriesFlat.filter(
+        (item) => item.id !== category.id,
+      );
       if (this.selectedId === category.id) {
         this.selectedId = null;
-        this.mode = 'create';
+        this.mode = "create";
       }
       this.rebuildTree();
-      window.alert('Category deleted.');
+      window.alert("Category deleted.");
     });
   }
 
@@ -317,13 +332,13 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       this.collectDescendants(this.selectedId, excludedIds);
     }
 
-    const options: ParentOption[] = [{ id: null, label: 'None (Top Level)' }];
+    const options: ParentOption[] = [{ id: null, label: "None (Top Level)" }];
     const walk = (nodes: CategoryNode[], depth: number) => {
       nodes.forEach((node) => {
         if (!excludedIds.has(node.category.id)) {
           options.push({
             id: node.category.id,
-            label: `${'— '.repeat(depth)}${node.category.name}`,
+            label: `${"— ".repeat(depth)}${node.category.name}`,
           });
         }
         if (node.children.length > 0) {
@@ -357,20 +372,29 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     return buildNodes(null);
   }
 
-  filterTree(nodes: CategoryNode[], term: string): { nodes: CategoryNode[]; expanded: Set<string> } {
+  filterTree(
+    nodes: CategoryNode[],
+    term: string,
+  ): { nodes: CategoryNode[]; expanded: Set<string> } {
     if (!term) {
       return { nodes, expanded: new Set() };
     }
 
     const expanded = new Set<string>();
 
-    const filterNodes = (items: CategoryNode[], ancestors: string[]): CategoryNode[] => {
+    const filterNodes = (
+      items: CategoryNode[],
+      ancestors: string[],
+    ): CategoryNode[] => {
       return items
         .map((node) => {
           const matches =
             node.category.name.toLowerCase().includes(term) ||
             node.category.slug.toLowerCase().includes(term);
-          const filteredChildren = filterNodes(node.children, [...ancestors, node.category.id]);
+          const filteredChildren = filterNodes(node.children, [
+            ...ancestors,
+            node.category.id,
+          ]);
           if (matches || filteredChildren.length > 0) {
             if (filteredChildren.length > 0) {
               expanded.add(node.category.id);
@@ -393,8 +417,8 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     return value
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
   }
 
   isDescendant(parentId: string, candidateId: string): boolean {
@@ -403,7 +427,9 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       if (current.parentId === parentId) {
         return true;
       }
-      current = this.categoriesFlat.find((item) => item.id === current?.parentId);
+      current = this.categoriesFlat.find(
+        (item) => item.id === current?.parentId,
+      );
     }
     return false;
   }
@@ -425,13 +451,18 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   private rebuildTree(): void {
     this.categoriesTree = this.buildTree(this.categoriesFlat);
     if (this.expandedSet.size === 0) {
-      this.expandedSet = new Set(this.categoriesTree.map((node) => node.category.id));
+      this.expandedSet = new Set(
+        this.categoriesTree.map((node) => node.category.id),
+      );
     }
     this.applyFilter();
   }
 
   private applyFilter(): void {
-    const { nodes, expanded } = this.filterTree(this.categoriesTree, this.filterTerm);
+    const { nodes, expanded } = this.filterTree(
+      this.categoriesTree,
+      this.filterTerm,
+    );
     this.filteredTree = nodes;
     if (this.filterTerm) {
       this.expandedSet = expanded;
@@ -441,7 +472,7 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   private updateSlugFromName(value: string): void {
     const slug = this.slugify(value);
     this.isSlugUpdating = true;
-    this.categoryForm.get('slug')?.setValue(slug, { emitEvent: false });
+    this.categoryForm.get("slug")?.setValue(slug, { emitEvent: false });
     this.isSlugUpdating = false;
   }
 
@@ -481,7 +512,9 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     siblings.splice(targetIndex, 0, dragged);
 
     siblings.forEach((item, index) => {
-      const categoryIndex = this.categoriesFlat.findIndex((entry) => entry.id === item.id);
+      const categoryIndex = this.categoriesFlat.findIndex(
+        (entry) => entry.id === item.id,
+      );
       if (categoryIndex !== -1) {
         this.categoriesFlat[categoryIndex] = {
           ...this.categoriesFlat[categoryIndex],

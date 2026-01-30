@@ -34,9 +34,14 @@ public class AuthController : ControllerBase
 
         return new AuthResponseDto
         {
-            Email = user.Email!,
             Token = _tokenService.CreateToken(user),
-            Name = user.FullName ?? user.UserName!
+            User = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email!,
+                Name = user.FullName ?? user.UserName!,
+                Role = "admin" // TODO: Get actual role from user manager if needed
+            }
         };
     }
 
@@ -61,9 +66,14 @@ public class AuthController : ControllerBase
 
         return new AuthResponseDto
         {
-            Email = user.Email,
             Token = _tokenService.CreateToken(user),
-            Name = user.FullName
+            User = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.FullName,
+                Role = "user" // Default role for new users
+            }
         };
     }
 }

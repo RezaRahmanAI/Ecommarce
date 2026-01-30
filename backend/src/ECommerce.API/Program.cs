@@ -28,6 +28,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 builder.Services.AddScoped<ECommerce.Core.Interfaces.ITokenService, ECommerce.Infrastructure.Services.TokenService>();
 builder.Services.AddScoped(typeof(ECommerce.Core.Interfaces.IGenericRepository<>), typeof(ECommerce.Infrastructure.Data.GenericRepository<>));
 builder.Services.AddScoped<ECommerce.Infrastructure.Services.OrderService>(); // Register OrderService
+builder.Services.AddScoped<ECommerce.Core.Interfaces.IDashboardService, ECommerce.Infrastructure.Services.DashboardService>();
+builder.Services.AddScoped<ECommerce.Core.Interfaces.IBlogService, ECommerce.Infrastructure.Services.BlogService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // CORS
@@ -52,6 +54,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(); // Enable serving static files from wwwroot
 
 app.UseCors("AllowAll");
 

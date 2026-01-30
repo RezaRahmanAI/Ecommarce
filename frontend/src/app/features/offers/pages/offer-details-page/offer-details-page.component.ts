@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from "@angular/common";
+import { Component, DestroyRef, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
-import { CustomerOrderApiService } from '../../../../core/services/customer-order-api.service';
-import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
+import { CustomerOrderApiService } from "../../../../core/services/customer-order-api.service";
+import { PriceDisplayComponent } from "../../../../shared/components/price-display/price-display.component";
 
 interface OfferDetails {
   slug: string;
@@ -19,24 +19,29 @@ interface OfferDetails {
 
 const OFFERS: OfferDetails[] = [
   {
-    slug: 'midnight-luxe-set',
-    title: 'Midnight Luxe Co-Ord Set',
-    subtitle: 'Exclusive drop for the weekend campaign',
+    slug: "midnight-luxe-set",
+    title: "Midnight Luxe Co-Ord Set",
+    subtitle: "Exclusive drop for the weekend campaign",
     description:
-      'A breathable satin blend with tailored lines that transitions from day to evening. Limited inventory with bundled pricing just for this pop-up.',
+      "A breathable satin blend with tailored lines that transitions from day to evening. Limited inventory with bundled pricing just for this pop-up.",
     imageUrl:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80',
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80",
     price: 89,
-    badge: 'Pop-up exclusive',
+    badge: "Pop-up exclusive",
   },
 ];
 
 @Component({
-  selector: 'app-offer-details-page',
+  selector: "app-offer-details-page",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
-  templateUrl: './offer-details-page.component.html',
-  styleUrl: './offer-details-page.component.css',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    PriceDisplayComponent,
+  ],
+  templateUrl: "./offer-details-page.component.html",
+  styleUrl: "./offer-details-page.component.css",
 })
 export class OfferDetailsPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -47,26 +52,28 @@ export class OfferDetailsPageComponent {
 
   offer: OfferDetails | null = null;
   isLoading = false;
-  errorMessage = '';
-  successMessage = '';
+  errorMessage = "";
+  successMessage = "";
 
   readonly orderForm = this.formBuilder.nonNullable.group({
-    fullName: ['', [Validators.required, Validators.minLength(2)]],
-    phone: ['', [Validators.required, Validators.minLength(7)]],
-    address: ['', [Validators.required, Validators.minLength(5)]],
+    fullName: ["", [Validators.required, Validators.minLength(2)]],
+    phone: ["", [Validators.required, Validators.minLength(7)]],
+    address: ["", [Validators.required, Validators.minLength(5)]],
     quantity: [1, [Validators.required, Validators.min(1), Validators.max(10)]],
-    size: ['M', [Validators.required]],
-    additionalDetails: [''],
+    size: ["M", [Validators.required]],
+    additionalDetails: [""],
   });
 
   constructor() {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const slug = params.get('slug');
-      this.offer = OFFERS.find((item) => item.slug === slug) ?? null;
-      if (!this.offer) {
-        void this.router.navigate(['/']);
-      }
-    });
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const slug = params.get("slug");
+        this.offer = OFFERS.find((item) => item.slug === slug) ?? null;
+        if (!this.offer) {
+          void this.router.navigate(["/"]);
+        }
+      });
   }
 
   get total(): number {
@@ -84,11 +91,11 @@ export class OfferDetailsPageComponent {
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage = "";
+    this.successMessage = "";
 
     const quantity = this.orderForm.controls.quantity.value ?? 1;
-    const size = this.orderForm.controls.size.value ?? '';
+    const size = this.orderForm.controls.size.value ?? "";
     const additional = this.orderForm.controls.additionalDetails.value?.trim();
     const deliveryDetails = [
       `Size: ${size}`,
@@ -96,7 +103,7 @@ export class OfferDetailsPageComponent {
       `Offer: ${this.offer.title}`,
     ]
       .filter(Boolean)
-      .join(' | ');
+      .join(" | ");
 
     this.customerOrderApi
       .placeOrder({
@@ -106,6 +113,7 @@ export class OfferDetailsPageComponent {
         deliveryDetails,
         itemsCount: quantity,
         total: this.total,
+        items: [],
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -113,17 +121,17 @@ export class OfferDetailsPageComponent {
           this.isLoading = false;
           this.successMessage = `Order ${response.orderId} placed! We will confirm details shortly.`;
           this.orderForm.reset({
-            fullName: '',
-            phone: '',
-            address: '',
+            fullName: "",
+            phone: "",
+            address: "",
             quantity: 1,
-            size: 'M',
-            additionalDetails: '',
+            size: "M",
+            additionalDetails: "",
           });
         },
         error: () => {
           this.isLoading = false;
-          this.errorMessage = 'Unable to place the order. Please try again.';
+          this.errorMessage = "Unable to place the order. Please try again.";
         },
       });
   }
