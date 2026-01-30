@@ -47,7 +47,12 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, P
             Status = product.Status,
             ImageUrl = product.ImageUrl,
             StatusActive = product.StatusActive,
-            MediaUrls = product.MediaUrls
+            MediaUrls = product.MediaUrls,
+            Ratings = product.Ratings,
+            Images = product.Images,
+            Variants = product.Variants,
+            Meta = product.Meta,
+            RelatedProducts = product.RelatedProducts
         };
     }
 }

@@ -60,15 +60,12 @@ public class PublicProductsController : ControllerBase
         {
             StatusTab = "Active",
             Page = 1,
-            PageSize = limit
+            PageSize = limit,
+            IsFeatured = true
         };
 
         var result = await _mediator.Send(query);
-        
-        // Filter only featured products
-        var featuredProducts = result.Where(p => p.Featured).ToList();
-        
-        return Ok(featuredProducts);
+        return Ok(result);
     }
 
     /// <summary>
@@ -81,14 +78,11 @@ public class PublicProductsController : ControllerBase
         {
             StatusTab = "Active",
             Page = 1,
-            PageSize = limit
+            PageSize = limit,
+            IsNewArrival = true
         };
 
         var result = await _mediator.Send(query);
-        
-        // Filter only new arrivals
-        var newArrivals = result.Where(p => p.NewArrival).ToList();
-        
-        return Ok(newArrivals);
+        return Ok(result);
     }
 }

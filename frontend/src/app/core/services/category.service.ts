@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Injectable, inject } from "@angular/core";
+import { Observable, map } from "rxjs";
 
-import { ApiHttpClient } from '../http/http-client';
-import { Category } from '../models/category';
+import { ApiHttpClient } from "../http/http-client";
+import { Category } from "../models/category";
 
 type AdminCategory = {
   id: string;
@@ -17,13 +17,13 @@ type AdminCategory = {
 };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class CategoryService {
   private readonly api = inject(ApiHttpClient);
 
   getCategories(): Observable<Category[]> {
-    return this.api.get<AdminCategory[]>('/admin/categories').pipe(
+    return this.api.get<AdminCategory[]>("/categories").pipe(
       map((categories) =>
         categories
           .filter((category) => category.isVisible && !category.parentId)
@@ -33,8 +33,10 @@ export class CategoryService {
             name: category.name,
             slug: category.slug,
             description: category.description,
-            imageUrl: category.imageUrl ?? '',
-            href: category.slug ? `/products?category=${encodeURIComponent(category.slug)}` : '/products',
+            imageUrl: category.imageUrl ?? "",
+            href: category.slug
+              ? `/products?category=${encodeURIComponent(category.slug)}`
+              : "/products",
             productCount: category.productCount,
           })),
       ),

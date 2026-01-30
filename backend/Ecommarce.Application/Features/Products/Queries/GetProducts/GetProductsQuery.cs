@@ -11,6 +11,8 @@ public record GetProductsQuery : IRequest<List<ProductDto>>
     public string? StatusTab { get; init; }
     public int? Page { get; init; }
     public int? PageSize { get; init; }
+    public bool? IsFeatured { get; init; }
+    public bool? IsNewArrival { get; init; }
 }
 
 public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<ProductDto>>
@@ -24,22 +26,21 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
 
     public async Task<List<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Products.AsQueryable();
+        var dbQuery = _context.Products.AsQueryable();
 
         // Search filter
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             var searchLower = request.SearchTerm.ToLower();
-            query = query.Where(p => 
+            dbQuery = dbQuery.Where(p => 
                 p.Name.ToLower().Contains(searchLower) ||
-                p.Sku.ToLower().Contains(searchLower) ||
-                p.Tags.Any(t => t.ToLower().Contains(searchLower)));
+                p.Sku.ToLower().Contains(searchLower));
         }
 
         // Category filter
         if (!string.IsNullOrEmpty(request.Category) && request.Category != "All Categories")
         {
-            query = query.Where(p => p.Category == request.Category);
+            dbQuery = dbQuery.Where(p => p.Category == request.Category);
         }
 
         // Status filter
@@ -48,26 +49,38 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             switch (request.StatusTab)
             {
                 case "Active":
-                    query = query.Where(p => p.Status == "Active");
+                    dbQuery = dbQuery.Where(p => p.Status == "Active");
                     break;
                 case "Drafts":
-                    query = query.Where(p => p.Status == "Draft");
+                    dbQuery = dbQuery.Where(p => p.Status == "Draft");
                     break;
                 case "Archived":
-                    query = query.Where(p => p.Status == "Archived");
+                    dbQuery = dbQuery.Where(p => p.Status == "Archived");
                     break;
             }
+        }
+
+        // Featured filter
+        if (request.IsFeatured.HasValue)
+        {
+            dbQuery = dbQuery.Where(p => p.Featured == request.IsFeatured.Value);
+        }
+
+        // New Arrival filter
+        if (request.IsNewArrival.HasValue)
+        {
+            dbQuery = dbQuery.Where(p => p.NewArrival == request.IsNewArrival.Value);
         }
 
         // Pagination
         if (request.Page.HasValue && request.PageSize.HasValue)
         {
             var skip = (request.Page.Value - 1) * request.PageSize.Value;
-            query = query.Skip(skip).Take(request.PageSize.Value);
+            dbQuery = dbQuery.Skip(skip).Take(request.PageSize.Value);
         }
 
         // Execute query
-        var products = query.ToList();
+        var products = dbQuery.ToList();
 
         return products.Select(p => new ProductDto
         {
@@ -90,7 +103,12 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
             Status = p.Status,
             ImageUrl = p.ImageUrl,
             StatusActive = p.StatusActive,
-            MediaUrls = p.MediaUrls
+            MediaUrls = p.MediaUrls,
+            Ratings = p.Ratings,
+            Images = p.Images,
+            Variants = p.Variants,
+            Meta = p.Meta,
+            RelatedProducts = p.RelatedProducts
         }).ToList();
     }
 }

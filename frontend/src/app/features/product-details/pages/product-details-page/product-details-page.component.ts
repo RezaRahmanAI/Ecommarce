@@ -1,20 +1,31 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { BehaviorSubject, combineLatest, filter, map, switchMap, tap } from 'rxjs';
+import { Component, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  map,
+  switchMap,
+  tap,
+} from "rxjs";
 
-import { ProductService } from '../../../../core/services/product.service';
-import { Product, ProductImage, RatingBreakdown } from '../../../../core/models/product';
-import { Review } from '../../../../core/models/review';
-import { CartService } from '../../../../core/services/cart.service';
-import { PriceDisplayComponent } from '../../../../shared/components/price-display/price-display.component';
+import { ProductService } from "../../../../core/services/product.service";
+import {
+  Product,
+  ProductImage,
+  RatingBreakdown,
+} from "../../../../core/models/product";
+import { Review } from "../../../../core/models/review";
+import { CartService } from "../../../../core/services/cart.service";
+import { PriceDisplayComponent } from "../../../../shared/components/price-display/price-display.component";
 
 @Component({
-  selector: 'app-product-details-page',
+  selector: "app-product-details-page",
   standalone: true,
   imports: [CommonModule, RouterLink, PriceDisplayComponent],
-  templateUrl: './product-details-page.component.html',
-  styleUrl: './product-details-page.component.css',
+  templateUrl: "./product-details-page.component.html",
+  styleUrl: "./product-details-page.component.css",
 })
 export class ProductDetailsPageComponent {
   private readonly route = inject(ActivatedRoute);
@@ -22,13 +33,18 @@ export class ProductDetailsPageComponent {
   private readonly cartService = inject(CartService);
   private readonly router = inject(Router);
 
-  private readonly selectedColorSubject = new BehaviorSubject<string | null>(null);
-  private readonly selectedSizeSubject = new BehaviorSubject<string | null>(null);
+  private readonly selectedColorSubject = new BehaviorSubject<string | null>(
+    null,
+  );
+  private readonly selectedSizeSubject = new BehaviorSubject<string | null>(
+    null,
+  );
   private readonly quantitySubject = new BehaviorSubject<number>(1);
-  private readonly selectedMediaSubject = new BehaviorSubject<ProductImage | null>(null);
+  private readonly selectedMediaSubject =
+    new BehaviorSubject<ProductImage | null>(null);
 
   product$ = this.route.paramMap.pipe(
-    map((params) => Number(params.get('id')) || 1),
+    map((params) => Number(params.get("id")) || 1),
     switchMap((id) => this.productService.getById(id)),
     filter((product): product is Product => Boolean(product)),
     tap((product) => {
@@ -40,7 +56,7 @@ export class ProductDetailsPageComponent {
   );
 
   reviews$ = this.route.paramMap.pipe(
-    map((params) => Number(params.get('id')) || 1),
+    map((params) => Number(params.get("id")) || 1),
     switchMap((id) => this.productService.getReviewsByProductId(id)),
   );
 
@@ -61,7 +77,7 @@ export class ProductDetailsPageComponent {
     })),
   );
 
-  selectionError = '';
+  selectionError = "";
 
   fullStars(rating: number): number[] {
     return Array.from({ length: Math.floor(rating) }, (_, index) => index);
@@ -74,25 +90,34 @@ export class ProductDetailsPageComponent {
   emptyStars(rating: number): number[] {
     const full = Math.floor(rating);
     const half = this.hasHalfStar(rating) ? 1 : 0;
-    return Array.from({ length: Math.max(0, 5 - full - half) }, (_, index) => index);
+    return Array.from(
+      { length: Math.max(0, 5 - full - half) },
+      (_, index) => index,
+    );
   }
 
-  selectedColorName(product: Product | null, selectedColor: string | null): string {
-    return selectedColor ?? product?.variants.colors[0]?.name ?? '';
+  selectedColorName(
+    product: Product | null,
+    selectedColor: string | null,
+  ): string {
+    return selectedColor ?? product?.variants.colors[0]?.name ?? "";
   }
 
-  selectedSizeLabel(product: Product | null, selectedSize: string | null): string {
-    return selectedSize ?? product?.variants.sizes[0]?.label ?? '';
+  selectedSizeLabel(
+    product: Product | null,
+    selectedSize: string | null,
+  ): string {
+    return selectedSize ?? product?.variants.sizes[0]?.label ?? "";
   }
 
   selectColor(colorName: string): void {
     this.selectedColorSubject.next(colorName);
-    this.selectionError = '';
+    this.selectionError = "";
   }
 
   selectSize(sizeLabel: string): void {
     this.selectedSizeSubject.next(sizeLabel);
-    this.selectionError = '';
+    this.selectionError = "";
   }
 
   selectMedia(media: ProductImage): void {
@@ -114,18 +139,19 @@ export class ProductDetailsPageComponent {
     const selectedColor = this.selectedColorSubject.getValue();
     const selectedSize = this.selectedSizeSubject.getValue();
     if (!selectedColor || !selectedSize) {
-      this.selectionError = 'Please select a color and size before adding to cart.';
+      this.selectionError =
+        "Please select a color and size before adding to cart.";
       return;
     }
     const quantity = this.quantitySubject.getValue();
-    this.cartService.addItem(product.id, quantity, selectedColor, selectedSize);
-    this.selectionError = '';
+    this.cartService.addItem(product, quantity, selectedColor, selectedSize);
+    this.selectionError = "";
   }
 
   buyNow(product: Product | null): void {
     this.addToCart(product);
     if (!this.selectionError) {
-      void this.router.navigateByUrl('/cart');
+      void this.router.navigateByUrl("/cart");
     }
   }
 
@@ -150,7 +176,10 @@ export class ProductDetailsPageComponent {
     });
   }
 
-  private ensureSelectedMedia(product: Product, selectedMedia: ProductImage | null): ProductImage {
+  private ensureSelectedMedia(
+    product: Product,
+    selectedMedia: ProductImage | null,
+  ): ProductImage {
     return selectedMedia ?? product.images.mainImage;
   }
 }

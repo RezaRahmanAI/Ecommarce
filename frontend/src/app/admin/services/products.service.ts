@@ -1,17 +1,17 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, map, of } from 'rxjs';
+import { Injectable, inject } from "@angular/core";
+import { HttpParams } from "@angular/common/http";
+import { BehaviorSubject, Observable, map, of } from "rxjs";
 
-import { Product as StoreProduct } from '../../core/models/product';
+import { Product as StoreProduct } from "../../core/models/product";
 import {
   Product,
   ProductCreatePayload,
   ProductUpdatePayload,
   ProductsQueryParams,
-} from '../models/products.models';
-import { ApiHttpClient } from '../../core/http/http-client';
+} from "../models/products.models";
+import { ApiHttpClient } from "../../core/http/http-client";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ProductsService {
   private readonly api = inject(ApiHttpClient);
   private readonly catalogSubject = new BehaviorSubject<Product[]>([]);
@@ -19,7 +19,7 @@ export class ProductsService {
   private catalogLoading = false;
 
   constructor() {
-    this.loadCatalog();
+    // Catalog is loaded lazily when first requested via getCatalogProducts()
   }
 
   getCatalogProducts(): Observable<Product[]> {
@@ -33,7 +33,9 @@ export class ProductsService {
     return [...this.catalogSubject.getValue()];
   }
 
-  getProducts(params: ProductsQueryParams): Observable<{ items: Product[]; total: number }> {
+  getProducts(
+    params: ProductsQueryParams,
+  ): Observable<{ items: Product[]; total: number }> {
     const queryParams = new HttpParams({
       fromObject: {
         searchTerm: params.searchTerm,
@@ -43,9 +45,12 @@ export class ProductsService {
         pageSize: params.pageSize,
       },
     });
-    return this.api.get<{ items: Product[]; total: number }>('/admin/products', {
-      params: queryParams,
-    });
+    return this.api.get<{ items: Product[]; total: number }>(
+      "/admin/products",
+      {
+        params: queryParams,
+      },
+    );
   }
 
   getFilteredProducts(params: ProductsQueryParams): Observable<Product[]> {
@@ -56,11 +61,15 @@ export class ProductsService {
         statusTab: params.statusTab,
       },
     });
-    return this.api.get<Product[]>('/admin/products/filtered', { params: queryParams });
+    return this.api.get<Product[]>("/admin/products/filtered", {
+      params: queryParams,
+    });
   }
 
   exportProducts(params: ProductsQueryParams): Observable<string> {
-    return this.getFilteredProducts(params).pipe(map((rows) => this.buildCsv(rows)));
+    return this.getFilteredProducts(params).pipe(
+      map((rows) => this.buildCsv(rows)),
+    );
   }
 
   deleteProduct(productId: number): Observable<boolean> {
@@ -77,7 +86,7 @@ export class ProductsService {
   }
 
   createProduct(payload: ProductCreatePayload): Observable<Product> {
-    return this.api.post<Product>('/admin/products', payload).pipe(
+    return this.api.post<Product>("/admin/products", payload).pipe(
       map((created) => {
         this.updateCatalogSnapshot((products) => [created, ...products]);
         return created;
@@ -89,7 +98,10 @@ export class ProductsService {
     return this.api.get<Product>(`/admin/products/${productId}`);
   }
 
-  updateProduct(productId: number, payload: ProductUpdatePayload): Observable<Product> {
+  updateProduct(
+    productId: number,
+    payload: ProductUpdatePayload,
+  ): Observable<Product> {
     return this.api.put<Product>(`/admin/products/${productId}`, payload).pipe(
       map((updated) => {
         this.updateCatalogSnapshot((products) => {
@@ -113,30 +125,32 @@ export class ProductsService {
       return of([]);
     }
     const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
-    return this.api.post<string[]>('/admin/products/media', formData);
+    files.forEach((file) => formData.append("files", file));
+    return this.api.post<string[]>("/admin/products/media", formData);
   }
 
   removeProductMedia(productId: number, mediaUrl: string): Observable<boolean> {
-    return this.api.post<boolean>(`/admin/products/${productId}/media/remove`, { mediaUrl }).pipe(
-      map((success) => {
-        if (success) {
-          this.updateCatalogSnapshot((products) =>
-            products.map((product) =>
-              product.id === productId
-                ? this.removeMediaFromProduct(product, mediaUrl)
-                : product,
-            ),
-          );
-        }
-        return success;
-      }),
-    );
+    return this.api
+      .post<boolean>(`/admin/products/${productId}/media/remove`, { mediaUrl })
+      .pipe(
+        map((success) => {
+          if (success) {
+            this.updateCatalogSnapshot((products) =>
+              products.map((product) =>
+                product.id === productId
+                  ? this.removeMediaFromProduct(product, mediaUrl)
+                  : product,
+              ),
+            );
+          }
+          return success;
+        }),
+      );
   }
 
   private loadCatalog(): void {
     this.catalogLoading = true;
-    this.api.get<Product[]>('/admin/products/catalog').subscribe({
+    this.api.get<Product[]>("/admin/products/catalog").subscribe({
       next: (products) => {
         this.catalogLoaded = true;
         this.catalogSubject.next(products);
@@ -150,7 +164,9 @@ export class ProductsService {
     });
   }
 
-  private updateCatalogSnapshot(updater: (products: Product[]) => Product[]): void {
+  private updateCatalogSnapshot(
+    updater: (products: Product[]) => Product[],
+  ): void {
     const current = this.catalogSubject.getValue();
     const next = updater(current);
     this.catalogLoaded = true;
@@ -159,15 +175,15 @@ export class ProductsService {
 
   private buildCsv(rows: Product[]): string {
     const header = [
-      'ID',
-      'Name',
-      'Category',
-      'SKU',
-      'Stock',
-      'Price',
-      'Purchase Rate',
-      'Status',
-      'Tags',
+      "ID",
+      "Name",
+      "Category",
+      "SKU",
+      "Stock",
+      "Price",
+      "Purchase Rate",
+      "Status",
+      "Tags",
     ];
     const csvRows = rows.map((product) => [
       product.id,
@@ -178,18 +194,27 @@ export class ProductsService {
       product.price.toFixed(2),
       (product.purchaseRate ?? 0).toFixed(2),
       product.status,
-      (product.tags ?? []).join('|'),
+      (product.tags ?? []).join("|"),
     ]);
 
     return [header, ...csvRows]
-      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+      .map((row) =>
+        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
   }
 
   private removeMediaFromProduct(product: Product, mediaUrl: string): Product {
-    const updatedMedia = (product.mediaUrls ?? []).filter((url) => url !== mediaUrl);
-    const images = this.buildImagesFromMedia(updatedMedia, product.name, product.images);
-    const imageUrl = product.imageUrl === mediaUrl ? updatedMedia[0] : product.imageUrl;
+    const updatedMedia = (product.mediaUrls ?? []).filter(
+      (url) => url !== mediaUrl,
+    );
+    const images = this.buildImagesFromMedia(
+      updatedMedia,
+      product.name,
+      product.images,
+    );
+    const imageUrl =
+      product.imageUrl === mediaUrl ? updatedMedia[0] : product.imageUrl;
 
     return {
       ...product,
@@ -202,20 +227,21 @@ export class ProductsService {
   private buildImagesFromMedia(
     mediaUrls: string[],
     name: string,
-    existing?: StoreProduct['images'],
-  ): StoreProduct['images'] {
-    const media = (mediaUrls.length ? mediaUrls : [existing?.mainImage.url ?? ''])
-      .filter(Boolean) as string[];
-    const [mainUrl, ...thumbnails] = media.length ? media : [''];
+    existing?: StoreProduct["images"],
+  ): StoreProduct["images"] {
+    const media = (
+      mediaUrls.length ? mediaUrls : [existing?.mainImage.url ?? ""]
+    ).filter(Boolean) as string[];
+    const [mainUrl, ...thumbnails] = media.length ? media : [""];
     const mainImage = {
-      type: (existing?.mainImage.type ?? 'image') as 'image' | 'video',
-      label: existing?.mainImage.label ?? 'Main',
+      type: (existing?.mainImage.type ?? "image") as "image" | "video",
+      label: existing?.mainImage.label ?? "Main",
       url: mainUrl,
       alt: existing?.mainImage.alt ?? `${name} image`,
     };
     const thumbnailUrls = thumbnails.length ? thumbnails : [mainUrl];
     const thumbnailImages = thumbnailUrls.map((url, index) => ({
-      type: 'image' as const,
+      type: "image" as const,
       label: existing?.thumbnails[index]?.label ?? `Gallery ${index + 1}`,
       url,
       alt: existing?.thumbnails[index]?.alt ?? `${name} gallery ${index + 1}`,
