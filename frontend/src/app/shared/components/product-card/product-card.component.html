@@ -4,7 +4,7 @@
     <img
       [alt]="product.images.mainImage.alt"
       class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-      [src]="product.images.mainImage.url"
+      [src]="imageUrlService.getImageUrl(product.images?.mainImage?.url || product.imageUrl)"
     />
     <app-icon-button
       icon="add_shopping_cart"

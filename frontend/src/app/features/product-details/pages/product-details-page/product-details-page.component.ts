@@ -48,10 +48,14 @@ export class ProductDetailsPageComponent {
     switchMap((id) => this.productService.getById(id)),
     filter((product): product is Product => Boolean(product)),
     tap((product) => {
-      this.selectedColorSubject.next(product.variants.colors[0]?.name ?? null);
-      this.selectedSizeSubject.next(product.variants.sizes[0]?.label ?? null);
+      this.selectedColorSubject.next(
+        product.variants?.colors?.[0]?.name ?? null,
+      );
+      this.selectedSizeSubject.next(
+        product.variants?.sizes?.[0]?.label ?? null,
+      );
       this.quantitySubject.next(1);
-      this.selectedMediaSubject.next(product.images.mainImage);
+      this.selectedMediaSubject.next(product.images?.mainImage ?? null);
     }),
   );
 
@@ -100,14 +104,14 @@ export class ProductDetailsPageComponent {
     product: Product | null,
     selectedColor: string | null,
   ): string {
-    return selectedColor ?? product?.variants.colors[0]?.name ?? "";
+    return selectedColor ?? product?.variants?.colors?.[0]?.name ?? "";
   }
 
   selectedSizeLabel(
     product: Product | null,
     selectedSize: string | null,
   ): string {
-    return selectedSize ?? product?.variants.sizes[0]?.label ?? "";
+    return selectedSize ?? product?.variants?.sizes?.[0]?.label ?? "";
   }
 
   selectColor(colorName: string): void {
@@ -164,7 +168,9 @@ export class ProductDetailsPageComponent {
   }
 
   private buildGallery(product: Product): ProductImage[] {
-    const gallery = [product.images.mainImage, ...product.images.thumbnails];
+    const mainImage = product.images?.mainImage;
+    const thumbnails = product.images?.thumbnails ?? [];
+    const gallery = mainImage ? [mainImage, ...thumbnails] : thumbnails;
     const seen = new Set<string>();
     return gallery.filter((item) => {
       const key = `${item.type}-${item.url}`;
@@ -179,7 +185,7 @@ export class ProductDetailsPageComponent {
   private ensureSelectedMedia(
     product: Product,
     selectedMedia: ProductImage | null,
-  ): ProductImage {
-    return selectedMedia ?? product.images.mainImage;
+  ): ProductImage | null {
+    return selectedMedia ?? product.images?.mainImage ?? null;
   }
 }

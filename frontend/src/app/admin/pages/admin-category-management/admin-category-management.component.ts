@@ -10,6 +10,7 @@ import {
   ReorderPayload,
 } from "../../models/categories.models";
 import { CategoriesService } from "../../services/categories.service";
+import { environment } from "../../../../environments/environment";
 
 interface ParentOption {
   id: string | null;
@@ -40,6 +41,9 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
   previousSelectedId: string | null = null;
   slugManuallyEdited = false;
   private isSlugUpdating = false;
+  selectedImageFile: File | null = null;
+  imagePreviewUrl: string | null = null;
+  isUploadingImage = false;
 
   filterControl = this.formBuilder.control("", { nonNullable: true });
 
@@ -96,6 +100,8 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     this.mode = "create";
     this.originalSnapshot = null;
     this.slugManuallyEdited = false;
+    this.selectedImageFile = null;
+    this.imagePreviewUrl = null;
     this.categoryForm.reset({
       name: "",
       slug: "",
@@ -110,6 +116,8 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
     this.mode = "edit";
     this.originalSnapshot = { ...category };
     this.slugManuallyEdited = false;
+    this.selectedImageFile = null;
+    this.imagePreviewUrl = null;
     this.categoryForm.reset({
       name: category.name,
       slug: category.slug,
@@ -218,6 +226,33 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // If there's a selected image file, upload it first
+    if (this.selectedImageFile) {
+      this.isUploadingImage = true;
+      this.categoriesService.uploadImage(this.selectedImageFile).subscribe({
+        next: (imageUrl) => {
+          this.isUploadingImage = false;
+          // Update form with uploaded image URL
+          this.categoryForm.patchValue({ imageUrl });
+          // Clear preview state
+          this.selectedImageFile = null;
+          this.imagePreviewUrl = null;
+          // Now save the category
+          this.performSave();
+        },
+        error: (error) => {
+          this.isUploadingImage = false;
+          window.alert("Failed to upload image. Please try again.");
+          console.error("Image upload error:", error);
+        },
+      });
+    } else {
+      // No new image, just save the category
+      this.performSave();
+    }
+  }
+
+  private performSave(): void {
     const formValue = this.categoryForm.getRawValue();
     const payload: Partial<Category> = {
       name: formValue.name ?? "",
@@ -320,9 +355,22 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       return;
     }
     const file = input.files[0];
-    this.categoriesService.uploadImage(file).subscribe((url) => {
-      this.categoryForm.patchValue({ imageUrl: url });
-    });
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      window.alert("Please select a valid image file.");
+      return;
+    }
+
+    // Store the file for later upload
+    this.selectedImageFile = file;
+
+    // Create local preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.imagePreviewUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   getParentOptions(): ParentOption[] {
@@ -538,5 +586,28 @@ export class AdminCategoryManagementComponent implements OnInit, OnDestroy {
       .filter((item) => (item.parentId ?? null) === parentId)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((item) => item.id);
+  }
+
+  getImageUrl(imageUrl: string | null | undefined): string {
+    if (!imageUrl) {
+      return "";
+    }
+    // If it's already an absolute URL, return as is
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+      return imageUrl;
+    }
+    // Convert relative URL to absolute URL using backend base URL
+    const baseUrl = environment.apiBaseUrl.replace("/api", "");
+    return `${baseUrl}${imageUrl.startsWith("/") ? imageUrl : "/" + imageUrl}`;
+  }
+
+  getPreviewUrl(): string {
+    // If there's a local preview, use it
+    if (this.imagePreviewUrl) {
+      return this.imagePreviewUrl;
+    }
+    // Otherwise, use the existing image URL from the form
+    const imageUrl = this.categoryForm.get("imageUrl")?.value;
+    return this.getImageUrl(imageUrl);
   }
 }

@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, inject } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, inject } from "@angular/core";
 import {
   AbstractControl,
   FormArray,
@@ -7,37 +7,42 @@ import {
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
-} from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+} from "@angular/forms";
+import { Router, RouterModule } from "@angular/router";
+import { switchMap } from "rxjs/operators";
 
-import { ProductCreatePayload } from '../../models/products.models';
-import { ProductImage } from '../../../core/models/product';
-import { ProductsService } from '../../services/products.service';
-import { PriceDisplayComponent } from '../../../shared/components/price-display/price-display.component';
+import { ProductCreatePayload } from "../../models/products.models";
+import { ProductImage } from "../../../core/models/product";
+import { ProductsService } from "../../services/products.service";
+import { PriceDisplayComponent } from "../../../shared/components/price-display/price-display.component";
 
 interface MediaFormValue {
   id: string;
   url: string;
   label: string;
   alt: string;
-  type: 'image' | 'video';
+  type: "image" | "video";
   isMain: boolean;
-  source: 'file' | 'url';
+  source: "file" | "url";
 }
 
 @Component({
-  selector: 'app-admin-product-create',
+  selector: "app-admin-product-create",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, PriceDisplayComponent],
-  templateUrl: './admin-product-create.component.html',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    PriceDisplayComponent,
+  ],
+  templateUrl: "./admin-product-create.component.html",
 })
 export class AdminProductCreateComponent implements OnDestroy {
   private formBuilder = inject(FormBuilder);
   private productsService = inject(ProductsService);
   private router = inject(Router);
 
-  private readonly defaultRatings: ProductCreatePayload['ratings'] = {
+  private readonly defaultRatings: ProductCreatePayload["ratings"] = {
     avgRating: 0,
     reviewCount: 0,
     ratingBreakdown: [
@@ -49,19 +54,19 @@ export class AdminProductCreateComponent implements OnDestroy {
     ],
   };
 
-  mediaError = '';
+  mediaError = "";
   private mediaFileMap = new Map<string, File>();
 
   form = this.formBuilder.group(
     {
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required]],
+      name: ["", [Validators.required, Validators.minLength(3)]],
+      description: ["", [Validators.required]],
       statusActive: [true],
-      category: ['', [Validators.required]],
-      subCategory: ['', [Validators.required]],
-      gender: ['women', [Validators.required]],
-      badges: [''],
-      tags: [''],
+      category: ["", [Validators.required]],
+      subCategory: ["", [Validators.required]],
+      gender: ["women", [Validators.required]],
+      badges: [""],
+      tags: [""],
       price: [0, [Validators.required, Validators.min(0)]],
       salePrice: [null as number | null, [Validators.min(0)]],
       purchaseRate: [0, [Validators.required, Validators.min(0)]],
@@ -74,17 +79,17 @@ export class AdminProductCreateComponent implements OnDestroy {
         sizes: this.formBuilder.array([this.createSizeGroup(true)]),
       }),
       meta: this.formBuilder.group({
-        fabricAndCare: [''],
-        shippingAndReturns: [''],
+        fabricAndCare: [""],
+        shippingAndReturns: [""],
       }),
     },
-    { validators: [this.salePriceValidator] }
+    { validators: [this.salePriceValidator] },
   );
 
   ngOnDestroy(): void {
     this.mediaItemsArray.controls.forEach((control) => {
       const value = control.value as MediaFormValue;
-      if (value.source === 'file') {
+      if (value.source === "file") {
         URL.revokeObjectURL(value.url);
       }
     });
@@ -92,15 +97,15 @@ export class AdminProductCreateComponent implements OnDestroy {
   }
 
   get mediaItemsArray(): FormArray {
-    return this.form.get('mediaItems') as FormArray;
+    return this.form.get("mediaItems") as FormArray;
   }
 
   get colorsArray(): FormArray {
-    return this.form.get('variants.colors') as FormArray;
+    return this.form.get("variants.colors") as FormArray;
   }
 
   get sizesArray(): FormArray {
-    return this.form.get('variants.sizes') as FormArray;
+    return this.form.get("variants.sizes") as FormArray;
   }
 
   addColor(): void {
@@ -111,15 +116,17 @@ export class AdminProductCreateComponent implements OnDestroy {
     if (this.colorsArray.length <= 1) {
       return;
     }
-    const wasSelected = Boolean(this.colorsArray.at(index)?.get('selected')?.value);
+    const wasSelected = Boolean(
+      this.colorsArray.at(index)?.get("selected")?.value,
+    );
     this.colorsArray.removeAt(index);
     if (wasSelected) {
-      this.ensureSingleSelected(this.colorsArray, 'selected');
+      this.ensureSingleSelected(this.colorsArray, "selected");
     }
   }
 
   setSelectedColor(index: number): void {
-    this.ensureSingleSelected(this.colorsArray, 'selected', index);
+    this.ensureSingleSelected(this.colorsArray, "selected", index);
   }
 
   addSize(): void {
@@ -130,15 +137,17 @@ export class AdminProductCreateComponent implements OnDestroy {
     if (this.sizesArray.length <= 1) {
       return;
     }
-    const wasSelected = Boolean(this.sizesArray.at(index)?.get('selected')?.value);
+    const wasSelected = Boolean(
+      this.sizesArray.at(index)?.get("selected")?.value,
+    );
     this.sizesArray.removeAt(index);
     if (wasSelected) {
-      this.ensureSingleSelected(this.sizesArray, 'selected');
+      this.ensureSingleSelected(this.sizesArray, "selected");
     }
   }
 
   setSelectedSize(index: number): void {
-    this.ensureSingleSelected(this.sizesArray, 'selected', index);
+    this.ensureSingleSelected(this.sizesArray, "selected", index);
   }
 
   handleFilesSelected(event: Event): void {
@@ -147,7 +156,7 @@ export class AdminProductCreateComponent implements OnDestroy {
       return;
     }
     this.addFiles(Array.from(input.files));
-    input.value = '';
+    input.value = "";
   }
 
   handleDrop(event: DragEvent): void {
@@ -163,13 +172,13 @@ export class AdminProductCreateComponent implements OnDestroy {
   }
 
   addFromUrl(): void {
-    const url = window.prompt('Enter media URL');
+    const url = window.prompt("Enter media URL");
     if (!url) {
       return;
     }
     this.addMediaItem({
       url,
-      source: 'url',
+      source: "url",
     });
   }
 
@@ -179,7 +188,7 @@ export class AdminProductCreateComponent implements OnDestroy {
       return;
     }
     const value = control.value as MediaFormValue;
-    if (value.source === 'file') {
+    if (value.source === "file") {
       URL.revokeObjectURL(value.url);
       this.mediaFileMap.delete(value.id);
     }
@@ -189,38 +198,81 @@ export class AdminProductCreateComponent implements OnDestroy {
   }
 
   setMainMedia(index: number): void {
-    this.ensureSingleSelected(this.mediaItemsArray, 'isMain', index);
+    this.ensureSingleSelected(this.mediaItemsArray, "isMain", index);
   }
 
   discard(): void {
-    const confirmed = window.confirm('Discard changes?');
+    const confirmed = window.confirm("Discard changes?");
     if (!confirmed) {
       return;
     }
     this.resetForm();
-    void this.router.navigate(['/admin/products']);
+    void this.router.navigate(["/admin/products"]);
   }
 
   saveProduct(): void {
-    this.mediaError = '';
+    console.log("=== Save Product Started ===");
+    this.mediaError = "";
 
     if (this.mediaItemsArray.length === 0) {
-      this.mediaError = 'Add at least one image or video for the product.';
+      this.mediaError = "Add at least one image or video for the product.";
+      console.error("Validation failed: No media items");
     }
 
     if (this.form.invalid || this.mediaItemsArray.length === 0) {
       this.form.markAllAsTouched();
+
+      // Log detailed validation errors
+      const invalidFields: string[] = [];
+      Object.keys(this.form.controls).forEach((key) => {
+        const control = this.form.get(key);
+        if (control?.invalid) {
+          invalidFields.push(key);
+          console.error(`Field "${key}" is invalid:`, control.errors);
+        }
+      });
+
+      console.error("Form validation failed", {
+        formValid: this.form.valid,
+        formErrors: this.form.errors,
+        mediaCount: this.mediaItemsArray.length,
+        invalidFields: invalidFields,
+        formValue: this.form.value,
+      });
+
+      window.alert(
+        `Please fill in all required fields: ${invalidFields.join(", ")}`,
+      );
       return;
     }
 
     const files = this.getSelectedFiles();
+    console.log("Files to upload:", files.length);
 
     this.productsService
       .uploadProductMedia(files)
-      .pipe(switchMap((mediaUrls) => this.productsService.createProduct(this.buildPayload(mediaUrls))))
-      .subscribe(() => {
-        window.alert('Product created successfully.');
-        void this.router.navigate(['/admin/products']);
+      .pipe(
+        switchMap((mediaUrls) => {
+          console.log("Media uploaded successfully:", mediaUrls);
+          const payload = this.buildPayload(mediaUrls);
+          console.log("Creating product with payload:", payload);
+          return this.productsService.createProduct(payload);
+        }),
+      )
+      .subscribe({
+        next: (createdProduct) => {
+          console.log("Product created successfully:", createdProduct);
+          window.alert("Product created successfully.");
+          void this.router.navigate(["/admin/products"]);
+        },
+        error: (error) => {
+          console.error("Error creating product:", error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            "Failed to create product. Please try again.";
+          window.alert(`Error: ${errorMessage}`);
+        },
       });
   }
 
@@ -230,15 +282,15 @@ export class AdminProductCreateComponent implements OnDestroy {
 
   private createColorGroup(selected: boolean): AbstractControl {
     return this.formBuilder.group({
-      name: [''],
-      hex: ['#111827'],
+      name: [""],
+      hex: ["#111827"],
       selected: [selected],
     });
   }
 
   private createSizeGroup(selected: boolean): AbstractControl {
     return this.formBuilder.group({
-      label: [''],
+      label: [""],
       stock: [0, [Validators.min(0)]],
       selected: [selected],
     });
@@ -256,9 +308,11 @@ export class AdminProductCreateComponent implements OnDestroy {
     });
   }
 
-  private salePriceValidator(control: AbstractControl): ValidationErrors | null {
-    const basePrice = Number(control.get('price')?.value ?? 0);
-    const salePriceControl = control.get('salePrice');
+  private salePriceValidator(
+    control: AbstractControl,
+  ): ValidationErrors | null {
+    const basePrice = Number(control.get("price")?.value ?? 0);
+    const salePriceControl = control.get("salePrice");
     const salePrice = salePriceControl?.value;
     if (salePrice === null || salePrice === undefined) {
       return null;
@@ -272,47 +326,58 @@ export class AdminProductCreateComponent implements OnDestroy {
 
   private addFiles(files: File[]): void {
     files.forEach((file) => {
-      const id = this.generateId('media');
+      const id = this.generateId("media");
       const url = URL.createObjectURL(file);
       this.mediaFileMap.set(id, file);
       this.addMediaItem({
         id,
         url,
-        label: this.titleize(file.name.replace(/\.[^.]+$/, '')) || 'Gallery image',
-        alt: this.form.get('name')?.value || 'Product image',
-        type: 'image',
+        label:
+          this.titleize(file.name.replace(/\.[^.]+$/, "")) || "Gallery image",
+        alt: this.form.get("name")?.value || "Product image",
+        type: "image",
         isMain: this.mediaItemsArray.length === 0,
-        source: 'file',
+        source: "file",
       });
     });
   }
 
-  private addMediaItem(partial: Partial<MediaFormValue> & Pick<MediaFormValue, 'url' | 'source'>): void {
+  private addMediaItem(
+    partial: Partial<MediaFormValue> & Pick<MediaFormValue, "url" | "source">,
+  ): void {
     const item: MediaFormValue = {
-      id: partial.id ?? this.generateId('media'),
+      id: partial.id ?? this.generateId("media"),
       url: partial.url,
-      label: partial.label ?? 'Gallery image',
-      alt: partial.alt ?? this.form.get('name')?.value ?? 'Product image',
-      type: partial.type ?? 'image',
+      label: partial.label ?? "Gallery image",
+      alt: partial.alt ?? this.form.get("name")?.value ?? "Product image",
+      type: partial.type ?? "image",
       isMain: partial.isMain ?? this.mediaItemsArray.length === 0,
       source: partial.source,
     };
     this.mediaItemsArray.push(this.createMediaItemGroup(item));
-    this.mediaError = '';
+    this.mediaError = "";
     this.ensureMainMedia();
     this.syncMediaFiles();
   }
 
   private ensureMainMedia(): void {
-    const hasMain = this.mediaItemsArray.controls.some((control) => control.get('isMain')?.value);
+    const hasMain = this.mediaItemsArray.controls.some(
+      (control) => control.get("isMain")?.value,
+    );
     if (!hasMain && this.mediaItemsArray.length > 0) {
-      this.mediaItemsArray.at(0)?.get('isMain')?.setValue(true);
+      this.mediaItemsArray.at(0)?.get("isMain")?.setValue(true);
     }
   }
 
-  private ensureSingleSelected(array: FormArray, controlName: string, selectedIndex?: number): void {
+  private ensureSingleSelected(
+    array: FormArray,
+    controlName: string,
+    selectedIndex?: number,
+  ): void {
     array.controls.forEach((control, index) => {
-      control.get(controlName)?.setValue(selectedIndex === index, { emitEvent: false });
+      control
+        .get(controlName)
+        ?.setValue(selectedIndex === index, { emitEvent: false });
     });
     if (selectedIndex === undefined && array.length > 0) {
       array.at(0)?.get(controlName)?.setValue(true, { emitEvent: false });
@@ -330,12 +395,12 @@ export class AdminProductCreateComponent implements OnDestroy {
 
   private buildPayload(uploadedUrls: string[]): ProductCreatePayload {
     const raw = this.form.getRawValue();
-    const tags = (raw.tags ?? '')
-      .split(',')
+    const tags = (raw.tags ?? "")
+      .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
-    const badges = (raw.badges ?? '')
-      .split(',')
+    const badges = (raw.badges ?? "")
+      .split(",")
       .map((badge) => badge.trim())
       .filter((badge) => badge.length > 0);
 
@@ -344,10 +409,10 @@ export class AdminProductCreateComponent implements OnDestroy {
     const mainImage: ProductImage = mainMedia
       ? this.mapToProductImage(mainMedia)
       : {
-          type: 'image',
-          label: 'Main',
-          url: 'https://via.placeholder.com/600x800?text=Product+Image',
-          alt: raw.name ?? 'Product image',
+          type: "image",
+          label: "Main",
+          url: "https://via.placeholder.com/600x800?text=Product+Image",
+          alt: raw.name ?? "Product image",
         };
     const thumbnails = mediaItems
       .filter((item) => item.id !== mainMedia?.id)
@@ -358,15 +423,15 @@ export class AdminProductCreateComponent implements OnDestroy {
     }
 
     const colors = this.colorsArray.controls.map((control, index) => ({
-      name: control.get('name')?.value ?? `Color ${index + 1}`,
-      hex: control.get('hex')?.value ?? '#111827',
-      selected: Boolean(control.get('selected')?.value),
+      name: control.get("name")?.value ?? `Color ${index + 1}`,
+      hex: control.get("hex")?.value ?? "#111827",
+      selected: Boolean(control.get("selected")?.value),
     }));
 
     const sizes = this.sizesArray.controls.map((control, index) => ({
-      label: control.get('label')?.value ?? `Size ${index + 1}`,
-      stock: Number(control.get('stock')?.value ?? 0),
-      selected: Boolean(control.get('selected')?.value),
+      label: control.get("label")?.value ?? `Size ${index + 1}`,
+      stock: Number(control.get("stock")?.value ?? 0),
+      selected: Boolean(control.get("selected")?.value),
     }));
 
     if (!colors.some((color) => color.selected) && colors.length > 0) {
@@ -377,14 +442,14 @@ export class AdminProductCreateComponent implements OnDestroy {
       sizes[0].selected = true;
     }
 
-    const gender = (raw.gender ?? 'women') as ProductCreatePayload['gender'];
+    const gender = (raw.gender ?? "women") as ProductCreatePayload["gender"];
 
     return {
-      name: raw.name ?? '',
-      description: raw.description ?? '',
+      name: raw.name ?? "",
+      description: raw.description ?? "",
       statusActive: Boolean(raw.statusActive),
-      category: raw.category ?? '',
-      subCategory: raw.subCategory ?? '',
+      category: raw.category ?? "",
+      subCategory: raw.subCategory ?? "",
       gender,
       tags,
       badges,
@@ -403,8 +468,8 @@ export class AdminProductCreateComponent implements OnDestroy {
         sizes,
       },
       meta: {
-        fabricAndCare: raw.meta?.fabricAndCare ?? '',
-        shippingAndReturns: raw.meta?.shippingAndReturns ?? '',
+        fabricAndCare: raw.meta?.fabricAndCare ?? "",
+        shippingAndReturns: raw.meta?.shippingAndReturns ?? "",
       },
     };
   }
@@ -413,7 +478,7 @@ export class AdminProductCreateComponent implements OnDestroy {
     let fileIndex = 0;
     return this.mediaItemsArray.controls.map((control) => {
       const value = control.getRawValue() as MediaFormValue;
-      if (value.source === 'file') {
+      if (value.source === "file") {
         const url = uploadedUrls[fileIndex] ?? value.url;
         fileIndex += 1;
         return { ...value, url };
@@ -425,22 +490,22 @@ export class AdminProductCreateComponent implements OnDestroy {
   private mapToProductImage(item: MediaFormValue): ProductImage {
     return {
       type: item.type,
-      label: item.label || 'Gallery',
+      label: item.label || "Gallery",
       url: item.url,
-      alt: item.alt || 'Product image',
+      alt: item.alt || "Product image",
     };
   }
 
   private resetForm(): void {
     this.form.reset({
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       statusActive: true,
-      category: '',
-      subCategory: '',
-      gender: 'women',
-      badges: '',
-      tags: '',
+      category: "",
+      subCategory: "",
+      gender: "women",
+      badges: "",
+      tags: "",
       price: 0,
       salePrice: null,
       purchaseRate: 0,
@@ -449,19 +514,19 @@ export class AdminProductCreateComponent implements OnDestroy {
       mediaFiles: [],
       mediaItems: [],
       variants: {
-        colors: [{ name: '', hex: '#111827', selected: true }],
-        sizes: [{ label: '', stock: 0, selected: true }],
+        colors: [{ name: "", hex: "#111827", selected: true }],
+        sizes: [{ label: "", stock: 0, selected: true }],
       },
       meta: {
-        fabricAndCare: '',
-        shippingAndReturns: '',
+        fabricAndCare: "",
+        shippingAndReturns: "",
       },
     });
-    this.mediaError = '';
+    this.mediaError = "";
 
     this.mediaItemsArray.controls.forEach((control) => {
-      if (control.get('source')?.value === 'file') {
-        URL.revokeObjectURL(control.get('url')?.value);
+      if (control.get("source")?.value === "file") {
+        URL.revokeObjectURL(control.get("url")?.value);
       }
     });
     this.mediaItemsArray.clear();
@@ -470,19 +535,23 @@ export class AdminProductCreateComponent implements OnDestroy {
     while (this.colorsArray.length > 1) {
       this.colorsArray.removeAt(0, { emitEvent: false });
     }
-    this.colorsArray.at(0)?.patchValue({ name: '', hex: '#111827', selected: true });
+    this.colorsArray
+      .at(0)
+      ?.patchValue({ name: "", hex: "#111827", selected: true });
 
     while (this.sizesArray.length > 1) {
       this.sizesArray.removeAt(0, { emitEvent: false });
     }
-    this.sizesArray.at(0)?.patchValue({ label: '', stock: 0, selected: true });
+    this.sizesArray.at(0)?.patchValue({ label: "", stock: 0, selected: true });
   }
 
   private titleize(value: string): string {
     return value
       .split(/[-_ ]+/)
-      .map((segment) => (segment ? segment[0].toUpperCase() + segment.slice(1) : ''))
-      .join(' ')
+      .map((segment) =>
+        segment ? segment[0].toUpperCase() + segment.slice(1) : "",
+      )
+      .join(" ")
       .trim();
   }
 

@@ -1,5 +1,5 @@
 export interface ProductImage {
-  type: 'image' | 'video';
+  type: "image" | "video";
   label: string;
   url: string;
   alt: string;
@@ -51,7 +51,7 @@ export interface Product {
   badges: string[];
   price: number;
   salePrice?: number;
-  gender?: 'men' | 'women' | 'kids' | 'accessories';
+  gender?: "men" | "women" | "kids" | "accessories";
   ratings: ProductRatings;
   images: {
     mainImage: ProductImage;
@@ -65,4 +65,5 @@ export interface Product {
   relatedProducts: RelatedProduct[];
   featured?: boolean;
   newArrival?: boolean;
+  imageUrl?: string; // Backend compatibility - main image URL
 }

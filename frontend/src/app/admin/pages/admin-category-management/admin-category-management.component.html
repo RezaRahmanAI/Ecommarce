@@ -178,26 +178,48 @@
             >
             <div class="flex items-center gap-4">
               <div
-                class="size-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden bg-cover bg-center"
+                class="size-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden bg-cover bg-center relative"
                 data-alt="Current category image preview"
                 [ngStyle]="{
-                  'background-image': categoryForm.get('imageUrl')?.value
-                    ? 'url(' + categoryForm.get('imageUrl')?.value + ')'
+                  'background-image': getPreviewUrl()
+                    ? 'url(' + getPreviewUrl() + ')'
                     : 'none'
                 }"
-              ></div>
+              >
+                <span 
+                  *ngIf="!getPreviewUrl()" 
+                  class="material-symbols-outlined text-slate-300 text-3xl"
+                >image</span>
+                <div 
+                  *ngIf="isUploadingImage" 
+                  class="absolute inset-0 bg-black/50 flex items-center justify-center"
+                >
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              </div>
               <div class="flex-1">
                 <label
                   class="flex justify-center w-full h-16 px-4 transition bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-md appearance-none cursor-pointer hover:border-primary focus:outline-none"
+                  [class.opacity-50]="isUploadingImage"
                 >
                   <span class="flex items-center space-x-2">
                     <span class="material-symbols-outlined text-slate-400">cloud_upload</span>
-                    <span class="font-medium text-slate-600 dark:text-slate-400 text-xs"
-                      >Drop files or click to upload</span
-                    >
+                    <span class="font-medium text-slate-600 dark:text-slate-400 text-xs">
+                      {{ selectedImageFile ? selectedImageFile.name : 'Drop files or click to upload' }}
+                    </span>
                   </span>
-                  <input class="hidden" name="file_upload" type="file" (change)="handleImageUpload($event)" />
+                  <input 
+                    class="hidden" 
+                    name="file_upload" 
+                    type="file" 
+                    accept="image/*"
+                    [disabled]="isUploadingImage"
+                    (change)="handleImageUpload($event)" 
+                  />
                 </label>
+                <p *ngIf="selectedImageFile" class="text-xs text-slate-500 mt-1">
+                  Image will be uploaded when you click Save
+                </p>
               </div>
             </div>
           </div>
@@ -213,12 +235,14 @@
               Cancel
             </button>
             <button
-              class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-[#052630] rounded-lg shadow-md shadow-primary/20 transition-all flex items-center gap-2"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-[#052630] rounded-lg shadow-md shadow-primary/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               type="button"
+              [disabled]="isUploadingImage"
               (click)="saveCategory()"
             >
-              <span class="material-symbols-outlined text-[18px]">save</span>
-              Save Changes
+              <div *ngIf="isUploadingImage" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span *ngIf="!isUploadingImage" class="material-symbols-outlined text-[18px]">save</span>
+              {{ isUploadingImage ? 'Uploading...' : 'Save Changes' }}
             </button>
           </div>
         </form>
@@ -279,7 +303,7 @@
             class="size-10 rounded bg-slate-100 shrink-0 bg-cover bg-center"
             [attr.data-alt]="'Thumbnail for ' + node.category.name + ' category'"
             [ngStyle]="{
-              'background-image': node.category.imageUrl ? 'url(' + node.category.imageUrl + ')' : 'none'
+              'background-image': node.category.imageUrl ? 'url(' + getImageUrl(node.category.imageUrl) + ')' : 'none'
             }"
           ></div>
           <div class="flex flex-col">

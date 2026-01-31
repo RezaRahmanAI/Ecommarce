@@ -33,6 +33,9 @@ public class AdminCategoryController : ControllerBase
                 Name = c.Name,
                 Slug = c.Slug,
                 ImageUrl = c.ImageUrl,
+                ParentId = c.ParentId,
+                IsVisible = c.IsVisible,
+                SortOrder = c.SortOrder,
                 ProductCount = c.Products.Count,
                 CreatedAt = c.CreatedAt
             })
@@ -65,95 +68,97 @@ public class AdminCategoryController : ControllerBase
     }
 
     [HttpPost("image")]
-    public async Task<ActionResult<string>> UploadImage([FromForm] IFormFile file)
+    public async Task<ActionResult<object>> UploadImage([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded");
 
         var imageUrl = await SaveImageAsync(file);
-        return Ok(imageUrl);
+        return Ok(new { url = imageUrl });
     }
 
     [HttpPost]
-    public async Task<ActionResult<CategoryDto>> CreateCategory([FromForm] string name, [FromForm] IFormFile? image)
+    public async Task<ActionResult<CategoryDto>> CreateCategory([FromBody] CategoryCreateDto dto)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(dto.Name))
             return BadRequest("Category name is required");
 
-        // Generate slug
-        var slug = GenerateSlug(name);
-
-        // Handle image upload
-        string? imageUrl = null;
-        if (image != null && image.Length > 0)
-        {
-            imageUrl = await SaveImageAsync(image);
-        }
+        // Generate slug if not provided
+        var slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : dto.Slug;
 
         var category = new Category
         {
-            Name = name,
+            Name = dto.Name,
             Slug = slug,
-            ImageUrl = imageUrl,
-            IsVisible = true,
-            SortOrder = 0
+            ImageUrl = dto.ImageUrl,
+            ParentId = dto.ParentId,
+            IsVisible = dto.IsVisible ?? true,
+            SortOrder = dto.SortOrder ?? 0
         };
 
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
 
-        var dto = new CategoryDto
+        var result = new CategoryDto
         {
             Id = category.Id,
             Name = category.Name,
             Slug = category.Slug,
             ImageUrl = category.ImageUrl,
+            ParentId = category.ParentId,
+            IsVisible = category.IsVisible,
+            SortOrder = category.SortOrder,
             ProductCount = 0,
             CreatedAt = category.CreatedAt
         };
 
-        return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, dto);
+        return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, result);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CategoryDto>> UpdateCategory(int id, [FromForm] string name, [FromForm] IFormFile? image)
+    public async Task<ActionResult<CategoryDto>> UpdateCategory(int id, [FromBody] CategoryUpdateDto dto)
     {
         var category = await _context.Categories.FindAsync(id);
         if (category == null)
             return NotFound();
 
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(dto.Name))
             return BadRequest("Category name is required");
 
-        category.Name = name;
-        category.Slug = GenerateSlug(name);
+        category.Name = dto.Name;
+        category.Slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : dto.Slug;
+        category.ParentId = dto.ParentId;
+        category.IsVisible = dto.IsVisible ?? category.IsVisible;
+        category.SortOrder = dto.SortOrder ?? category.SortOrder;
         category.UpdatedAt = DateTime.UtcNow;
 
-        // Handle image upload
-        if (image != null && image.Length > 0)
+        // Update image URL if provided
+        if (!string.IsNullOrEmpty(dto.ImageUrl))
         {
-            // Delete old image if exists
-            if (!string.IsNullOrEmpty(category.ImageUrl))
+            // Delete old image if it's different and exists
+            if (!string.IsNullOrEmpty(category.ImageUrl) && category.ImageUrl != dto.ImageUrl)
             {
                 DeleteImage(category.ImageUrl);
             }
-
-            category.ImageUrl = await SaveImageAsync(image);
+            category.ImageUrl = dto.ImageUrl;
         }
 
         await _context.SaveChangesAsync();
 
-        var dto = new CategoryDto
+        var result = new CategoryDto
         {
             Id = category.Id,
             Name = category.Name,
             Slug = category.Slug,
             ImageUrl = category.ImageUrl,
+            ParentId = category.ParentId,
+            IsVisible = category.IsVisible,
+            SortOrder = category.SortOrder,
             ProductCount = await _context.Products.CountAsync(p => p.CategoryId == id),
             CreatedAt = category.CreatedAt
         };
 
-        return Ok(dto);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
@@ -173,6 +178,29 @@ public class AdminCategoryController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("reorder")]
+    public async Task<ActionResult<bool>> ReorderCategories([FromBody] ReorderCategoriesDto dto)
+    {
+        if (dto.OrderedIds == null || dto.OrderedIds.Count == 0)
+            return BadRequest("OrderedIds is required");
+
+        var categories = await _context.Categories
+            .Where(c => (c.ParentId ?? 0) == (dto.ParentId ?? 0))
+            .ToListAsync();
+
+        for (int i = 0; i < dto.OrderedIds.Count; i++)
+        {
+            var category = categories.FirstOrDefault(c => c.Id == dto.OrderedIds[i]);
+            if (category != null)
+            {
+                category.SortOrder = i + 1;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(true);
     }
 
     private async Task<string> SaveImageAsync(IFormFile image)

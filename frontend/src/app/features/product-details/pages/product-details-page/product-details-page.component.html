@@ -13,7 +13,7 @@
       <!-- Left Column: Image Gallery -->
       <div class="lg:col-span-7 flex flex-col gap-4">
         <div class="aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 relative group cursor-zoom-in">
-          <ng-container [ngSwitch]="vm.selectedMedia.type">
+          <ng-container *ngIf="vm.selectedMedia" [ngSwitch]="vm.selectedMedia.type">
             <video
               *ngSwitchCase="'video'"
               class="h-full w-full object-cover"
@@ -33,10 +33,10 @@
             />
           </ng-container>
           <div
-            *ngIf="vm.product.badges.length"
+            *ngIf="vm.product.badges?.length"
             class="absolute top-4 left-4 bg-white/90 dark:bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary dark:text-white uppercase tracking-wider"
           >
-            {{ vm.product.badges[0] }}
+            {{ vm.product.badges?.[0] }}
           </div>
         </div>
         <!-- Thumbnails -->
@@ -45,7 +45,7 @@
             *ngFor="let thumbnail of vm.gallery"
             class="aspect-[3/4] rounded-lg overflow-hidden cursor-pointer relative"
             [ngClass]="
-              thumbnail.url === vm.selectedMedia.url
+              thumbnail.url === vm.selectedMedia?.url
                 ? 'border-2 border-primary'
                 : 'border border-transparent hover:border-primary/50'
             "
@@ -83,10 +83,10 @@
               </app-price-display>
               <div class="flex items-center gap-1">
                 <div class="flex text-[#F59E0B]">
-                  <ng-container *ngFor="let _ of fullStars(vm.product.ratings.avgRating)">
+                  <ng-container *ngFor="let _ of fullStars(vm.product.ratings?.avgRating || 0)">
                     <span class="material-symbols-outlined fill" style="font-size: 18px;">star</span>
                   </ng-container>
-                  <ng-container *ngIf="hasHalfStar(vm.product.ratings.avgRating)">
+                  <ng-container *ngIf="hasHalfStar(vm.product.ratings?.avgRating || 0)">
                     <span
                       class="material-symbols-outlined fill"
                       style="font-size: 18px; width: 9px; overflow: hidden; display:inline-block;"
@@ -98,14 +98,14 @@
                       >star</span
                     >
                   </ng-container>
-                  <ng-container *ngFor="let _ of emptyStars(vm.product.ratings.avgRating)">
+                  <ng-container *ngFor="let _ of emptyStars(vm.product.ratings?.avgRating || 0)">
                     <span class="material-symbols-outlined text-gray-300" style="font-size: 18px;">star</span>
                   </ng-container>
                 </div>
                 <a
                   class="text-sm text-[#4d8799] dark:text-gray-400 hover:text-primary underline offset-2 decoration-1"
                   href="#reviews"
-                  >{{ vm.product.ratings.reviewCount }} reviews</a
+                  >{{ vm.product.ratings?.reviewCount || 0 }} reviews</a>
                 >
               </div>
             </div>
@@ -126,7 +126,7 @@
               >
               <div class="flex gap-3">
                 <button
-                  *ngFor="let color of vm.product.variants.colors"
+                  *ngFor="let color of vm.product.variants?.colors || []"
                   class="w-10 h-10 rounded-full"
                   [ngClass]="
                     color.name === vm.selectedColor
@@ -156,7 +156,7 @@
               </div>
               <div class="flex flex-wrap gap-3">
                 <button
-                  *ngFor="let size of vm.product.variants.sizes"
+                  *ngFor="let size of vm.product.variants?.sizes || []"
                   class="h-10 px-4 min-w-[3rem] rounded-lg text-sm transition-colors"
                   [ngClass]="
                     size.label === vm.selectedSize
@@ -223,7 +223,7 @@
                 <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
               </summary>
               <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
-                {{ vm.product.meta.fabricAndCare }}
+                {{ vm.product.meta?.fabricAndCare || 'No information available' }}
               </div>
             </details>
             <details class="group py-4 cursor-pointer">
@@ -232,7 +232,7 @@
                 <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-gray-400">expand_more</span>
               </summary>
               <div class="text-sm text-gray-600 dark:text-gray-400 pt-3 leading-relaxed">
-                {{ vm.product.meta.shippingAndReturns }}
+                {{ vm.product.meta?.shippingAndReturns || 'No information available' }}
               </div>
             </details>
           </div>
@@ -247,7 +247,7 @@
         <div class="w-full lg:w-1/3 flex-shrink-0">
           <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-[#e7f0f3] dark:border-white/5">
             <div class="flex items-end gap-3 mb-4">
-              <span class="text-5xl font-black text-primary dark:text-white leading-none">{{ vm.product.ratings.avgRating }}</span>
+              <span class="text-5xl font-black text-primary dark:text-white leading-none">{{ vm.product.ratings?.avgRating || 0 }}</span>
               <div class="mb-1">
                 <div class="flex text-[#F59E0B] text-sm mb-1">
                   <ng-container *ngFor="let _ of fullStars(vm.product.ratings.avgRating)">
@@ -261,13 +261,13 @@
                     >
                   </ng-container>
                 </div>
-                <span class="text-sm text-gray-500">Based on {{ vm.product.ratings.reviewCount }} reviews</span>
+                <span class="text-sm text-gray-500">Based on {{ vm.product.ratings?.reviewCount || 0 }} reviews</span>
               </div>
             </div>
             <!-- Progress Bars -->
             <div class="space-y-2">
               <div
-                *ngFor="let breakdown of vm.product.ratings.ratingBreakdown; trackBy: trackRating"
+                *ngFor="let breakdown of vm.product.ratings?.ratingBreakdown || []; trackBy: trackRating"
                 class="flex items-center gap-3 text-sm"
               >
                 <span class="w-3 text-right font-medium">{{ breakdown.rating }}</span>
@@ -332,7 +332,7 @@
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
         <a
-          *ngFor="let related of vm.product.relatedProducts"
+          *ngFor="let related of vm.product.relatedProducts || []"
           [routerLink]="['/product', related.id]"
           class="group flex flex-col gap-3"
         >

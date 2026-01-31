@@ -38,7 +38,83 @@ public class ProductsController : ControllerBase
 
         if (product == null) return NotFound();
 
-        return Ok(_mapper.Map<ProductDto>(product));
+        // Deserialize JSON fields
+        var tags = !string.IsNullOrEmpty(product.Tags)
+            ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.Tags) ?? new List<string>()
+            : new List<string>();
+        var badges = !string.IsNullOrEmpty(product.Badges)
+            ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.Badges) ?? new List<string>()
+            : new List<string>();
+        var variants = !string.IsNullOrEmpty(product.Variants)
+            ? System.Text.Json.JsonSerializer.Deserialize<ProductVariantsDto>(product.Variants) ?? new ProductVariantsDto()
+            : new ProductVariantsDto();
+        var meta = !string.IsNullOrEmpty(product.Meta)
+            ? System.Text.Json.JsonSerializer.Deserialize<ProductMetaDto>(product.Meta) ?? new ProductMetaDto()
+            : new ProductMetaDto();
+
+        // Build images
+        var mainImage = new ImageDto
+        {
+            Url = product.ImageUrl ?? "",
+            Alt = product.Name,
+            Label = "Main",
+            Type = "image"
+        };
+        var thumbnails = product.Images?.Select(img => new ImageDto
+        {
+            Url = img.Url,
+            Alt = img.AltText ?? product.Name,
+            Label = "Gallery",
+            Type = "image"
+        }).ToList() ?? new List<ImageDto>();
+
+        // Default ratings
+        var ratings = new ProductRatingsDto
+        {
+            AvgRating = 0,
+            ReviewCount = 0,
+            RatingBreakdown = new List<RatingBreakdownDto>
+            {
+                new() { Rating = 5, Percentage = 0 },
+                new() { Rating = 4, Percentage = 0 },
+                new() { Rating = 3, Percentage = 0 },
+                new() { Rating = 2, Percentage = 0 },
+                new() { Rating = 1, Percentage = 0 }
+            }
+        };
+
+        var dto = new ProductDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Sku = product.Sku,
+            Price = product.Price,
+            SalePrice = product.SalePrice,
+            PurchaseRate = product.PurchaseRate,
+            Stock = product.Stock,
+            Status = product.Status,
+            ImageUrl = product.ImageUrl,
+            Category = product.Category?.Name ?? "",
+            CategoryId = product.CategoryId,
+            SubCategory = product.SubCategory,
+            Gender = product.Gender,
+            Tags = tags,
+            Badges = badges,
+            Featured = product.Featured,
+            NewArrival = product.NewArrival,
+            Images = new ProductImagesDto
+            {
+                MainImage = mainImage,
+                Thumbnails = thumbnails
+            },
+            Variants = variants,
+            Meta = meta,
+            Ratings = ratings,
+            RelatedProducts = new List<RelatedProductDto>()
+        };
+
+        return Ok(dto);
     }
     
     [HttpGet("featured")]

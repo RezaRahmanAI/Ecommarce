@@ -140,152 +140,168 @@ public class AdminProductsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateProduct([FromBody] dynamic payload)
+    public async Task<ActionResult> CreateProduct([FromBody] ProductCreateDto dto)
     {
-        // Parse the complex payload from frontend
-        var name = (string)payload.name;
-        var description = (string?)payload.description;
-        var price = (decimal)payload.price;
-        var categoryName = (string)payload.category;
-
-        // Find or create category
-        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == categoryName);
-        if (category == null)
+        try
         {
-            category = new Category
+            // Find existing category - DO NOT create new ones
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == dto.Category);
+            if (category == null)
             {
-                Name = categoryName,
-                Slug = GenerateSlug(categoryName),
-                IsVisible = true
-            };
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-        }
-
-        // Generate SKU if not provided
-        var sku = $"PRD-{DateTime.UtcNow.Ticks}";
-
-        // Get main image URL from media
-        string? mainImageUrl = null;
-        if (payload.media?.mainImage?.url != null)
-        {
-            mainImageUrl = (string)payload.media.mainImage.url;
-        }
-
-        var product = new Product
-        {
-            Name = name,
-            Description = description,
-            Sku = sku,
-            Price = price,
-            SalePrice = payload.salePrice != null ? (decimal?)payload.salePrice : null,
-            PurchaseRate = payload.purchaseRate != null ? (decimal?)payload.purchaseRate : 0,
-            Stock = 100, // Default stock
-            Status = payload.statusActive == true ? "Active" : "Draft",
-            CategoryId = category.Id,
-            ImageUrl = mainImageUrl
-        };
-
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
-
-        // Add additional images
-        if (payload.media?.thumbnails != null)
-        {
-            foreach (var thumbnail in payload.media.thumbnails)
-            {
-                var imageUrl = (string)thumbnail.url;
-                if (imageUrl != mainImageUrl) // Don't duplicate main image
-                {
-                    var productImage = new ProductImage
-                    {
-                        ProductId = product.Id,
-                        Url = imageUrl,
-                        AltText = (string?)thumbnail.alt ?? name,
-                        IsMain = false,
-                        SortOrder = 0
-                    };
-                    _context.ProductImages.Add(productImage);
-                }
+                return BadRequest(new { message = $"Category '{dto.Category}' does not exist. Please create it first in Category Management." });
             }
+
+            // Generate SKU if not provided
+            var sku = $"PRD-{DateTime.UtcNow.Ticks}";
+
+            // Get main image URL from media
+            string? mainImageUrl = dto.Media?.MainImage?.Url;
+
+            // Serialize JSON fields
+            var tagsJson = dto.Tags != null && dto.Tags.Count > 0 
+                ? System.Text.Json.JsonSerializer.Serialize(dto.Tags) 
+                : null;
+            var badgesJson = dto.Badges != null && dto.Badges.Count > 0 
+                ? System.Text.Json.JsonSerializer.Serialize(dto.Badges) 
+                : null;
+            var variantsJson = dto.Variants != null 
+                ? System.Text.Json.JsonSerializer.Serialize(dto.Variants) 
+                : null;
+            var metaJson = dto.Meta != null 
+                ? System.Text.Json.JsonSerializer.Serialize(dto.Meta) 
+                : null;
+
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Sku = sku,
+                Price = dto.Price,
+                SalePrice = dto.SalePrice,
+                PurchaseRate = dto.PurchaseRate,
+                Stock = 100, // Default stock
+                Status = dto.StatusActive ? "Active" : "Draft",
+                CategoryId = category.Id,
+                ImageUrl = mainImageUrl,
+                SubCategory = dto.SubCategory,
+                Gender = dto.Gender,
+                Tags = tagsJson,
+                Badges = badgesJson,
+                Featured = dto.Featured,
+                NewArrival = dto.NewArrival,
+                Variants = variantsJson,
+                Meta = metaJson
+            };
+
+            _context.Products.Add(product);
             await _context.SaveChangesAsync();
+
+            // Add additional images
+            if (dto.Media?.Thumbnails != null)
+            {
+                foreach (var thumbnail in dto.Media.Thumbnails)
+                {
+                    if (thumbnail.Url != mainImageUrl) // Don't duplicate main image
+                    {
+                        var productImage = new ProductImage
+                        {
+                            ProductId = product.Id,
+                            Url = thumbnail.Url,
+                            AltText = thumbnail.Alt ?? dto.Name,
+                            IsMain = false,
+                            SortOrder = 0
+                        };
+                        _context.ProductImages.Add(productImage);
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            var result = new
+            {
+                product.Id,
+                product.Name,
+                product.Description,
+                product.Sku,
+                product.Price,
+                product.SalePrice,
+                product.PurchaseRate,
+                product.Stock,
+                product.Status,
+                product.ImageUrl,
+                Category = category.Name,
+                CategoryId = product.CategoryId,
+                product.CreatedAt
+            };
+
+            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, result);
         }
-
-        var result = new
+        catch (Exception ex)
         {
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Sku,
-            product.Price,
-            product.SalePrice,
-            product.PurchaseRate,
-            product.Stock,
-            product.Status,
-            product.ImageUrl,
-            Category = category.Name,
-            CategoryId = product.CategoryId,
-            MediaUrls = new List<string> { mainImageUrl ?? "" },
-            product.CreatedAt
-        };
-
-        return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, result);
+            return StatusCode(500, new { message = $"Error creating product: {ex.Message}" });
+        }
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateProduct(int id, [FromBody] dynamic payload)
+    public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto dto)
     {
-        var product = await _context.Products
-            .Include(p => p.Images)
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (product == null)
-            return NotFound();
-
-        // Update basic fields
-        product.Name = (string)payload.name;
-        product.Description = (string?)payload.description;
-        product.Price = (decimal)payload.price;
-        product.SalePrice = payload.salePrice != null ? (decimal?)payload.salePrice : null;
-        product.PurchaseRate = payload.purchaseRate != null ? (decimal?)payload.purchaseRate : 0;
-        product.Status = payload.statusActive == true ? "Active" : "Draft";
-        product.UpdatedAt = DateTime.UtcNow;
-
-        // Update category if changed
-        var categoryName = (string)payload.category;
-        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == categoryName);
-        if (category != null)
+        try
         {
-            product.CategoryId = category.Id;
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+                return NotFound();
+
+            // Update basic fields
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.Price = dto.Price;
+            product.SalePrice = dto.SalePrice;
+            product.PurchaseRate = dto.PurchaseRate;
+            product.Status = dto.StatusActive ? "Active" : "Draft";
+            product.UpdatedAt = DateTime.UtcNow;
+
+            // Update category if changed
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == dto.Category);
+            if (category != null)
+            {
+                product.CategoryId = category.Id;
+            }
+
+            // Update main image if provided
+            if (!string.IsNullOrEmpty(dto.Media?.MainImage?.Url))
+            {
+                product.ImageUrl = dto.Media.MainImage.Url;
+            }
+
+            await _context.SaveChangesAsync();
+
+            var result = new
+            {
+                product.Id,
+                product.Name,
+                product.Description,
+                product.Sku,
+                product.Price,
+                product.SalePrice,
+                product.PurchaseRate,
+                product.Stock,
+                product.Status,
+                product.ImageUrl,
+                Category = category?.Name ?? "",
+                CategoryId = product.CategoryId,
+                MediaUrls = product.Images.Select(i => i.Url).ToList(),
+                product.CreatedAt
+            };
+
+            return Ok(result);
         }
-
-        // Update main image if provided
-        if (payload.media?.mainImage?.url != null)
+        catch (Exception ex)
         {
-            product.ImageUrl = (string)payload.media.mainImage.url;
+            return StatusCode(500, new { message = $"Error updating product: {ex.Message}" });
         }
-
-        await _context.SaveChangesAsync();
-
-        var result = new
-        {
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Sku,
-            product.Price,
-            product.SalePrice,
-            product.PurchaseRate,
-            product.Stock,
-            product.Status,
-            product.ImageUrl,
-            Category = category?.Name ?? "",
-            CategoryId = product.CategoryId,
-            MediaUrls = product.Images.Select(i => i.Url).ToList(),
-            product.CreatedAt
-        };
-
-        return Ok(result);
     }
 
     [HttpDelete("{id}")]

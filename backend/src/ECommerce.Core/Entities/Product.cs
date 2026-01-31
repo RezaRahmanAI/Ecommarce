@@ -16,6 +16,20 @@ public class Product : BaseEntity
     
     public string? ImageUrl { get; set; } // Main image
     
+    // Additional product details
+    public string? SubCategory { get; set; }
+    public string? Gender { get; set; } // men, women, kids, accessories
+    public string? Tags { get; set; } // JSON array stored as string
+    public string? Badges { get; set; } // JSON array stored as string
+    public bool Featured { get; set; } = false;
+    public bool NewArrival { get; set; } = false;
+    
+    // Variants (colors and sizes) stored as JSON
+    public string? Variants { get; set; } // JSON object
+    
+    // Meta information stored as JSON
+    public string? Meta { get; set; } // JSON object with fabricAndCare and shippingAndReturns
+    
     // Foreign Key
     public int CategoryId { get; set; }
     public Category Category { get; set; }

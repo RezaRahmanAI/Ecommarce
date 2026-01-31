@@ -1,17 +1,21 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from "@angular/core";
+import { Observable, map } from "rxjs";
 
-import { Category, CategoryNode, ReorderPayload } from '../models/categories.models';
-import { ApiHttpClient } from '../../core/http/http-client';
+import {
+  Category,
+  CategoryNode,
+  ReorderPayload,
+} from "../models/categories.models";
+import { ApiHttpClient } from "../../core/http/http-client";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class CategoriesService {
   private readonly api = inject(ApiHttpClient);
 
   getAll(): Observable<Category[]> {
-    return this.api.get<Category[]>('/admin/categories');
+    return this.api.get<Category[]>("/admin/categories");
   }
 
   getById(id: string): Observable<Category> {
@@ -19,7 +23,7 @@ export class CategoriesService {
   }
 
   create(payload: Partial<Category>): Observable<Category> {
-    return this.api.post<Category>('/admin/categories', payload);
+    return this.api.post<Category>("/admin/categories", payload);
   }
 
   update(id: string, payload: Partial<Category>): Observable<Category> {
@@ -32,15 +36,17 @@ export class CategoriesService {
 
   uploadImage(file: File): Observable<string> {
     const formData = new FormData();
-    formData.append('file', file);
-    return this.api.post<string>('/admin/categories/image', formData);
+    formData.append("file", file);
+    return this.api
+      .post<{ url: string }>("/admin/categories/image", formData)
+      .pipe(map((response) => response.url));
   }
 
   reorder(payload: ReorderPayload): Observable<boolean> {
-    return this.api.post<boolean>('/admin/categories/reorder', payload);
+    return this.api.post<boolean>("/admin/categories/reorder", payload);
   }
 
   getTree(): Observable<CategoryNode[]> {
-    return this.api.get<CategoryNode[]>('/admin/categories/tree');
+    return this.api.get<CategoryNode[]>("/admin/categories/tree");
   }
 }
